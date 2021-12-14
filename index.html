@@ -322,8 +322,6 @@
                 }
             }
         </script>
-        <script src="node_modules/socket.io/client-dist/socket.io.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/async@3.2.2/dist/async.min.js"></script>
         <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js" integrity="sha512-xQBQYt9UcgblF6aCMrwU1NkVA7HCXaSN2oq0so80KO+y68M+n64FOcqgav4igHe6D5ObBLIf68DWv+gfBowczg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -332,48 +330,6 @@
             let currentTab = "characterSheet";
             let dm = false;
             let currentPlayer = "self";
-    
-            //let socket = io('http://localhost:3000');
-            let socket = io('https://dnd-server.glitch.me');
-
-            function echo(text) {
-                console.log(text)
-            }
-    
-            socket.on("loadOwlbear", (data) => {
-                document.getElementById("owlbearEmbed").src = data.url;
-                console.log("Loading Owlbear")
-            });
-    
-            socket.on("dmAssigned", () => {
-                document.getElementById("login").style.display = "none";
-                socket.emit("loadPlayerData", {
-                    playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                    hpNow: ((localStorage.getItem("hpCurrent") != null && localStorage.getItem("hpCurrent") != "" && localStorage.getItem("hpCurrent") != undefined) ? localStorage.getItem("hpCurrent") : ""),
-                    hpMax: ((localStorage.getItem("hpMax") != null && localStorage.getItem("hpMax") != "" && localStorage.getItem("hpMax") != undefined) ? localStorage.getItem("hpMax") : ""),
-                    session_code: localStorage.getItem("session_code")
-                })
-            })
-    
-            socket.on("dmRemoved", () => {
-                document.getElementById("login").style.display = "block"
-                document.getElementById("playerSelectContainer").style.display = "none"
-                document.getElementById("owlbearEmbed").src = ""
-
-                let hpWrap = document.querySelector("[data-player='You']")
-                if (hpWrap != undefined && hpWrap != null) {
-                    hpWrap.remove()
-                }
-                document.getElementById("playerHPContainer").style.display = "none"
-            })
-    
-            let sizes = localStorage.getItem('split-sizes')
-    
-            if (sizes) {
-                sizes = JSON.parse(sizes)
-            } else {
-                sizes = [99, 1]
-            }
     
             function openTab(evt, tabId) {
                 let i, tabcontent, tablinks;
@@ -390,190 +346,6 @@
     
                 document.getElementById(tabId).style.display = "block";
                 evt.currentTarget.className += " active";
-            }
-
-            async function showSpellInfo(element) {
-                if (element.value.trim() == "")
-                    return
-
-                let inputWrapper
-                if (element.parentNode.className != "input-wrapper") {
-                    inputWrapper = document.createElement("div")
-                    inputWrapper.classList.add("input-wrapper")
-                    element.parentNode.insertBefore(inputWrapper, element)
-                    inputWrapper.appendChild(element)
-                } else {
-                    inputWrapper = element.parentNode
-                }
-                
-                let spellname = element.value.toLowerCase().trim().replaceAll(" ", "-").split("(")[0].trim()
-                let baseUrl = "http://dnd5e.wikidot.com/spell:"
-                let url = baseUrl + spellname
-
-                let tooltipDiv = document.createElement("div")
-                tooltipDiv.classList.add("tooltip")
-                tooltipDiv.innerHTML = await window.spells.getSpellInfo(url)
-                tooltipDiv.innerHTML = "<button class='button-x' onclick='hideSpellInfo(event)' type='button'><i class='far fa-times-circle' onclick='hideSpellInfo(event)'></i></button>" + tooltipDiv.innerHTML
-
-                let compStyle = window.getComputedStyle(element)
-                Array.from(compStyle).forEach(
-                    key => tooltipDiv.style.setProperty(key, compStyle.getPropertyValue(key))
-                )
-
-                inputWrapper.appendChild(tooltipDiv)
-            }
-
-            async function showSpellInfoRight(element) {
-                if (element.value.trim() == "")
-                    return
-
-                let inputWrapper
-                if (element.parentNode.className != "input-wrapper") {
-                    inputWrapper = document.createElement("div")
-                    inputWrapper.classList.add("input-wrapper")
-                    element.parentNode.insertBefore(inputWrapper, element)
-                    inputWrapper.appendChild(element)
-                } else {
-                    inputWrapper = element.parentNode
-                }
-                
-                let spellname = element.value.toLowerCase().trim().replaceAll(" ", "-").split("(")[0].trim()
-                let baseUrl = "http://dnd5e.wikidot.com/spell:"
-                let url = baseUrl + spellname
-
-                let tooltipDiv = document.createElement("div")
-                tooltipDiv.classList.add("tooltip-right")
-                tooltipDiv.innerHTML = await window.spells.getSpellInfo(url)
-                tooltipDiv.innerHTML = "<button class='button-x' onclick='hideSpellInfo(event)' type='button'><i class='far fa-times-circle' onclick='hideSpellInfo(event)'></i></button>" + tooltipDiv.innerHTML
-
-                let compStyle = window.getComputedStyle(element)
-                Array.from(compStyle).forEach(
-                    key => tooltipDiv.style.setProperty(key, compStyle.getPropertyValue(key))
-                )
-
-                inputWrapper.appendChild(tooltipDiv)
-            }
-
-            function hideSpellInfo(event) {
-                let inputWrapper = event.currentTarget.parentNode.parentNode
-                if (inputWrapper.className != "input-wrapper") return
-                let removedTooltip = false
-                let finished = false
-                while (!finished) {
-                    const children = inputWrapper.children
-                    for(let i = 0; i < children.length; i++) {
-                        if (children[i].tagName != "INPUT") {
-                            children[i].remove()
-                            removedTooltip = true
-                        }
-                    }
-                    if (!removedTooltip)
-                        finished = true
-                    
-                    removedTooltip = false
-                }
-            }
-
-            function updatePlayerHP (data) {
-                let hpWrapDiv = document.querySelector("[data-player='" + data.player + "']")
-                if (hpWrapDiv != undefined && hpWrapDiv != null) {
-
-                    let hBar = hpWrapDiv.lastChild.lastChild
-                    let hHit = hBar.lastChild
-
-                    let total = hpWrapDiv.lastChild.getAttribute('data-total')
-                    let value = hpWrapDiv.lastChild.getAttribute('data-value')
-
-                    if (data.hpNow != undefined && data.hpNow != null && data.hpNow != "") {
-                        let damage = value-data.hpNow
-
-                        let barWidth = (data.hpNow / total) * 100
-                        let hitWidth = (damage / value) * 100 + "%"
-
-                        if (barWidth > 100 || barWidth == Infinity || barWidth == -Infinity) 
-                            barWidth = 100
-
-                        hpWrapDiv.lastChild.setAttribute("data-value", data.hpNow)
-                        hHit.style.width = hitWidth
-
-                        setTimeout(() => {
-                            hHit.style.width = 0
-                            hBar.style.width = barWidth + "%"
-                        }, 500);
-                    } else {
-                        hpWrapDiv.lastChild.setAttribute("data-value", "0")
-                        hHit.style.width = "100%"
-
-                        setTimeout(() => {
-                            hHit.style.width = 0
-                            hBar.style.width = 0
-                        }, 500);
-                    }
-
-                    if (data.hpMax != undefined && data.hpMax != null && data.hpMax != "") {
-                        total = data.hpMax
-
-                        let barWidth = (data.hpNow / total) * 100
-
-                        if (barWidth > 100 || barWidth == Infinity || barWidth == -Infinity) 
-                            barWidth = 100
-
-                        hpWrapDiv.lastChild.setAttribute("data-total", data.hpMax)
-
-                        hBar.style.width = barWidth + "%"
-                    } else {
-                        total = 100
-
-                        let barWidth = (value / total) * 100
-
-                        if (barWidth > 100 || barWidth == Infinity || barWidth == -Infinity) 
-                            barWidth = 100
-
-                        hpWrapDiv.lastChild.setAttribute("data-total", "100")
-
-                        hBar.style.width = barWidth + "%"
-                    }
-                }
-            }
-        
-            function loadSheetsFromPdf() {
-                let PDFDocument = PDFLib.PDFDocument
-
-                let inputElement = document.createElement("input")
-
-                inputElement.type = "file"
-
-                inputElement.setAttribute("multiple", "")
-
-                inputElement.accept = ".pdf"
-
-                inputElement.addEventListener("change", async (event) => {
-                    async.forEachOf(event.target.files, async (file) => {
-                        const formUrl = file.path
-                        const formPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer())
-                        let form = await PDFDocument.load(formPdfBytes)
-                        form = form.getForm()
-
-                        const fields = form.getFields()
-                        fields.forEach(field => {
-                            const name = field.getName()
-                            let element = document.querySelector("[data-field-name='" + name + "']")
-
-                            if (element != undefined && (typeof field.getText == "function" || typeof field.isChecked == "function")) {
-                                if (element.matches('[type="checkbox"]')) {
-                                    element.checked = field.isChecked()
-                                } else {
-                                    element.value = field.getText() ? field.getText() : ""
-                                }
-                            }
-                        })
-                    }).then(() => {
-                        fixCheckedAll()
-                        saveAll()
-                    })
-                })
-                
-                inputElement.dispatchEvent(new MouseEvent("click")); 
             }
 
             async function exportSheetsToPdf() {
@@ -642,14 +414,9 @@
                 })
             }
 
-            function saveAll() {
-                let elements = document.querySelectorAll("[data-field-name]")
-                elements.forEach(element =>  {
-                    if (element.matches('[type="checkbox"]')) {
-                        localStorage.setItem(element.id.replace("_img", ""), element.checked)
-                    } else if (element.type == "text" || element.tagName.toLowerCase() == "textarea"){
-                        localStorage.setItem(element.id.replace("_img", ""), element.value)
-                    }
+            function genSheetBlob(data, mimeType) {
+                return new Blob([data], {
+                    type: mimeType
                 })
             }
         </script>
@@ -657,9 +424,6 @@
     <body>
         <div style="height: -webkit-fill-available; overflow: hidden;">
             <div class="container-flexsplit" id="mainContent">
-                <div id="owlbear">
-                    <webview id="owlbearEmbed" src="" autosize></webview>
-                </div>
                 <div id="characterSheets">
                     <div class="tab">
                         <button class="tablinks active" onclick="currentTab = 'characterSheet'; openTab(event, 'characterSheet');">Character Sheet</button>
@@ -1622,14 +1386,14 @@
                         <input id="SpellAtk" type="text" tabindex="4" value="" data-objref="1114 0 R" data-field-name="SpellAtkBonus 2" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots1_1" type="text" tabindex="13" value="" data-objref="1115 0 R" data-field-name="SlotsTotal 19" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots1_2" type="text" tabindex="14" value="" data-objref="1116 0 R" data-field-name="SlotsRemaining 19" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
-                        <input id="spell0_1" type="text" tabindex="5" value="" data-objref="1117 0 R" data-field-name="Spells 1014" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell0_2" type="text" tabindex="6" value="" data-objref="1119 0 R" data-field-name="Spells 1016" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell0_3" type="text" tabindex="7" value="" data-objref="1120 0 R" data-field-name="Spells 1017" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell0_4" type="text" tabindex="8" value="" data-objref="1121 0 R" data-field-name="Spells 1018" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell0_5" type="text" tabindex="9" value="" data-objref="1122 0 R" data-field-name="Spells 1019" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell0_6" type="text" tabindex="10" value="" data-objref="1123 0 R" data-field-name="Spells 1020" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell0_7" type="text" tabindex="11" value="" data-objref="1124 0 R" data-field-name="Spells 1021" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell0_8" type="text" tabindex="12" value="" data-objref="1125 0 R" data-field-name="Spells 1022" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
+                        <input id="spell0_1" type="text" tabindex="5" value="" data-objref="1117 0 R" data-field-name="Spells 1014" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell0_2" type="text" tabindex="6" value="" data-objref="1119 0 R" data-field-name="Spells 1016" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell0_3" type="text" tabindex="7" value="" data-objref="1120 0 R" data-field-name="Spells 1017" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell0_4" type="text" tabindex="8" value="" data-objref="1121 0 R" data-field-name="Spells 1018" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell0_5" type="text" tabindex="9" value="" data-objref="1122 0 R" data-field-name="Spells 1019" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell0_6" type="text" tabindex="10" value="" data-objref="1123 0 R" data-field-name="Spells 1020" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell0_7" type="text" tabindex="11" value="" data-objref="1124 0 R" data-field-name="Spells 1021" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell0_8" type="text" tabindex="12" value="" data-objref="1125 0 R" data-field-name="Spells 1022" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="spell3_2Prep" type="checkbox" tabindex="15" data-objref="1126 0 R" data-field-name="Check Box 314" imageName="3/form/1126 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell3_3Prep" type="checkbox" tabindex="16" data-objref="1128 0 R" data-field-name="Check Box 3031" imageName="3/form/1128 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell3_4Prep" type="checkbox" tabindex="17" data-objref="1129 0 R" data-field-name="Check Box 3032" imageName="3/form/1129 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
@@ -1664,48 +1428,48 @@
                         <input id="spell1_10Prep" type="checkbox" tabindex="46" data-objref="1159 0 R" data-field-name="Check Box 3017" imageName="3/form/1159 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell1_11Prep" type="checkbox" tabindex="47" data-objref="1160 0 R" data-field-name="Check Box 3018" imageName="3/form/1160 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell1_12Prep" type="checkbox" tabindex="48" data-objref="1161 0 R" data-field-name="Check Box 3019" imageName="3/form/1161 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
-                        <input id="spell1_1" type="text" tabindex="49" value="" data-objref="1118 0 R" data-field-name="Spells 1015" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_2" type="text" tabindex="50" value="" data-objref="1149 0 R" data-field-name="Spells 1023" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_3" type="text" tabindex="51" value="" data-objref="1162 0 R" data-field-name="Spells 1024" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_4" type="text" tabindex="52" value="" data-objref="1163 0 R" data-field-name="Spells 1025" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_5" type="text" tabindex="53" value="" data-objref="1164 0 R" data-field-name="Spells 1026" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_6" type="text" tabindex="54" value="" data-objref="1165 0 R" data-field-name="Spells 1027" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_7" type="text" tabindex="55" value="" data-objref="1166 0 R" data-field-name="Spells 1028" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_8" type="text" tabindex="56" value="" data-objref="1167 0 R" data-field-name="Spells 1029" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_9" type="text" tabindex="57" value="" data-objref="1168 0 R" data-field-name="Spells 1030" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_10" type="text" tabindex="58" value="" data-objref="1169 0 R" data-field-name="Spells 1031" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_11" type="text" tabindex="59" value="" data-objref="1170 0 R" data-field-name="Spells 1032" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell1_12" type="text" tabindex="60" value="" data-objref="1171 0 R" data-field-name="Spells 1033" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
+                        <input id="spell1_1" type="text" tabindex="49" value="" data-objref="1118 0 R" data-field-name="Spells 1015" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_2" type="text" tabindex="50" value="" data-objref="1149 0 R" data-field-name="Spells 1023" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_3" type="text" tabindex="51" value="" data-objref="1162 0 R" data-field-name="Spells 1024" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_4" type="text" tabindex="52" value="" data-objref="1163 0 R" data-field-name="Spells 1025" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_5" type="text" tabindex="53" value="" data-objref="1164 0 R" data-field-name="Spells 1026" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_6" type="text" tabindex="54" value="" data-objref="1165 0 R" data-field-name="Spells 1027" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_7" type="text" tabindex="55" value="" data-objref="1166 0 R" data-field-name="Spells 1028" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_8" type="text" tabindex="56" value="" data-objref="1167 0 R" data-field-name="Spells 1029" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_9" type="text" tabindex="57" value="" data-objref="1168 0 R" data-field-name="Spells 1030" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_10" type="text" tabindex="58" value="" data-objref="1169 0 R" data-field-name="Spells 1031" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_11" type="text" tabindex="59" value="" data-objref="1170 0 R" data-field-name="Spells 1032" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell1_12" type="text" tabindex="60" value="" data-objref="1171 0 R" data-field-name="Spells 1033" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots2_1" type="text" tabindex="61" value="" data-objref="1172 0 R" data-field-name="SlotsTotal 20" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots2_2" type="text" tabindex="62" value="" data-objref="1173 0 R" data-field-name="SlotsRemaining 20" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
-                        <input id="spell2_1" type="text" tabindex="63" value="" data-objref="1186 0 R" data-field-name="Spells 1046" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_2" type="text" tabindex="64" value="" data-objref="1174 0 R" data-field-name="Spells 1034" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_3" type="text" tabindex="65" value="" data-objref="1175 0 R" data-field-name="Spells 1035" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_4" type="text" tabindex="66" value="" data-objref="1176 0 R" data-field-name="Spells 1036" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_5" type="text" tabindex="67" value="" data-objref="1177 0 R" data-field-name="Spells 1037" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_6" type="text" tabindex="68" value="" data-objref="1178 0 R" data-field-name="Spells 1038" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_7" type="text" tabindex="69" value="" data-objref="1179 0 R" data-field-name="Spells 1039" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_8" type="text" tabindex="70" value="" data-objref="1180 0 R" data-field-name="Spells 1040" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_9" type="text" tabindex="71" value="" data-objref="1181 0 R" data-field-name="Spells 1041" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_10" type="text" tabindex="72" value="" data-objref="1182 0 R" data-field-name="Spells 1042" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_11" type="text" tabindex="73" value="" data-objref="1183 0 R" data-field-name="Spells 1043" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_12" type="text" tabindex="74" value="" data-objref="1184 0 R" data-field-name="Spells 1044" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
-                        <input id="spell2_13" type="text" tabindex="75" value="" data-objref="1185 0 R" data-field-name="Spells 1045" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfoRight(this)"/>
+                        <input id="spell2_1" type="text" tabindex="63" value="" data-objref="1186 0 R" data-field-name="Spells 1046" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_2" type="text" tabindex="64" value="" data-objref="1174 0 R" data-field-name="Spells 1034" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_3" type="text" tabindex="65" value="" data-objref="1175 0 R" data-field-name="Spells 1035" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_4" type="text" tabindex="66" value="" data-objref="1176 0 R" data-field-name="Spells 1036" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_5" type="text" tabindex="67" value="" data-objref="1177 0 R" data-field-name="Spells 1037" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_6" type="text" tabindex="68" value="" data-objref="1178 0 R" data-field-name="Spells 1038" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_7" type="text" tabindex="69" value="" data-objref="1179 0 R" data-field-name="Spells 1039" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_8" type="text" tabindex="70" value="" data-objref="1180 0 R" data-field-name="Spells 1040" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_9" type="text" tabindex="71" value="" data-objref="1181 0 R" data-field-name="Spells 1041" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_10" type="text" tabindex="72" value="" data-objref="1182 0 R" data-field-name="Spells 1042" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_11" type="text" tabindex="73" value="" data-objref="1183 0 R" data-field-name="Spells 1043" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_12" type="text" tabindex="74" value="" data-objref="1184 0 R" data-field-name="Spells 1044" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell2_13" type="text" tabindex="75" value="" data-objref="1185 0 R" data-field-name="Spells 1045" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots3_1" type="text" tabindex="76" value="" data-objref="1187 0 R" data-field-name="SlotsTotal 21" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots3_2" type="text" tabindex="77" value="" data-objref="1188 0 R" data-field-name="SlotsRemaining 21" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
-                        <input id="spell3_1" type="text" tabindex="78" value="" data-objref="1190 0 R" data-field-name="Spells 1048" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_2" type="text" tabindex="79" value="" data-objref="1189 0 R" data-field-name="Spells 1047" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_3" type="text" tabindex="80" value="" data-objref="1191 0 R" data-field-name="Spells 1049" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_4" type="text" tabindex="81" value="" data-objref="1192 0 R" data-field-name="Spells 1050" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_5" type="text" tabindex="82" value="" data-objref="1193 0 R" data-field-name="Spells 1051" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_6" type="text" tabindex="83" value="" data-objref="1194 0 R" data-field-name="Spells 1052" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_7" type="text" tabindex="84" value="" data-objref="1195 0 R" data-field-name="Spells 1053" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_8" type="text" tabindex="85" value="" data-objref="1196 0 R" data-field-name="Spells 1054" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_9" type="text" tabindex="86" value="" data-objref="1197 0 R" data-field-name="Spells 1055" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_10" type="text" tabindex="87" value="" data-objref="1198 0 R" data-field-name="Spells 1056" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_11" type="text" tabindex="88" value="" data-objref="1199 0 R" data-field-name="Spells 1057" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_12" type="text" tabindex="89" value="" data-objref="1200 0 R" data-field-name="Spells 1058" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell3_13" type="text" tabindex="90" value="" data-objref="1201 0 R" data-field-name="Spells 1059" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
+                        <input id="spell3_1" type="text" tabindex="78" value="" data-objref="1190 0 R" data-field-name="Spells 1048" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_2" type="text" tabindex="79" value="" data-objref="1189 0 R" data-field-name="Spells 1047" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_3" type="text" tabindex="80" value="" data-objref="1191 0 R" data-field-name="Spells 1049" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_4" type="text" tabindex="81" value="" data-objref="1192 0 R" data-field-name="Spells 1050" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_5" type="text" tabindex="82" value="" data-objref="1193 0 R" data-field-name="Spells 1051" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_6" type="text" tabindex="83" value="" data-objref="1194 0 R" data-field-name="Spells 1052" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_7" type="text" tabindex="84" value="" data-objref="1195 0 R" data-field-name="Spells 1053" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_8" type="text" tabindex="85" value="" data-objref="1196 0 R" data-field-name="Spells 1054" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_9" type="text" tabindex="86" value="" data-objref="1197 0 R" data-field-name="Spells 1055" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_10" type="text" tabindex="87" value="" data-objref="1198 0 R" data-field-name="Spells 1056" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_11" type="text" tabindex="88" value="" data-objref="1199 0 R" data-field-name="Spells 1057" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_12" type="text" tabindex="89" value="" data-objref="1200 0 R" data-field-name="Spells 1058" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell3_13" type="text" tabindex="90" value="" data-objref="1201 0 R" data-field-name="Spells 1059" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots4_1" type="text" tabindex="91" value="" data-objref="1202 0 R" data-field-name="SlotsTotal 22" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots4_2" type="text" tabindex="92" value="" data-objref="1203 0 R" data-field-name="SlotsRemaining 22" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="spell7_1Prep" type="checkbox" tabindex="98" data-objref="1209 0 R" data-field-name="Check Box 323" imageName="3/form/1209 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
@@ -1717,53 +1481,53 @@
                         <input id="spell7_7Prep" type="checkbox" tabindex="104" data-objref="1215 0 R" data-field-name="Check Box 3071" imageName="3/form/1215 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell7_8Prep" type="checkbox" tabindex="105" data-objref="1216 0 R" data-field-name="Check Box 3072" imageName="3/form/1216 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell7_9Prep" type="checkbox" tabindex="106" data-objref="1217 0 R" data-field-name="Check Box 3073" imageName="3/form/1217 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
-                        <input id="spell4_1" type="text" tabindex="93" value="" data-objref="1204 0 R" data-field-name="Spells 1060" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_2" type="text" tabindex="94" value="" data-objref="1205 0 R" data-field-name="Spells 1061" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_3" type="text" tabindex="95" value="" data-objref="1206 0 R" data-field-name="Spells 1062" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_4" type="text" tabindex="96" value="" data-objref="1207 0 R" data-field-name="Spells 1063" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_5" type="text" tabindex="97" value="" data-objref="1208 0 R" data-field-name="Spells 1064" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_6" type="text" tabindex="107" value="" data-objref="1218 0 R" data-field-name="Spells 1065" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_7" type="text" tabindex="108" value="" data-objref="1219 0 R" data-field-name="Spells 1066" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_8" type="text" tabindex="109" value="" data-objref="1220 0 R" data-field-name="Spells 1067" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_9" type="text" tabindex="110" value="" data-objref="1221 0 R" data-field-name="Spells 1068" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_10" type="text" tabindex="111" value="" data-objref="1222 0 R" data-field-name="Spells 1069" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_11" type="text" tabindex="112" value="" data-objref="1223 0 R" data-field-name="Spells 1070" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_12" type="text" tabindex="113" value="" data-objref="1224 0 R" data-field-name="Spells 1071" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell4_13" type="text" tabindex="115" value="" data-objref="1226 0 R" data-field-name="Spells 1072" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
+                        <input id="spell4_1" type="text" tabindex="93" value="" data-objref="1204 0 R" data-field-name="Spells 1060" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_2" type="text" tabindex="94" value="" data-objref="1205 0 R" data-field-name="Spells 1061" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_3" type="text" tabindex="95" value="" data-objref="1206 0 R" data-field-name="Spells 1062" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_4" type="text" tabindex="96" value="" data-objref="1207 0 R" data-field-name="Spells 1063" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_5" type="text" tabindex="97" value="" data-objref="1208 0 R" data-field-name="Spells 1064" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_6" type="text" tabindex="107" value="" data-objref="1218 0 R" data-field-name="Spells 1065" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_7" type="text" tabindex="108" value="" data-objref="1219 0 R" data-field-name="Spells 1066" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_8" type="text" tabindex="109" value="" data-objref="1220 0 R" data-field-name="Spells 1067" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_9" type="text" tabindex="110" value="" data-objref="1221 0 R" data-field-name="Spells 1068" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_10" type="text" tabindex="111" value="" data-objref="1222 0 R" data-field-name="Spells 1069" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_11" type="text" tabindex="112" value="" data-objref="1223 0 R" data-field-name="Spells 1070" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_12" type="text" tabindex="113" value="" data-objref="1224 0 R" data-field-name="Spells 1071" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell4_13" type="text" tabindex="115" value="" data-objref="1226 0 R" data-field-name="Spells 1072" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="spell4_1Prep" type="checkbox" tabindex="114" data-objref="1225 0 R" data-field-name="Check Box 317" imageName="3/form/1225 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="slots5_1" type="text" tabindex="116" value="" data-objref="1227 0 R" data-field-name="SlotsTotal 23" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots5_2" type="text" tabindex="117" value="" data-objref="1228 0 R" data-field-name="SlotsRemaining 23" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
-                        <input id="spell5_1" type="text" tabindex="118" value="" data-objref="1229 0 R" data-field-name="Spells 1073" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_2" type="text" tabindex="119" value="" data-objref="1230 0 R" data-field-name="Spells 1074" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_3" type="text" tabindex="120" value="" data-objref="1231 0 R" data-field-name="Spells 1075" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_4" type="text" tabindex="121" value="" data-objref="1232 0 R" data-field-name="Spells 1076" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_5" type="text" tabindex="122" value="" data-objref="1233 0 R" data-field-name="Spells 1077" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_6" type="text" tabindex="123" value="" data-objref="1234 0 R" data-field-name="Spells 1078" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_7" type="text" tabindex="124" value="" data-objref="1235 0 R" data-field-name="Spells 1079" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_8" type="text" tabindex="125" value="" data-objref="1236 0 R" data-field-name="Spells 1080" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell5_9" type="text" tabindex="126" value="" data-objref="1237 0 R" data-field-name="Spells 1081" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
+                        <input id="spell5_1" type="text" tabindex="118" value="" data-objref="1229 0 R" data-field-name="Spells 1073" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_2" type="text" tabindex="119" value="" data-objref="1230 0 R" data-field-name="Spells 1074" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_3" type="text" tabindex="120" value="" data-objref="1231 0 R" data-field-name="Spells 1075" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_4" type="text" tabindex="121" value="" data-objref="1232 0 R" data-field-name="Spells 1076" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_5" type="text" tabindex="122" value="" data-objref="1233 0 R" data-field-name="Spells 1077" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_6" type="text" tabindex="123" value="" data-objref="1234 0 R" data-field-name="Spells 1078" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_7" type="text" tabindex="124" value="" data-objref="1235 0 R" data-field-name="Spells 1079" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_8" type="text" tabindex="125" value="" data-objref="1236 0 R" data-field-name="Spells 1080" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell5_9" type="text" tabindex="126" value="" data-objref="1237 0 R" data-field-name="Spells 1081" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots6_1" type="text" tabindex="127" value="" data-objref="1238 0 R" data-field-name="SlotsTotal 24" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots6_2" type="text" tabindex="128" value="" data-objref="1239 0 R" data-field-name="SlotsRemaining 24" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
-                        <input id="spell6_1" type="text" tabindex="129" value="" data-objref="1240 0 R" data-field-name="Spells 1082" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_2" type="text" tabindex="130" value="" data-objref="1241 0 R" data-field-name="Spells 1083" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_3" type="text" tabindex="131" value="" data-objref="1242 0 R" data-field-name="Spells 1084" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_4" type="text" tabindex="132" value="" data-objref="1243 0 R" data-field-name="Spells 1085" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_5" type="text" tabindex="133" value="" data-objref="1244 0 R" data-field-name="Spells 1086" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_6" type="text" tabindex="134" value="" data-objref="1245 0 R" data-field-name="Spells 1087" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_7" type="text" tabindex="135" value="" data-objref="1246 0 R" data-field-name="Spells 1088" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_8" type="text" tabindex="136" value="" data-objref="1247 0 R" data-field-name="Spells 1089" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell6_9" type="text" tabindex="137" value="" data-objref="1248 0 R" data-field-name="Spells 1090" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
+                        <input id="spell6_1" type="text" tabindex="129" value="" data-objref="1240 0 R" data-field-name="Spells 1082" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_2" type="text" tabindex="130" value="" data-objref="1241 0 R" data-field-name="Spells 1083" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_3" type="text" tabindex="131" value="" data-objref="1242 0 R" data-field-name="Spells 1084" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_4" type="text" tabindex="132" value="" data-objref="1243 0 R" data-field-name="Spells 1085" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_5" type="text" tabindex="133" value="" data-objref="1244 0 R" data-field-name="Spells 1086" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_6" type="text" tabindex="134" value="" data-objref="1245 0 R" data-field-name="Spells 1087" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_7" type="text" tabindex="135" value="" data-objref="1246 0 R" data-field-name="Spells 1088" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_8" type="text" tabindex="136" value="" data-objref="1247 0 R" data-field-name="Spells 1089" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell6_9" type="text" tabindex="137" value="" data-objref="1248 0 R" data-field-name="Spells 1090" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots7_1" type="text" tabindex="138" value="" data-objref="1249 0 R" data-field-name="SlotsTotal 25" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots7_2" type="text" tabindex="139" value="" data-objref="1250 0 R" data-field-name="SlotsRemaining 25" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
-                        <input id="spell7_1" type="text" tabindex="140" value="" data-objref="1251 0 R" data-field-name="Spells 1091" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_2" type="text" tabindex="141" value="" data-objref="1252 0 R" data-field-name="Spells 1092" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_3" type="text" tabindex="142" value="" data-objref="1253 0 R" data-field-name="Spells 1093" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_4" type="text" tabindex="143" value="" data-objref="1254 0 R" data-field-name="Spells 1094" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_5" type="text" tabindex="144" value="" data-objref="1255 0 R" data-field-name="Spells 1095" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_6" type="text" tabindex="145" value="" data-objref="1256 0 R" data-field-name="Spells 1096" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_7" type="text" tabindex="146" value="" data-objref="1257 0 R" data-field-name="Spells 1097" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_8" type="text" tabindex="147" value="" data-objref="1258 0 R" data-field-name="Spells 1098" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell7_9" type="text" tabindex="148" value="" data-objref="1259 0 R" data-field-name="Spells 1099" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
+                        <input id="spell7_1" type="text" tabindex="140" value="" data-objref="1251 0 R" data-field-name="Spells 1091" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_2" type="text" tabindex="141" value="" data-objref="1252 0 R" data-field-name="Spells 1092" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_3" type="text" tabindex="142" value="" data-objref="1253 0 R" data-field-name="Spells 1093" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_4" type="text" tabindex="143" value="" data-objref="1254 0 R" data-field-name="Spells 1094" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_5" type="text" tabindex="144" value="" data-objref="1255 0 R" data-field-name="Spells 1095" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_6" type="text" tabindex="145" value="" data-objref="1256 0 R" data-field-name="Spells 1096" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_7" type="text" tabindex="146" value="" data-objref="1257 0 R" data-field-name="Spells 1097" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_8" type="text" tabindex="147" value="" data-objref="1258 0 R" data-field-name="Spells 1098" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell7_9" type="text" tabindex="148" value="" data-objref="1259 0 R" data-field-name="Spells 1099" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots8_1" type="text" tabindex="149" value="" data-objref="1260 0 R" data-field-name="SlotsTotal 26" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots8_2" type="text" tabindex="150" value="" data-objref="1261 0 R" data-field-name="SlotsRemaining 26" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="spell4_2Prep" type="checkbox" tabindex="155" data-objref="1266 0 R" data-field-name="Check Box 316" imageName="3/form/1266 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
@@ -1784,13 +1548,13 @@
                         <input id="spell8_4Prep" type="checkbox" tabindex="171" data-objref="1282 0 R" data-field-name="Check Box 3075" imageName="3/form/1282 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell8_5Prep" type="checkbox" tabindex="172" data-objref="1283 0 R" data-field-name="Check Box 3076" imageName="3/form/1283 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell8_6Prep" type="checkbox" tabindex="173" data-objref="1284 0 R" data-field-name="Check Box 3077" imageName="3/form/1284 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
-                        <input id="spell8_1" type="text" tabindex="151" value="" data-objref="1262 0 R" data-field-name="Spells 10100" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell8_2" type="text" tabindex="152" value="" data-objref="1263 0 R" data-field-name="Spells 10101" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell8_3" type="text" tabindex="153" value="" data-objref="1264 0 R" data-field-name="Spells 10102" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell8_4" type="text" tabindex="154" value="" data-objref="1265 0 R" data-field-name="Spells 10103" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell8_5" type="text" tabindex="167" value="" data-objref="1278 0 R" data-field-name="Spells 10104" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell8_6" type="text" tabindex="174" value="" data-objref="1285 0 R" data-field-name="Spells 10105" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell8_7" type="text" tabindex="175" value="" data-objref="1286 0 R" data-field-name="Spells 10106" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
+                        <input id="spell8_1" type="text" tabindex="151" value="" data-objref="1262 0 R" data-field-name="Spells 10100" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell8_2" type="text" tabindex="152" value="" data-objref="1263 0 R" data-field-name="Spells 10101" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell8_3" type="text" tabindex="153" value="" data-objref="1264 0 R" data-field-name="Spells 10102" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell8_4" type="text" tabindex="154" value="" data-objref="1265 0 R" data-field-name="Spells 10103" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell8_5" type="text" tabindex="167" value="" data-objref="1278 0 R" data-field-name="Spells 10104" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell8_6" type="text" tabindex="174" value="" data-objref="1285 0 R" data-field-name="Spells 10105" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell8_7" type="text" tabindex="175" value="" data-objref="1286 0 R" data-field-name="Spells 10106" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="spell8_7Prep" type="checkbox" tabindex="176" data-objref="1287 0 R" data-field-name="Check Box 3078" imageName="3/form/1287 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="slots9_1" type="text" tabindex="177" value="" data-objref="1288 0 R" data-field-name="SlotsTotal 27" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="slots9_2" type="text" tabindex="178" value="" data-objref="1289 0 R" data-field-name="SlotsRemaining 27" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
@@ -1822,13 +1586,13 @@
                         <input id="spell9_4Prep" type="checkbox" tabindex="210" data-objref="1321 0 R" data-field-name="Check Box 3080" imageName="3/form/1321 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell9_5Prep" type="checkbox" tabindex="211" data-objref="1322 0 R" data-field-name="Check Box 3081" imageName="3/form/1322 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         <input id="spell9_6Prep" type="checkbox" tabindex="212" data-objref="1323 0 R" data-field-name="Check Box 3082" imageName="3/form/1323 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
-                        <input id="spell9_1" type="text" tabindex="192" value="" data-objref="1303 0 R" data-field-name="Spells 10107" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell9_2" type="text" tabindex="193" value="" data-objref="1304 0 R" data-field-name="Spells 10108" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell9_3" type="text" tabindex="194" value="" data-objref="1305 0 R" data-field-name="Spells 10109" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell9_4" type="text" tabindex="195" value="" data-objref="1306 0 R" data-field-name="Spells 101010" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell9_5" type="text" tabindex="196" value="" data-objref="1307 0 R" data-field-name="Spells 101011" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell9_6" type="text" tabindex="197" value="" data-objref="1308 0 R" data-field-name="Spells 101012" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
-                        <input id="spell9_7" type="text" tabindex="213" value="" data-objref="1324 0 R" data-field-name="Spells 101013" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;" ondblclick="showSpellInfo(this)"/>
+                        <input id="spell9_1" type="text" tabindex="192" value="" data-objref="1303 0 R" data-field-name="Spells 10107" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell9_2" type="text" tabindex="193" value="" data-objref="1304 0 R" data-field-name="Spells 10108" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell9_3" type="text" tabindex="194" value="" data-objref="1305 0 R" data-field-name="Spells 10109" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell9_4" type="text" tabindex="195" value="" data-objref="1306 0 R" data-field-name="Spells 101010" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell9_5" type="text" tabindex="196" value="" data-objref="1307 0 R" data-field-name="Spells 101011" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell9_6" type="text" tabindex="197" value="" data-objref="1308 0 R" data-field-name="Spells 101012" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
+                        <input id="spell9_7" type="text" tabindex="213" value="" data-objref="1324 0 R" data-field-name="Spells 101013" onblur="onSpellcastingBlurEvent(event);" ondrop="return false;"/>
                         <input id="spell9_7Prep" type="checkbox" tabindex="214" data-objref="1325 0 R" data-field-name="Check Box 3083" imageName="3/form/1325 0 R" images="110100" onchange="onSpellcastingCheck(event);"/>
                         
                         <!-- End Form Data -->
@@ -1844,422 +1608,12 @@
             </div>
 
             <div id="dmContent" class="container-flex">
-                <div class="container-padded">
-                    <p>
-                        You are <span id="userType">a Player</span>
-                    </p>
-                    <button class="button" id="login" style="display: none;">I want to be DM!</button>
-                    <div id="loadOwlbear" style="display: none;">
-                        <input id="owlbearUrl" type="url" name="url">
-                        <button class="button mapControl" id="displayOwlbear">Load map for yourself</button>
-                        <button class="button mapControl" id="submitOwlbearUrl">Load map for everyone</button>
-                    </div>
-                </div>
-                <div id="playerSelectContainer" class="container-padded">
-                    <p>
-                        Player:
-                    </p>
-                    <div id="playerSelector" class="container-flex">
-                        <select id="playerSelect">
-                            <option value="self" id="playerSelectSelf" class="playerSelectOption" selected>You</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="container-padded" id="playerHPContainer" style="display: none;"></div>
-                <div class="container-padded" id="sessionControlContainer">
-                    <button class="button" id="createSession">Create Session</button>
-                    <input id="sessionid" type="text" name="sessionid">
-                    <button class="button" id="joinSession">Join Session</button>
-                </div>
                 <div id="PDF-Manager" class="container-padded" style="margin-left: auto;">
-                    <button class="button" style="display: block;" onclick="loadSheetsFromPdf()">Import Sheet(s) from PDF</button>
                     <button class="button" style="display: block;" onclick="exportSheetsToPdf()">Export Sheets to PDF</button>
                 </div>
             </div>
         </div>
         <script>
-            socket.emit("startupSync", {session_code: localStorage.getItem("session_code")}, (callback) => {
-                data = callback
-                if (data.session_exists) {
-                    if (!data.hasDm) {
-                        document.getElementById("login").style = "display: block;";
-                        document.getElementById("loadOwlbear").style.display = "none";
-                        document.getElementById("userType").innerText = "a Player";
-                        document.getElementById("playerSelectContainer").style.display = "none"
-                        dm = false;
-                    }
-                    document.getElementById("owlbearEmbed").src = data.url;
-                    socket.emit("loadPlayerData", {
-                        playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                        hpNow: document.getElementById("hpCurrent").value,
-                        hpMax: document.getElementById("hpMax").value,
-                        session_code: localStorage.getItem("session_code")
-                    })
-
-                    document.getElementById("sessionid").value = localStorage.getItem("session_code")
-                } else {
-                    localStorage.removeItem("session_code")
-                }
-            })
-
-            document.getElementById("login").onclick = () => {
-                socket.emit("login", {session_code: localStorage.getItem("session_code")}, (response) => {
-                    if (response.loggedIn) {
-                        document.getElementById("login").style.display = "none";
-                        document.getElementById("loadOwlbear").style.display = "block";
-                        document.getElementById("userType").innerText = "the DM";
-                        document.getElementById("playerSelectContainer").style.display = "block"
-                        document.getElementById("playerHPContainer").style.display = "block"
-                        dm = true;
-                        currentPlayer = "self"
-                    }
-                })
-            }
-
-            socket.on("getPlayerSheets", () => {
-
-                let playerSheet = {}
-                let detailsSheet = {}
-                let spellcastingSheet = {}
-
-                let elements = document.querySelectorAll("[data-field-name]")
-
-                let characterSheetNode = document.querySelector("[id='characterSheet']")
-                let characterDetailsNode = document.querySelector("[id='characterDetails']")
-                let spellcastingNode = document.querySelector("[id='spellcasting']")
-                elements.forEach(element =>  {
-                    if (characterSheetNode.contains(element)) {
-                        if (element.matches('[type="checkbox"]')) {
-                            playerSheet[(element.id.replace("_img", ""))] =  element.checked
-                        } else if (element.type == "text" || element.tagName.toLowerCase() == "textarea"){
-                            playerSheet[(element.id.replace("_img", ""))] = element.value
-                        }
-                    } else if (characterDetailsNode.contains(element)) {
-                        if (element.matches('[type="checkbox"]')) {
-                            detailsSheet[(element.id.replace("_img", ""))] =  element.checked
-                        } else if (element.type == "text" || element.tagName.toLowerCase() == "textarea"){
-                            detailsSheet[(element.id.replace("_img", ""))] = element.value
-                        }
-                    } else if (spellcastingNode.contains(element)) {
-                        if (element.matches('[type="checkbox"]')) {
-                            spellcastingSheet[(element.id.replace("_img", ""))] =  element.checked
-                        } else if (element.type == "text" || element.tagName.toLowerCase() == "textarea"){
-                            spellcastingSheet[(element.id.replace("_img", ""))] = element.value
-                        }
-                    }
-                })
-
-                socket.emit("sendPlayerSheets",
-                    {
-                        playerSheet: playerSheet,
-                        detailsSheet: detailsSheet,
-                        spellcastingSheet: spellcastingSheet,
-                        session_code: localStorage.getItem("session_code")
-                    }
-                )
-            })
-
-            socket.on("newPlayer", (data) => {
-                let option = document.createElement("option")
-                option.value = data.player
-                option.text = data.playerName
-                document.getElementById("playerSelect").add(option)
-                document.getElementById("playerSelect").onchange(event)
-
-                let hpWrapper = document.createElement("div")
-                hpWrapper.setAttribute("data-player", data.player)
-                hpWrapper.style.display = "flex"
-
-                let playerNameText = document.createElement("p")
-                playerNameText.innerText = data.playerName + ":"
-                playerNameText.classList.add("playerName")
-
-                let playerHPProgressBarWrapper = document.createElement("div")
-                playerHPProgressBarWrapper.classList.add("health-bar")
-
-                let playerHpBar = document.createElement("div")
-                playerHpBar.classList.add("bar")
-
-                let playerHpHit = document.createElement("div")
-                playerHpHit.classList.add("hit")
-
-                playerHpBar.appendChild(playerHpHit)
-                playerHPProgressBarWrapper.appendChild(playerHpBar)
-
-                hpWrapper.appendChild(playerNameText)
-                hpWrapper.appendChild(playerHPProgressBarWrapper)
-                document.getElementById("playerHPContainer").appendChild(hpWrapper)
-
-                updatePlayerHP(data)
-            })
-
-            socket.on("playerDisconnected", (data) => {
-                let option = document.querySelector('option[value=\'' + data.player + '\']')
-                if (option != undefined) {
-                    option.remove()
-                }
-                let hpWrap = document.querySelector("[data-player='" + data.player + "']")
-                if (hpWrap != undefined && hpWrap != null) {
-                    hpWrap.remove()
-                }
-            })
-    
-            document.getElementById("displayOwlbear").onclick = () => {
-                document.getElementById("owlbearEmbed").src = document.getElementById("owlbearUrl").value
-            }
-
-            document.getElementById("submitOwlbearUrl").onclick = () => {
-                socket.emit("loadOwlbear", {
-                    url: document.getElementById("owlbearUrl").value,
-                    session_code: localStorage.getItem("session_code")
-                })
-            }
-
-            document.getElementById("playerSelect").onchange = (event) => {
-                if (event.type != "change") return
-                currentPlayer = event.target.value
-
-                if (currentPlayer != "self") {
-                    socket.emit("getPlayerSheets", {
-                        player: event.target.value,
-                        session_code: localStorage.getItem("session_code")
-                    })
-
-                } else {
-                    Object.keys(localStorage).forEach(function(key){
-                        if (key == "split-sizes") return
-                        if (key == "session_code") return
-                        let value = localStorage.getItem(key)
-                        if (value == "true" || value == "false") {
-                            if (value == "true") {
-                                document.getElementById(key.replace("_img", "")).setAttribute('checked', 'checked')
-                            } else {
-                                document.getElementById(key.replace("_img", "")).removeAttribute('checked')
-                            }
-                        } else {
-                            document.getElementById(key.replace("_img", "")).value = value
-                        }
-                    })
-                }
-                fixCheckedAll()
-            }
-                
-            document.getElementById("createSession").onclick = () => {
-                socket.emit("createSession", (callback) => {
-                    localStorage.setItem("session_code", callback.session_code)
-                    document.getElementById("sessionid").value = callback.session_code
-
-                    socket.emit("sync", {session_code: localStorage.getItem("session_code")}, (callback) => {
-                        data = callback
-                        if (data.session_exists) {
-                            if (!data.hasDm) {
-                                document.getElementById("login").style = "display: block;";
-                                document.getElementById("loadOwlbear").style.display = "none";
-                                document.getElementById("userType").innerText = "a Player";
-                                document.getElementById("playerSelectContainer").style.display = "none"
-                                dm = false;
-                            }
-                            document.getElementById("owlbearEmbed").src = data.url;
-                            socket.emit("loadPlayerData", {
-                                playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                                hpNow: document.getElementById("hpCurrent").value,
-                                hpMax: document.getElementById("hpMax").value,
-                                session_code: localStorage.getItem("session_code")
-                            })
-                        } else {
-                            localStorage.removeItem("session_code")
-                        }
-                    })
-                })
-            }
-
-            document.getElementById("joinSession").onclick = () => {
-                socket.emit("joinSession", {session_code: document.getElementById("sessionid").value}, (callback) => {
-                    if (callback.joined) {
-                        localStorage.setItem("session_code", document.getElementById("sessionid").value)
-
-                        socket.emit("sync", {session_code: localStorage.getItem("session_code")}, (callback) => {
-                            data = callback
-                            if (data.session_exists) {
-                                if (!data.hasDm) {
-                                    document.getElementById("login").style = "display: block;";
-                                    document.getElementById("loadOwlbear").style.display = "none";
-                                    document.getElementById("userType").innerText = "a Player";
-                                    document.getElementById("playerSelectContainer").style.display = "none"
-                                    dm = false;
-                                }
-                                document.getElementById("owlbearEmbed").src = data.url;
-                                socket.emit("loadPlayerData", {
-                                    playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                                    hpNow: document.getElementById("hpCurrent").value,
-                                    hpMax: document.getElementById("hpMax").value,
-                                    session_code: localStorage.getItem("session_code")
-                                })
-                            } else {
-                                localStorage.removeItem("session_code")
-                            }
-                        })
-                    }
-                })
-            }
-
-            socket.on("sendPlayerSheets", (data) => {
-                for (const [key, value] of Object.entries(data.playerSheet)) {
-                    if (value === true || value === false) {
-                        if (value === true) {
-                            document.getElementById(key.replace("_img", "")).setAttribute('checked', 'checked')
-                        } else {
-                            document.getElementById(key.replace("_img", "")).removeAttribute('checked')
-                        }
-                    } else {
-                        document.getElementById(key.replace("_img", "")).value = value
-                    }
-                    fixCheckedAll()
-                }
-                for (let [key, value] of Object.entries(data.detailsSheet)) {
-                    if (value === true || value === false) {
-                        if (value === true) {
-                            document.getElementById(key.replace("_img", "")).setAttribute('checked', 'checked')
-                        } else {
-                            document.getElementById(key.replace("_img", "")).removeAttribute('checked')
-                        }
-                    } else {
-                        document.getElementById(key.replace("_img", "")).value = value
-                    }
-                    fixCheckedAll()
-                }
-                for (let [key, value] of Object.entries(data.spellcastingSheet)) {
-                    if (value === true || value === false) {
-                        if (value === true) {
-                            document.getElementById(key.replace("_img", "")).setAttribute('checked', 'checked')
-                        } else {
-                            document.getElementById(key.replace("_img", "")).removeAttribute('checked')
-                        }
-                    } else {
-                        document.getElementById(key.replace("_img", "")).value = value
-                    }
-                    fixCheckedAll()
-                }
-            })
-
-            socket.on("updateCharacterSheet", (data) => {
-                if (data.player == currentPlayer) {
-                    switch (data.type) {
-                        case "text":
-                            document.getElementById(data.elementID).value = data.value
-                            break
-
-                        case "checkbox":
-                            if (data.checked == "checked" || data.checked == true) {
-                                document.getElementById(data.elementID).setAttribute("checked", "checked")
-                            } else {
-                                document.getElementById(data.elementID).removeAttribute("checked")
-                            }
-                            fixCheckedAll()
-                            break
-                    }
-                }
-            })
-
-            socket.on("updateDetailsSheet", (data) => {
-                if (data.player == currentPlayer) {
-                    switch (data.type) {
-                        case "text":
-                            document.getElementById(data.elementID).value = data.value
-                            break
-
-                        case "checkbox":
-                            if (data.checked == "checked" || data.checked == true) {
-                                document.getElementById(data.elementID).setAttribute("checked", "checked")
-                            } else {
-                                document.getElementById(data.elementID).removeAttribute("checked")
-                            }
-                            fixCheckedAll()
-                            break
-                    }
-                }
-            })
-
-            socket.on("updateSpellcastingSheet", (data) => {
-                if (data.player == currentPlayer) {
-                    switch (data.type) {
-                        case "text":
-                            document.getElementById(data.elementID).value = data.value
-                            break
-
-                        case "checkbox":
-                            if (data.checked == "checked" || data.checked == true) {
-                                document.getElementById(data.elementID).setAttribute("checked", "checked")
-                            } else {
-                                document.getElementById(data.elementID).removeAttribute("checked")
-                            }
-                            fixCheckedAll()
-                            break
-                    }
-                }
-            })
-
-            socket.on("updatePlayerHP", (data) => {
-                updatePlayerHP(data)
-            })
-
-            let data = {}
-
-            data.hpNow = ((localStorage.getItem("hpCurrent") != null && localStorage.getItem("hpCurrent") != "" && localStorage.getItem("hpCurrent") != undefined) ? localStorage.getItem("hpCurrent") : ""),
-            data.hpMax = ((localStorage.getItem("hpMax") != null && localStorage.getItem("hpMax") != "" && localStorage.getItem("hpMax") != undefined) ? localStorage.getItem("hpMax") : ""),
-            data.playerName = "You"
-            data.player = "You"
-
-            let hpWrapper = document.createElement("div")
-            hpWrapper.setAttribute("data-player", data.player)
-            hpWrapper.style.display = "flex"
-
-            let playerNameText = document.createElement("p")
-            playerNameText.innerText = data.playerName + ":"
-            playerNameText.classList.add("playerName")
-
-            let playerHPProgressBarWrapper = document.createElement("div")
-            playerHPProgressBarWrapper.classList.add("health-bar")
-
-            let playerHpBar = document.createElement("div")
-            playerHpBar.classList.add("bar")
-
-            let playerHpHit = document.createElement("div")
-            playerHpHit.classList.add("hit")
-
-            playerHpBar.appendChild(playerHpHit)
-            playerHPProgressBarWrapper.appendChild(playerHpBar)
-
-            hpWrapper.appendChild(playerNameText)
-            hpWrapper.appendChild(playerHPProgressBarWrapper)
-            document.getElementById("playerHPContainer").appendChild(hpWrapper)
-
-            updatePlayerHP(data)
-
-            document.getElementById("playerHPContainer").style.display = "block"
-
-            Split(['#owlbear', '#characterSheets'], {
-                gutterSize: 7,
-                minSize: [500, 1],
-                cursor: "e-resize",
-                expandToMin: true,
-                sizes: sizes,
-                snapOffset: 0,
-                onDragEnd: function (sizes) {
-                    localStorage.setItem('split-sizes', JSON.stringify(sizes))
-                },
-            })
-
-            Split(['#mainContent', '#dmContent'], {
-                direction: "vertical",
-                minSize: [500, 1],
-                sizes: [90, 10],
-                expandToMin: true,
-                cursor: 'n-resize',
-                gutterSize: 7,
-                snapOffset: 0,
-            })
-
             Object.keys(localStorage).forEach(function(key){
                 if (key == "split-sizes") return
                 if (key == "session_code") return

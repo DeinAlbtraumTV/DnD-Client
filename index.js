@@ -99,20 +99,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit();
 })
-
-const clientId = '858413101320503317';
-
-const rpc = new DiscordRPC.Client({ transport: 'ipc' });
-const startTimestamp = new Date();
-
-rpc.on('ready', () => {
-    rpc.setActivity({
-        details: `Playing Dungeons and Dragons`,
-        state: 'in a Dungeon',
-        startTimestamp,
-        largeImageKey: 'dnd_logo_full',
-        instance: false,
-      });
-});
-
-rpc.login({ clientId }).catch(console.error);

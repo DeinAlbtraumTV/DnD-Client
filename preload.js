@@ -1,7 +1,5 @@
 const customTitlebar = require('custom-electron-titlebar')
 const {contextBridge} = require("electron")
-const rp = require('request-promise')
-const cheerio = require('cheerio')
 const fs = require('fs')
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -12,22 +10,6 @@ window.addEventListener('DOMContentLoaded', () => {
         icon: null,
     })
 })
-
-contextBridge.exposeInMainWorld(
-    "spells", {
-        getSpellInfo: async (url) => {
-            return new Promise(resolve => {
-                rp(url).then((html) => {
-                    const $ = cheerio.load(html)
-                    const content = $('#page-content').html()
-                    resolve(content)
-                }).catch(function(err){
-                    resolve("I can´t seem to find this spell. Please make sure to not include special characters")
-                });
-            })
-        }
-    }
-)
 
 contextBridge.exposeInMainWorld(
     "pdfs", {
