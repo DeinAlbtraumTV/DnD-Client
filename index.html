@@ -642,6 +642,12 @@
                 })
             }
 
+            function genSheetBlob(data, mimeType) {
+                return new Blob([data], {
+                    type: mimeType
+                })
+            }
+
             function saveAll() {
                 let elements = document.querySelectorAll("[data-field-name]")
                 elements.forEach(element =>  {
