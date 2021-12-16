@@ -33,6 +33,10 @@ body, html {
     border: none !important;
 }
 
+.container-block {
+    display: block !important;
+}
+
 .gutter {
     background-color: rgb(61, 68, 100);
     background-repeat: no-repeat;
@@ -348,4 +352,39 @@ option {
 
 .playerName {
     padding-right: 3px;
+}
+
+.initiativeTrackerControls {
+    display: block;
+}
+
+#removeToken {
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: rgb(0 0 0 / 20%);
+}
+
+.token {
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: rgb(255 255 255 / 20%);
+    margin-top: 4px;
+}
+
+.token[draggable=true] {
+    cursor: grab;
+}
+
+.token:first-child {
+    background-color: rgba(0, 255, 0, 0.4);
+}
+
+.token:-moz-drag-over {
+    background-color: rgb(255 255 255 / 50%);
+}
+
+.token:first-child:-moz-drag-over {
+    background-color: rgba(0, 255, 0, 0.7);
 }

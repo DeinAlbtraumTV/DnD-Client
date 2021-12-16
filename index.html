@@ -334,24 +334,28 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js" integrity="sha512-xQBQYt9UcgblF6aCMrwU1NkVA7HCXaSN2oq0so80KO+y68M+n64FOcqgav4igHe6D5ObBLIf68DWv+gfBowczg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script>
-            let currentTab = "characterSheet";
-            let dm = false;
-            let currentPlayer = "self";
+            let currentTab = "characterSheet"
+            let dm = false
+            let currentPlayer = "self"
+            let tokens = []
+            let draggedToken, draggedOverToken
     
             //let socket = io('http://localhost:3000');
-            let socket = io('https://dnd-server.glitch.me');
+            let socket = io('https://dnd-server.glitch.me')
 
             function echo(text) {
                 console.log(text)
             }
     
+            //still leaving this in for compatibility
+            //TODO rename to loadMapUrl/loadMap
             socket.on("loadOwlbear", (data) => {
-                document.getElementById("owlbearEmbed").src = data.url;
+                document.getElementById("mapEmbed").src = data.url
                 console.log("Loading Owlbear")
             });
     
             socket.on("dmAssigned", () => {
-                document.getElementById("login").style.display = "none";
+                document.getElementById("login").style.display = "none"
                 socket.emit("loadPlayerData", {
                     playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
                     hpNow: ((localStorage.getItem("hpCurrent") != null && localStorage.getItem("hpCurrent") != "" && localStorage.getItem("hpCurrent") != undefined) ? localStorage.getItem("hpCurrent") : ""),
@@ -363,7 +367,7 @@
             socket.on("dmRemoved", () => {
                 document.getElementById("login").style.display = "block"
                 document.getElementById("playerSelectContainer").style.display = "none"
-                document.getElementById("owlbearEmbed").src = ""
+                document.getElementById("mapEmbed").src = ""
 
                 let hpWrap = document.querySelector("[data-player='You']")
                 if (hpWrap != undefined && hpWrap != null) {
@@ -381,20 +385,20 @@
             }
     
             function openTab(evt, tabId) {
-                let i, tabcontent, tablinks;
+                let i, tabcontent, tablinks
     
-                tabcontent = document.getElementsByClassName("tabcontent");
+                tabcontent = document.getElementsByClassName("tabcontent")
                 for (i = 0; i < tabcontent.length; i++) {
-                    tabcontent[i].style.display = "none";
+                    tabcontent[i].style.display = "none"
                 }
     
-                tablinks = document.getElementsByClassName("tablinks");
+                tablinks = document.getElementsByClassName("tablinks")
                 for (i = 0; i < tablinks.length; i++) {
-                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                    tablinks[i].className = tablinks[i].className.replace(" active", "")
                 }
     
-                document.getElementById(tabId).style.display = "block";
-                evt.currentTarget.className += " active";
+                document.getElementById(tabId).style.display = "block"
+                evt.currentTarget.className += " active"
             }
 
             async function showSpellInfo(element) {
@@ -603,8 +607,6 @@
                         if (element.matches('[type="checkbox"]')) {
                             if (element.checked) {
                                 sheetForm.getCheckBox(element.getAttribute("data-field-name")).check()
-                            } else {
-                                sheetForm.getCheckBox(element.getAttribute("data-field-name")).uncheck()
                             }
                         } else if (element.type == "text" || element.tagName.toLowerCase() == "textarea"){
                             sheetForm.getTextField(element.getAttribute("data-field-name")).setText(element.value)
@@ -613,8 +615,6 @@
                         if (element.matches('[type="checkbox"]')) {
                             if (element.checked) {
                                 detailsForm.getCheckBox(element.getAttribute("data-field-name")).check()
-                            } else {
-                                detailsForm.getCheckBox(element.getAttribute("data-field-name")).uncheck()
                             }
                         } else if (element.type == "text" || element.tagName.toLowerCase() == "textarea"){
                             detailsForm.getTextField(element.getAttribute("data-field-name")).setText(element.value)
@@ -623,8 +623,6 @@
                         if (element.matches('[type="checkbox"]')) {
                             if (element.checked) {
                                 spellcastingForm.getCheckBox(element.getAttribute("data-field-name")).check()
-                            } else {
-                                spellcastingForm.getCheckBox(element.getAttribute("data-field-name")).uncheck()
                             }
                         } else if (element.type == "text" || element.tagName.toLowerCase() == "textarea"){
                             spellcastingForm.getTextField(element.getAttribute("data-field-name")).setText(element.value)
@@ -663,13 +661,121 @@
                     }
                 })
             }
+
+            function addToken() {
+                let tokenContainer = document.getElementById("tokenContainer")
+                let tokenName = document.getElementById("tokenName").value || "Unnamed Token"
+
+                let tokenDiv = document.createElement("div")
+
+                let tokensLength = tokens.push(tokenName)
+
+                document.getElementById("tokenName").value = ""
+
+                tokenDiv.innerText = (tokensLength) + ". " + tokenName
+                tokenDiv.setAttribute("draggable", dm)
+                tokenDiv.setAttribute("data-pos", tokensLength - 1)
+                tokenDiv.classList.add("token")
+                tokenDiv.addEventListener("drag", tokenDragStart)
+                tokenDiv.addEventListener("dragover", tokenDragOver)
+                tokenDiv.addEventListener("dragenter", tokenDragEnter)
+                tokenDiv.addEventListener("dragleave", tokenDragLeave)
+                tokenDiv.addEventListener("drop", tokenRelocate)
+
+                tokenContainer.appendChild(tokenDiv)
+            }
+
+            function tokenDragStart(event) {
+                draggedToken = event.target.getAttribute("data-pos");
+            }
+
+            function tokenDragOver(event) {
+                event.preventDefault();
+                draggedOverToken = event.target.getAttribute("data-pos")
+            }
+
+            function tokenDragEnter(event) {
+                if (event.target.getAttribute("data-pos") === "0") {
+                    event.target.style = "background-color: rgba(0, 255, 0, 0.7);"
+                } else {
+                    event.target.style = "background-color: rgb(255 255 255 / 50%);"
+                }
+            }
+
+            function tokenDragLeave(event) {
+                event.target.style = ""
+            }
+
+            function tokenRelocate(event) {
+                event.preventDefault();
+
+                if (!dm) return
+
+                let relocateName = tokens[draggedToken]
+
+                tokens.splice(draggedToken, 1)
+                tokens.splice(draggedOverToken, 0, relocateName)
+
+                renderTokens()
+
+                socket.emit("syncTokens", {tokens: tokens, session_code: localStorage.getItem("session_code")})
+            }
+
+            function cycleTokens() {
+                if (tokens.length > 0 || !dm) {
+                    tokens.push(tokens.shift())
+
+                    renderTokens()
+
+                    socket.emit("syncTokens", {tokens: tokens, session_code: localStorage.getItem("session_code")})
+                }
+            }
+
+            function renderTokens() {
+                let tokenContainer = document.getElementById("tokenContainer")
+
+                tokenContainer.innerHTML = ""
+
+                if (tokens.length == 0 && !dm) {
+                    document.getElementById("initiativeTracker").style.display = "none"
+                } else {
+                    document.getElementById("initiativeTracker").style.display = "block"
+                    for (token in tokens) {
+                        let tokenVal = tokens[token]
+
+                        let tokenDiv = document.createElement("div")
+
+                        tokenDiv.innerText = (parseInt(token) + 1) + ". " + tokenVal
+                        tokenDiv.setAttribute("draggable", dm)
+                        tokenDiv.setAttribute("data-pos", token)
+                        tokenDiv.classList.add("token")
+                        tokenDiv.addEventListener("drag", tokenDragStart)
+                        tokenDiv.addEventListener("dragover", tokenDragOver)
+                        tokenDiv.addEventListener("dragenter", tokenDragEnter)
+                        tokenDiv.addEventListener("dragleave", tokenDragLeave)
+                        tokenDiv.addEventListener("drop", tokenRelocate)
+
+                        tokenContainer.appendChild(tokenDiv)
+                    }
+                }
+            }
+
+            function removeToken(event) {
+                event.preventDefault();
+
+                tokens.splice(draggedToken, 1)
+
+                renderTokens()
+
+                socket.emit("syncTokens", {tokens: tokens, session_code: localStorage.getItem("session_code")})
+            }
         </script>
     </head>
     <body>
         <div style="height: -webkit-fill-available; overflow: hidden;">
             <div class="container-flexsplit" id="mainContent">
                 <div id="owlbear">
-                    <webview id="owlbearEmbed" src="" autosize></webview>
+                    <webview id="mapEmbed" src="" autosize></webview>
                 </div>
                 <div id="characterSheets">
                     <div class="tab">
@@ -1235,10 +1341,10 @@
                         You are <span id="userType">a Player</span>
                     </p>
                     <button class="button" id="login" style="display: none;">I want to be DM!</button>
-                    <div id="loadOwlbear" style="display: none;">
-                        <input id="owlbearUrl" type="url" name="url">
-                        <button class="button mapControl" id="displayOwlbear">Load map for yourself</button>
-                        <button class="button mapControl" id="submitOwlbearUrl">Load map for everyone</button>
+                    <div id="loadMap" style="display: none;">
+                        <input id="mapUrl" type="url" name="url">
+                        <button class="button mapControl" id="displayMap">Load map for yourself</button>
+                        <button class="button mapControl" id="submitMapUrl">Load map for everyone</button>
                     </div>
                 </div>
                 <div id="playerSelectContainer" class="container-padded">
@@ -1253,13 +1359,27 @@
                 </div>
                 <div class="container-padded" id="playerHPContainer" style="display: none;"></div>
                 <div class="container-padded" id="sessionControlContainer">
-                    <button class="button" id="createSession">Create Session</button>
-                    <input id="sessionid" type="text" name="sessionid">
-                    <button class="button" id="joinSession">Join Session</button>
+                    <input id="sessionid" type="text" name="sessionid" placeholder="Session ID">
+                    <div class="container-block">
+                        <button class="button" id="createSession">Create Session</button>
+                        <button class="button" id="joinSession">Join Session</button>
+                    </div>
+                </div>
+                <div class="container-padded" id="initiativeTracker">
+                    <div class="initiativeTrackerControls" id="initiativeTrackerControls" style="display: none;">
+                        <button class="button" onclick="addToken()">Add Token</button>
+                        <input id="tokenName" type="text" name="tokenName" placeholder="Token Name">
+                        <div id="removeToken" ondrop="removeToken(event)" ondragover="return false" ondragenter="return false">
+                            Drag here to remove token
+                        </div>
+                        <button class="button" onclick="cycleTokens()">Next</button>
+                    </div>
+                    <div class="initiativeTrackingContainer" id="tokenContainer"></div>
                 </div>
                 <div id="PDF-Manager" class="container-padded" style="margin-left: auto;">
                     <button class="button" style="display: block;" onclick="loadSheetsFromPdf()">Import Sheet(s) from PDF</button>
-                    <button class="button" style="display: block;" onclick="exportSheetsToPdf()">Export Sheets to PDF</button>
+                    <!--Disabled because of bug in pdf-lib causing exported stylesheets to look wierd rendering them practically read only (text doesn´t scale and checkboxes don´t have the original styles if unchecked)-->
+                    <!--<button class="button" style="display: block;" onclick="exportSheetsToPdf()">Export Sheets to PDF</button>-->
                 </div>
             </div>
         </div>
@@ -1268,13 +1388,18 @@
                 data = callback
                 if (data.session_exists) {
                     if (!data.hasDm) {
-                        document.getElementById("login").style = "display: block;";
-                        document.getElementById("loadOwlbear").style.display = "none";
+                        document.getElementById("login").style.display = "block";
+                        document.getElementById("loadMap").style.display = "none";
                         document.getElementById("userType").innerText = "a Player";
                         document.getElementById("playerSelectContainer").style.display = "none"
                         dm = false;
                     }
-                    document.getElementById("owlbearEmbed").src = data.url;
+                    document.getElementById("mapEmbed").src = data.url;
+
+                    tokens = data.tokens
+
+                    renderTokens()
+
                     socket.emit("loadPlayerData", {
                         playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
                         hpNow: document.getElementById("hpCurrent").value,
@@ -1292,15 +1417,23 @@
                 socket.emit("login", {session_code: localStorage.getItem("session_code")}, (response) => {
                     if (response.loggedIn) {
                         document.getElementById("login").style.display = "none";
-                        document.getElementById("loadOwlbear").style.display = "block";
+                        document.getElementById("loadMap").style.display = "block";
                         document.getElementById("userType").innerText = "the DM";
                         document.getElementById("playerSelectContainer").style.display = "block"
                         document.getElementById("playerHPContainer").style.display = "block"
+                        document.getElementById("initiativeTrackerControls").style.display = "block"
                         dm = true;
                         currentPlayer = "self"
+                        renderTokens()
                     }
                 })
             }
+
+            socket.on("renderTokens", (data) => {
+                tokens = data.tokens
+
+                renderTokens()
+            })
 
             socket.on("getPlayerSheets", () => {
 
@@ -1390,13 +1523,15 @@
                 }
             })
     
-            document.getElementById("displayOwlbear").onclick = () => {
-                document.getElementById("owlbearEmbed").src = document.getElementById("owlbearUrl").value
+            document.getElementById("displayMap").onclick = () => {
+                document.getElementById("mapEmbed").src = document.getElementById("mapUrl").value
             }
 
-            document.getElementById("submitOwlbearUrl").onclick = () => {
+            document.getElementById("submitMapUrl").onclick = () => {
+                //still leaving this in for compatibility
+                //TODO rename to loadMapUrl/loadMap
                 socket.emit("loadOwlbear", {
-                    url: document.getElementById("owlbearUrl").value,
+                    url: document.getElementById("mapUrl").value,
                     session_code: localStorage.getItem("session_code")
                 })
             }
@@ -1440,12 +1575,17 @@
                         if (data.session_exists) {
                             if (!data.hasDm) {
                                 document.getElementById("login").style = "display: block;";
-                                document.getElementById("loadOwlbear").style.display = "none";
+                                document.getElementById("loadMap").style.display = "none";
                                 document.getElementById("userType").innerText = "a Player";
                                 document.getElementById("playerSelectContainer").style.display = "none"
                                 dm = false;
                             }
-                            document.getElementById("owlbearEmbed").src = data.url;
+                            document.getElementById("mapEmbed").src = data.url;
+
+                            tokens = data.tokens
+                    
+                            renderTokens()
+
                             socket.emit("loadPlayerData", {
                                 playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
                                 hpNow: document.getElementById("hpCurrent").value,
@@ -1469,12 +1609,17 @@
                             if (data.session_exists) {
                                 if (!data.hasDm) {
                                     document.getElementById("login").style = "display: block;";
-                                    document.getElementById("loadOwlbear").style.display = "none";
+                                    document.getElementById("loadMap").style.display = "none";
                                     document.getElementById("userType").innerText = "a Player";
                                     document.getElementById("playerSelectContainer").style.display = "none"
                                     dm = false;
                                 }
-                                document.getElementById("owlbearEmbed").src = data.url;
+                                document.getElementById("mapEmbed").src = data.url;
+
+                                tokens = data.tokens
+                    
+                                renderTokens()
+
                                 socket.emit("loadPlayerData", {
                                     playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
                                     hpNow: document.getElementById("hpCurrent").value,
@@ -1661,6 +1806,7 @@
                 }
             })
 
+            renderTokens()
             replaceChecks(false)
         </script>
     </body>
