@@ -1,0 +1,23 @@
+.t {
+    transform-origin: bottom left;
+    z-index: 2;
+    position: absolute;
+    white-space: pre;
+    overflow: visible;
+    line-height: 1.5;
+}
+
+@font-face {
+    font-family: ScalaSansOffc-Bold_72;
+    src: url("../fonts/ScalaSansOffc-Bold_72.woff") format("woff");
+}
+
+@font-face {
+    font-family: ScalaSansOffc_70;
+    src: url("../fonts/ScalaSansOffc_70.woff") format("woff");
+}
+
+@font-face {
+    font-family: sub_Interstate-Light_nr;
+    src: url("../fonts/sub_Interstate-Light_nr.woff") format("woff");
+}

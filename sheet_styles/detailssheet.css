@@ -1,0 +1,38 @@
+#text_cname2{left:107px;bottom:1054px;letter-spacing:-0.19px;}
+#text_eyes{left:406px;bottom:1053px;letter-spacing:-0.17px;}
+#text_age{left:406px;bottom:1093px;letter-spacing:-0.21px;}
+#text_weight{left:726px;bottom:1093px;letter-spacing:-0.19px;}
+#text_height{left:578px;bottom:1093px;letter-spacing:-0.18px;}
+#text_hair{left:726px;bottom:1053px;letter-spacing:-0.17px;}
+#text_skin{left:578px;bottom:1053px;letter-spacing:-0.17px;}
+#text_name{left:645px;bottom:976px;letter-spacing:-0.15px;}
+#text_treasure{left:589px;bottom:39px;letter-spacing:-0.09px;}
+#text_backstory{left:125px;bottom:39px;letter-spacing:-0.12px;word-spacing:0.03px;}
+#text_appearance{left:122px;bottom:657px;letter-spacing:-0.09px;word-spacing:-0.2px;}
+#text_additionalFeatures{left:538px;bottom:307px;letter-spacing:-0.06px;word-spacing:-0.05px;}
+#text_allies{left:553px;bottom:657px;letter-spacing:-0.06px;word-spacing:0.03px;}
+#text_symbol{left:733px;bottom:745px;letter-spacing:-0.04px;}
+#text_copyright2{left:264px;bottom:16px;letter-spacing:0.81px;word-spacing:-0.19px;}
+
+.s1_2{font-size:11px;font-family:ScalaSansOffc_70;color:#000;}
+.s2_2{font-size:9px;font-family:ScalaSansOffc_70;color:#969797;}
+.s3_2{font-size:10px;font-family:ScalaSansOffc-Bold_72;color:#000;}
+.s4_2{font-size:10px;font-family:ScalaSansOffc-Bold_72;color:#FFF;}
+.s5_2{font-size:8px;font-family:sub_Interstate-Light_nr;color:#BFBFBF;}
+
+#cname2{	z-index: 2;	padding: 0px;	position: absolute;	left: 74px;	top: 99px;	width: 316px;	height: 31px;	text-align: center;	background: transparent;	border: none;	font: normal 24px Arial, Helvetica, sans-serif;}
+#age{	z-index: 2;	padding: 0px;	position: absolute;	left: 407px;	top: 78px;	width: 161px;	height: 23px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#height{	z-index: 2;	padding: 0px;	position: absolute;	left: 579px;	top: 78px;	width: 130px;	height: 23px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#weight{	z-index: 2;	padding: 0px;	position: absolute;	left: 726px;	top: 78px;	width: 148px;	height: 23px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#eyes{	z-index: 2;	padding: 0px;	position: absolute;	left: 405px;	top: 118px;	width: 162px;	height: 23px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#skin{	z-index: 2;	padding: 0px;	position: absolute;	left: 579px;	top: 118px;	width: 136px;	height: 23px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#hair{	z-index: 2;	padding: 0px;	position: absolute;	left: 726px;	top: 118px;	width: 148px;	height: 23px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#image{	z-index: 2;	border-style: none;	padding: 0px;	position: absolute;	left: 55px;	top: 200px;	width: 249px;	height: 333px;	color: rgb(0,0,0);	text-align: left;	background: transparent;	font: normal 18px Arial, Helvetica, sans-serif;}
+#factionImage{	z-index: 2;	border-style: none;	padding: 0px;	position: absolute;	left: 648px;	top: 266px;	width: 209px;	height: 167px;	color: rgb(0,0,0);	text-align: left;	background: transparent;	font: normal 18px Arial, Helvetica, sans-serif;}
+#allies{	z-index: 2;	resize: none;	padding: 0px;	position: absolute;	left: 344px;	top: 200px;	width: 268px;	height: 333px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#factionName{	z-index: 2;	padding: 0px;	position: absolute;	left: 646px;	top: 234px;	width: 209px;	height: 23px;	text-align: center;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#backstory{	z-index: 2;	resize: none;	padding: 0px;	position: absolute;	left: 54px;	top: 588px;	width: 249px;	height: 564px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#additionalFeatures{	z-index: 2;	resize: none;	padding: 0px;	position: absolute;	left: 342px;	top: 573px;	width: 538px;	height: 312px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#treasure{	z-index: 2;	resize: none;	padding: 0px;	position: absolute;	left: 342px;	top: 921px;	width: 538px;	height: 231px;	text-align: left;	background: transparent;	border: none;	font: normal 18px Arial, Helvetica, sans-serif;}
+#image2{	z-index: 2;	border-style: none;	padding: 0px;	position: absolute;	left: 55px;	top: 200px;	width: 249px;	height: 333px;	color: rgb(0,0,0);	text-align: left;	background: transparent;	font: normal 18px Arial, Helvetica, sans-serif;}
+#image3{	z-index: 2;	border-style: none;	padding: 0px;	position: absolute;	left: 55px;	top: 200px;	width: 249px;	height: 333px;	color: rgb(0,0,0);	text-align: left;	background: transparent;	font: normal 18px Arial, Helvetica, sans-serif;}
