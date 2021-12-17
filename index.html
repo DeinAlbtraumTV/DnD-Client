@@ -358,8 +358,8 @@
                 document.getElementById("login").style.display = "none"
                 socket.emit("loadPlayerData", {
                     playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                    hpNow: ((localStorage.getItem("hpCurrent") != null && localStorage.getItem("hpCurrent") != "" && localStorage.getItem("hpCurrent") != undefined) ? localStorage.getItem("hpCurrent") : ""),
-                    hpMax: ((localStorage.getItem("hpMax") != null && localStorage.getItem("hpMax") != "" && localStorage.getItem("hpMax") != undefined) ? localStorage.getItem("hpMax") : ""),
+                    hpNow: localStorage.getItem("hpCurrent") ?? "",
+                    hpMax: localStorage.getItem("hpMax") ?? "",
                     session_code: localStorage.getItem("session_code")
                 })
             })
@@ -368,12 +368,6 @@
                 document.getElementById("login").style.display = "block"
                 document.getElementById("playerSelectContainer").style.display = "none"
                 document.getElementById("mapEmbed").src = ""
-
-                let hpWrap = document.querySelector("[data-player='You']")
-                if (hpWrap != undefined && hpWrap != null) {
-                    hpWrap.remove()
-                }
-                document.getElementById("playerHPContainer").style.display = "none"
             })
     
             let sizes = localStorage.getItem('split-sizes')
@@ -485,16 +479,15 @@
 
             function updatePlayerHP (data) {
                 let hpWrapDiv = document.querySelector("[data-player='" + data.player + "']")
-                if (hpWrapDiv != undefined && hpWrapDiv != null) {
-
+                if (hpWrapDiv) {
                     let hBar = hpWrapDiv.lastChild.lastChild
                     let hHit = hBar.lastChild
 
-                    let total = hpWrapDiv.lastChild.getAttribute('data-total')
-                    let value = hpWrapDiv.lastChild.getAttribute('data-value')
+                    let total = hpWrapDiv.lastChild.getAttribute('data-total') ?? data.hpMax
+                    let value = hpWrapDiv.lastChild.getAttribute('data-value') ?? data.hpNow
 
-                    if (data.hpNow != undefined && data.hpNow != null && data.hpNow != "") {
-                        let damage = value-data.hpNow
+                    if (data.hpNow) {
+                        let damage = value - data.hpNow
 
                         let barWidth = (data.hpNow / total) * 100
                         let hitWidth = (damage / value) * 100 + "%"
@@ -519,7 +512,7 @@
                         }, 500);
                     }
 
-                    if (data.hpMax != undefined && data.hpMax != null && data.hpMax != "") {
+                    if (data.hpMax) {
                         total = data.hpMax
 
                         let barWidth = (data.hpNow / total) * 100
@@ -683,6 +676,8 @@
                 tokenDiv.addEventListener("drop", tokenRelocate)
 
                 tokenContainer.appendChild(tokenDiv)
+
+                socket.emit("syncTokens", {tokens: tokens, session_code: localStorage.getItem("session_code")})
             }
 
             function tokenDragStart(event) {
@@ -1359,6 +1354,9 @@
                 </div>
                 <div class="container-padded" id="playerHPContainer" style="display: none;"></div>
                 <div class="container-padded" id="sessionControlContainer">
+                    <div>
+                        Current Session: <div id="currentSession" style="display: inline;">Unknown</div>
+                    </div>
                     <input id="sessionid" type="text" name="sessionid" placeholder="Session ID">
                     <div class="container-block">
                         <button class="button" id="createSession">Create Session</button>
@@ -1402,11 +1400,12 @@
 
                     socket.emit("loadPlayerData", {
                         playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                        hpNow: document.getElementById("hpCurrent").value,
-                        hpMax: document.getElementById("hpMax").value,
+                        hpNow: localStorage.getItem("hpCurrent"),
+                        hpMax: localStorage.getItem("hpMax"),
                         session_code: localStorage.getItem("session_code")
                     })
 
+                    document.getElementById("currentSession").innerText = localStorage.getItem("session_code")
                     document.getElementById("sessionid").value = localStorage.getItem("session_code")
                 } else {
                     localStorage.removeItem("session_code")
@@ -1424,6 +1423,9 @@
                         document.getElementById("initiativeTrackerControls").style.display = "block"
                         dm = true;
                         currentPlayer = "self"
+
+                        tokens = response.tokens
+
                         renderTokens()
                     }
                 })
@@ -1513,7 +1515,7 @@
             })
 
             socket.on("playerDisconnected", (data) => {
-                let option = document.querySelector('option[value=\'' + data.player + '\']')
+                let option = document.querySelector("option[value='" + data.player + "']")
                 if (option != undefined) {
                     option.remove()
                 }
@@ -1569,6 +1571,7 @@
                 socket.emit("createSession", (callback) => {
                     localStorage.setItem("session_code", callback.session_code)
                     document.getElementById("sessionid").value = callback.session_code
+                    document.getElementById("currentSession").innerText = callback.session_code
 
                     socket.emit("sync", {session_code: localStorage.getItem("session_code")}, (callback) => {
                         data = callback
@@ -1588,8 +1591,8 @@
 
                             socket.emit("loadPlayerData", {
                                 playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                                hpNow: document.getElementById("hpCurrent").value,
-                                hpMax: document.getElementById("hpMax").value,
+                                hpNow: localStorage.getItem("hpCurrent"),
+                                hpMax: localStorage.getItem("hpMax"),
                                 session_code: localStorage.getItem("session_code")
                             })
                         } else {
@@ -1603,6 +1606,7 @@
                 socket.emit("joinSession", {session_code: document.getElementById("sessionid").value}, (callback) => {
                     if (callback.joined) {
                         localStorage.setItem("session_code", document.getElementById("sessionid").value)
+                        document.getElementById("currentSession").innerText = document.getElementById("sessionid").value
 
                         socket.emit("sync", {session_code: localStorage.getItem("session_code")}, (callback) => {
                             data = callback
@@ -1622,8 +1626,8 @@
 
                                 socket.emit("loadPlayerData", {
                                     playerName: ((localStorage.getItem("playername") != null && localStorage.getItem("playername") != "" && localStorage.getItem("playername") != undefined) ? localStorage.getItem("playername") : "Unknown Player"),
-                                    hpNow: document.getElementById("hpCurrent").value,
-                                    hpMax: document.getElementById("hpMax").value,
+                                    hpNow: localStorage.getItem("hpCurrent"),
+                                    hpMax: localStorage.getItem("hpMax"),
                                     session_code: localStorage.getItem("session_code")
                                 })
                             } else {
