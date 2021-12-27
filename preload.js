@@ -3,6 +3,7 @@ const {contextBridge} = require("electron")
 const rp = require('request-promise')
 const cheerio = require('cheerio')
 const fs = require('fs')
+const path = require('path')
 
 window.addEventListener('DOMContentLoaded', () => {
     new customTitlebar.Titlebar({
@@ -32,13 +33,16 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "pdfs", {
         readCharacterSheet: () => {
-            return fs.readFileSync('pdfs/character.pdf')
+            const filename = path.resolve(__dirname, 'pdfs', 'character.pdf')
+            return fs.readFileSync(filename)
         },
         readDetailsSheet: () => {
-            return fs.readFileSync('pdfs/details.pdf')
+            const filename = path.resolve(__dirname, 'pdfs', 'details.pdf')
+            return fs.readFileSync(filename)
         },
         readSpellcastingSheet: () => {
-            return fs.readFileSync('pdfs/spellcasting.pdf')
+            const filename = path.resolve(__dirname, 'pdfs', 'spellcasting.pdf')
+            return fs.readFileSync(filename)
         }
     }
 )
