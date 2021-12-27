@@ -60,7 +60,7 @@ option {
     color: black;
 }
 
-#owlbearEmbed {
+#mapEmbed {
     height: 100%;
 }
 
@@ -352,6 +352,30 @@ option {
 
 .playerName {
     padding-right: 3px;
+}
+
+#initiativeTracker {
+    overflow-x: auto;
+}
+
+#initiativeTracker::-webkit-scrollbar, .tooltip-right::-webkit-scrollbar {
+    width: 13px;
+    height: 13px;
+}
+
+#initiativeTracker::-webkit-scrollbar-track, .tooltip-right::-webkit-scrollbar-track {
+    background: hsl(230,25%,18%);
+    border-radius: 20px;
+}
+
+#initiativeTracker::-webkit-scrollbar-thumb, .tooltip-right::-webkit-scrollbar-thumb {
+    background-color: #717171;
+    border-radius: 20px;
+    border: 3px solid hsl(230,25%,18%);
+}
+
+#initiativeTracker::-webkit-scrollbar-corner, .tooltip-right::-webkit-scrollbar-corner {
+    background: hsl(230,25%,18%);
 }
 
 .initiativeTrackerControls {
