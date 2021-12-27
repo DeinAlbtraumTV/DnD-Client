@@ -39,15 +39,15 @@
 .s5_3{font-size:7px;font-family:ScalaSansOffc-Bold_tl;color:#C5C6C7;}
 .s6_3{font-size:18px;font-family:ScalaSansOffc-Bold_tl;color:#000;}
 .s7_3{font-size:11px;font-family:ScalaSansOffc-Bold_tl;color:#000;}
-.t3.m0_1_3{transform:matrix(0,-1,1,0,0,0);}
-.t3.m1_1_3{transform:matrix(-0.04,-1,1,-0.04,0,0);}
-.t3.m2_1_3{transform:matrix(0.44,-0.9,0.9,0.44,0,0);}
-.t3.m3_1_3{transform:matrix(0.76,-0.65,0.65,0.76,0,0);}
-.t3.m4_1_3{transform:matrix(0.95,-0.32,0.32,0.95,0,0);}
-.t3.m5_1_3{transform:matrix(0.99,0.15,-0.15,0.99,0,0);}
-.t3.m6_1_3{transform:matrix(0.85,0.53,-0.53,0.85,0,0);}
-.t3.m7_1_3{transform:matrix(0.58,0.82,-0.82,0.58,0,0);}
-.t3.m8_1_3{transform:matrix(0.04,1,-1,0.04,0,0);}
+.t.m0_1_3{transform:matrix(0,-1,1,0,0,0);}
+.t.m1_1_3{transform:matrix(-0.04,-1,1,-0.04,0,0);}
+.t.m2_1_3{transform:matrix(0.44,-0.9,0.9,0.44,0,0);}
+.t.m3_1_3{transform:matrix(0.76,-0.65,0.65,0.76,0,0);}
+.t.m4_1_3{transform:matrix(0.95,-0.32,0.32,0.95,0,0);}
+.t.m5_1_3{transform:matrix(0.99,0.15,-0.15,0.99,0,0);}
+.t.m6_1_3{transform:matrix(0.85,0.53,-0.53,0.85,0,0);}
+.t.m7_1_3{transform:matrix(0.58,0.82,-0.82,0.58,0,0);}
+.t.m8_1_3{transform:matrix(0.04,1,-1,0.04,0,0);}
 
 #spellClass{	z-index: 2;	padding: 0px;	position: absolute;	left: 74px;	top: 99px;	width: 316px;	height: 31px;	text-align: center;	background: transparent;	border: none;	font: normal 24px Arial, Helvetica, sans-serif;}
 #spellAbility{	z-index: 2;	padding: 0px;	position: absolute;	left: 434px;	top: 86px;	width: 98px;	height: 37px;	text-align: center;	background: transparent;	border: none;	font: normal 30px Arial, Helvetica, sans-serif;}
