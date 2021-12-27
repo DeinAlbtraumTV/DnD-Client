@@ -1,7 +1,11 @@
 {
   "name": "DnD-Client",
-  "version": "0.0.1",
+  "version": "v0.0.1-alpha.1",
   "description": "Just a small client for DnD",
+  "repository": {
+    "url": "https://github.com/DeinAlbtraumTV/DnD-Client",
+    "type": "git"
+  },
   "main": "index.js",
   "scripts": {
     "start": "electron-forge start",
@@ -21,7 +25,7 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
-    "custom-electron-titlebar": "^3.2.7",
+    "custom-electron-titlebar": "^3.2.10",
     "discord-rpc": "^4.0.1",
     "electron-squirrel-startup": "^1.0.0",
     "pdf-lib": "^1.16.0",
