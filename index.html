@@ -1799,6 +1799,10 @@
                 if (key == "split-sizes") return
                 if (key == "session_code") return
                 let value = localStorage.getItem(key)
+                if (key.endsWith("_img")) {
+                    localStorage.removeItem(key)
+                    return;
+                }
                 if (value == "true" || value == "false") {
                     if (value == "true") {
                         document.getElementById(key.replace("_img", "")).setAttribute('checked', 'checked')

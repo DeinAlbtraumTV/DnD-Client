@@ -1,6 +1,9 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow } = require('electron/remote')
 const DiscordRPC = require('discord-rpc');
 const path = require('path');
+const remoteMain = require('@electron/remote/main')
+
+remoteMain.initialize()
 
 if (handleSquirrelEvent()) {
     // squirrel event handled and app will exit in 1000ms, so don't do anything else
@@ -81,6 +84,7 @@ function createWindow () {
       },
       show: false,
     });
+    remoteMain.enable(win.webContents);
   
     win.loadFile('index.html');
 
