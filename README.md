@@ -22,7 +22,7 @@ A small program i wrote for playing D&D with my friends.
 
 ## Info
 - This Client is developed by a single person in their free time, so please don´t expect me to reply to issues instantly
-- The Client is still in beta, issues such as desyncs will happen and i am working on them
+- The Client is still in alpha, issues such as desyncs will happen and i am working on them
 - **The Client is still in an early alpha, so there will be breaking changes very often!**
 - The code for the server is made public in a [second repository](https://github.com/DeinAlbtraumTV/DnD-Server) and currently hosted on glitch (this will very likely change in the future because of persistent sessions)
 - I am open to suggestions, so if you want to see a feature in the client feel free to open an issue
