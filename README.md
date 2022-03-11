@@ -32,7 +32,7 @@ A small program i wrote for playing D&D with my friends.
 - Help, something is not working correctly!
   - Please make sure you are on the newest version of the client and proceed to look below. Otherwise please upgrade as only the latest version will work like expected due to breaking changes on the server
 - I encountered a desync
-  - Things like this may happen, try strg + r to reload the client. Initiative tokens should persist, however the dm will need to become dm again as well as loading in the map
+  - Things like this may happen, try ctrl + r to reload the client. Initiative tokens should persist, however the dm will need to become dm again as well as loading in the map
   - The above should be done by the dm first, then once by the affected clients
 - The problem i am having is not listed above
   - Feel free to open an issue
