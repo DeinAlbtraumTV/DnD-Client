@@ -1553,14 +1553,23 @@
                         if (key == "split-sizes") return
                         if (key == "session_code") return
                         let value = localStorage.getItem(key)
+                        if (key.endsWith("_img")) {
+                            localStorage.removeItem(key)
+                            return;
+                        }
+
+                        let elem = document.getElementById(key.replace("_img", ""));
+
+                        if (!elem) return;
+
                         if (value == "true" || value == "false") {
                             if (value == "true") {
-                                document.getElementById(key.replace("_img", "")).setAttribute('checked', 'checked')
+                                elem.setAttribute('checked', 'checked')
                             } else {
-                                document.getElementById(key.replace("_img", "")).removeAttribute('checked')
+                                elem.removeAttribute('checked')
                             }
                         } else {
-                            document.getElementById(key.replace("_img", "")).value = value
+                            elem.value = value
                         }
                     })
                 }
@@ -1803,14 +1812,19 @@
                     localStorage.removeItem(key)
                     return;
                 }
+
+                let elem = document.getElementById(key.replace("_img", ""));
+
+                if (!elem) return;
+
                 if (value == "true" || value == "false") {
                     if (value == "true") {
-                        document.getElementById(key.replace("_img", "")).setAttribute('checked', 'checked')
+                        elem.setAttribute('checked', 'checked')
                     } else {
-                        document.getElementById(key.replace("_img", "")).removeAttribute('checked')
+                        elem.removeAttribute('checked')
                     }
                 } else {
-                    document.getElementById(key.replace("_img", "")).value = value
+                    elem.value = value
                 }
             })
 
