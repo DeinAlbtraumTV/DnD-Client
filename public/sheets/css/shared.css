@@ -1,0 +1,70 @@
+.t {
+    transform-origin: bottom left;
+    z-index: 2;
+    position: absolute;
+    white-space: pre;
+    overflow: visible;
+    line-height: 1.5;
+}
+
+@font-face {
+    font-family: ScalaSansOffc-Bold_72;
+    src: url("../fonts/ScalaSansOffc-Bold_72.woff") format("woff");
+}
+
+@font-face {
+    font-family: ScalaSansOffc_70;
+    src: url("../fonts/ScalaSansOffc_70.woff") format("woff");
+}
+
+@font-face {
+    font-family: sub_Interstate-Light_nr;
+    src: url("../fonts/sub_Interstate-Light_nr.woff") format("woff");
+}
+
+#pg1 > svg:focus {
+    outline: none;
+}
+
+.g0, .g1 {
+    fill: var(--characterSheetsPrimary) !important;
+}
+
+.g2 {
+    fill: var(--characterSheetsSecondary) !important;
+}
+
+.g3 {
+    fill: var(--characterSheetsTertiary) !important;
+    stroke: none !important;
+}
+
+#spellcastingSheet .g3 {
+    fill: none !important;
+    stroke: var(--characterSheetsPrimary) !important;
+}
+
+#spellcastingSheet .g4 {
+    fill: var(--characterSheetsTertiary) !important;
+}
+
+.g5 {
+    fill: var(--characterSheetsTertiary) !important;
+    stroke: none !important;
+}
+
+#spellcastingSheet .g5 {
+    fill: var(--characterSheetsPrimary) !important;
+}
+
+.g6 {
+    fill: var(--characterSheetsSecondary) !important;
+}
+
+#spellcastingSheet .g6 {
+    fill: var(--characterSheetsSecondary) !important;
+}
+
+.ga {
+    fill: var(--characterSheetsTertiary) !important;
+}

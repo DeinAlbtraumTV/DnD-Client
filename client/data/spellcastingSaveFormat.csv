@@ -1,0 +1,215 @@
+V1,V2
+Spellcasting Class 2,spellClass
+SpellcastingAbility 2,spellAbility
+SpellSaveDC  2,spellSave
+SpellAtkBonus 2,SpellAtk
+Spells 1014,spell0_1
+Spells 1016,spell0_2
+Spells 1017,spell0_3
+Spells 1018,spell0_4
+Spells 1019,spell0_5
+Spells 1020,spell0_6
+Spells 1021,spell0_7
+Spells 1022,spell0_8
+SlotsTotal 19,slots1_1
+SlotsRemaining 19,slots1_2
+Check Box 251,spell1_1Prep
+Spells 1015,spell1_1
+Check Box 309,spell1_2Prep
+Spells 1023,spell1_2
+Check Box 3010,spell1_3Prep
+Spells 1024,spell1_3
+Check Box 3011,spell1_4Prep
+Spells 1025,spell1_4
+Check Box 3012,spell1_5Prep
+Spells 1026,spell1_5
+Check Box 3013,spell1_6Prep
+Spells 1027,spell1_6
+Check Box 3014,spell1_7Prep
+Spells 1028,spell1_7
+Check Box 3015,spell1_8Prep
+Spells 1029,spell1_8
+Check Box 3016,spell1_9Prep
+Spells 1030,spell1_9
+Check Box 3017,spell1_10Prep
+Spells 1031,spell1_10
+Check Box 3018,spell1_11Prep
+Spells 1032,spell1_11
+Check Box 3019,spell1_12Prep
+Spells 1033,spell1_12
+SlotsTotal 20,slots2_1
+SlotsRemaining 20,slots2_2
+Check Box 313,spell2_1Prep
+Spells 1046,spell2_1
+Check Box 310,spell2_2Prep
+Spells 1034,spell2_2
+Check Box 3020,spell2_3Prep
+Spells 1035,spell2_3
+Check Box 3021,spell2_4Prep
+Spells 1036,spell2_4
+Check Box 3022,spell2_5Prep
+Spells 1037,spell2_5
+Check Box 3023,spell2_6Prep
+Spells 1038,spell2_6
+Check Box 3024,spell2_7Prep
+Spells 1039,spell2_7
+Check Box 3025,spell2_8Prep
+Spells 1040,spell2_8
+Check Box 3026,spell2_9Prep
+Spells 1041,spell2_9
+Check Box 3027,spell2_10Prep
+Spells 1042,spell2_10
+Check Box 3028,spell2_11Prep
+Spells 1043,spell2_11
+Check Box 3029,spell2_12Prep
+Spells 1044,spell2_12
+Check Box 3030,spell2_13Prep
+Spells 1045,spell2_13
+SlotsTotal 21,slots3_1
+SlotsRemaining 21,slots3_2
+Check Box 315,spell3_1Prep
+Spells 1048,spell3_1
+Check Box 314,spell3_2Prep
+Spells 1047,spell3_2
+Check Box 3031,spell3_3Prep
+Spells 1049,spell3_3
+Check Box 3032,spell3_4Prep
+Spells 1050,spell3_4
+Check Box 3033,spell3_5Prep
+Spells 1051,spell3_5
+Check Box 3034,spell3_6Prep
+Spells 1052,spell3_6
+Check Box 3035,spell3_7Prep
+Spells 1053,spell3_7
+Check Box 3036,spell3_8Prep
+Spells 1054,spell3_8
+Check Box 3037,spell3_9Prep
+Spells 1055,spell3_9
+Check Box 3038,spell3_10Prep
+Spells 1056,spell3_10
+Check Box 3039,spell3_11Prep
+Spells 1057,spell3_11
+Check Box 3040,spell3_12Prep
+Spells 1058,spell3_12
+Check Box 3041,spell3_13Prep
+Spells 1059,spell3_13
+SlotsTotal 22,slots4_1
+SlotsRemaining 22,slots4_2
+Check Box 317,spell4_1Prep
+Spells 1060,spell4_1
+Check Box 316,spell4_2Prep
+Spells 1061,spell4_2
+Check Box 3042,spell4_3Prep
+Spells 1062,spell4_3
+Check Box 3043,spell4_4Prep
+Spells 1063,spell4_4
+Check Box 3044,spell4_5Prep
+Spells 1064,spell4_5
+Check Box 3045,spell4_6Prep
+Spells 1065,spell4_6
+Check Box 3046,spell4_7Prep
+Spells 1066,spell4_7
+Check Box 3047,spell4_8Prep
+Spells 1067,spell4_8
+Check Box 3048,spell4_9Prep
+Spells 1068,spell4_9
+Check Box 3049,spell4_10Prep
+Spells 1069,spell4_10
+Check Box 3050,spell4_11Prep
+Spells 1070,spell4_11
+Check Box 3051,spell4_12Prep
+Spells 1071,spell4_12
+Check Box 3052,spell4_13Prep
+Spells 1072,spell4_13
+SlotsTotal 23,slots5_1
+SlotsRemaining 23,slots5_2
+Check Box 319,spell5_1Prep
+Spells 1073,spell5_1
+Check Box 318,spell5_2Prep
+Spells 1074,spell5_2
+Check Box 3053,spell5_3Prep
+Spells 1075,spell5_3
+Check Box 3054,spell5_4Prep
+Spells 1076,spell5_4
+Check Box 3055,spell5_5Prep
+Spells 1077,spell5_5
+Check Box 3056,spell5_6Prep
+Spells 1078,spell5_6
+Check Box 3057,spell5_7Prep
+Spells 1079,spell5_7
+Check Box 3058,spell5_8Prep
+Spells 1080,spell5_8
+Check Box 3059,spell5_9Prep
+Spells 1081,spell5_9
+SlotsTotal 24,slots6_1
+SlotsRemaining 24,slots6_2
+Check Box 321,spell6_1Prep
+Spells 1082,spell6_1
+Check Box 320,spell6_2Prep
+Spells 1083,spell6_2
+Check Box 3060,spell6_3Prep
+Spells 1084,spell6_3
+Check Box 3061,spell6_4Prep
+Spells 1085,spell6_4
+Check Box 3062,spell6_5Prep
+Spells 1086,spell6_5
+Check Box 3063,spell6_6Prep
+Spells 1087,spell6_6
+Check Box 3064,spell6_7Prep
+Spells 1088,spell6_7
+Check Box 3065,spell6_8Prep
+Spells 1089,spell6_8
+Check Box 3066,spell6_9Prep
+Spells 1090,spell6_9
+SlotsTotal 25,slots7_1
+SlotsRemaining 25,slots7_2
+Check Box 323,spell7_1Prep
+Spells 1091,spell7_1
+Check Box 322,spell7_2Prep
+Spells 1092,spell7_2
+Check Box 3067,spell7_3Prep
+Spells 1093,spell7_3
+Check Box 3068,spell7_4Prep
+Spells 1094,spell7_4
+Check Box 3069,spell7_5Prep
+Spells 1095,spell7_5
+Check Box 3070,spell7_6Prep
+Spells 1096,spell7_6
+Check Box 3071,spell7_7Prep
+Spells 1097,spell7_7
+Check Box 3072,spell7_8Prep
+Spells 1098,spell7_8
+Check Box 3073,spell7_9Prep
+Spells 1099,spell7_9
+SlotsTotal 26,slots8_1
+SlotsRemaining 26,slots8_2
+Check Box 325,spell8_1Prep
+Spells 10100,spell8_1
+Check Box 324,spell8_2Prep
+Spells 10101,spell8_2
+Check Box 3074,spell8_3Prep
+Spells 10102,spell8_3
+Check Box 3075,spell8_4Prep
+Spells 10103,spell8_4
+Check Box 3076,spell8_5Prep
+Spells 10104,spell8_5
+Check Box 3077,spell8_6Prep
+Spells 10105,spell8_6
+Check Box 3078,spell8_7Prep
+Spells 10106,spell8_7
+SlotsTotal 27,slots9_1
+SlotsRemaining 27,slots9_2
+Check Box 327,spell9_1Prep
+Spells 10107,spell9_1
+Check Box 326,spell9_2Prep
+Spells 10108,spell9_2
+Check Box 3079,spell9_3Prep
+Spells 10109,spell9_3
+Check Box 3080,spell9_4Prep
+Spells 101010,spell9_4
+Check Box 3081,spell9_5Prep
+Spells 101011,spell9_5
+Check Box 3082,spell9_6Prep
+Spells 101012,spell9_6
+Check Box 3083,spell9_7Prep
+Spells 101013,spell9_7
