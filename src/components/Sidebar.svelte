@@ -1,7 +1,7 @@
 <script lang="ts">
     import { localStorageStore } from "../stores/localStorageStore.js"
-    import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode } from "../stores/persistentSettingsStore.js"
-    import { socket, session } from "../stores/nonPersistentStore.js"
+    import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode, currentCharacter } from "../stores/persistentSettingsStore.js"
+    import { socket, session, characters } from "../stores/nonPersistentStore.js"
 
     let settingsOpened = false
     let activeSettingsCategory = 0
@@ -96,7 +96,7 @@
             })
         }
 
-        $socket.emit("joinSession", { session_code: $sessionCode, playerName: $localStorageStore.playerName }, (callback: any) => {
+        $socket.emit("joinSession", { session_code: $sessionCode, playerName: $localStorageStore.playerName, initiativeModifier: $characters[$currentCharacter].sheet["initiative"] }, (callback: any) => {
             if (callback && callback.joined) {
                 $session = {
                     code: $sessionCode,
@@ -106,10 +106,9 @@
                 }
                 players = {}
                 console.log("Joined session", $sessionCode)
-                console.log($session)
             } else {
                 $sessionCode = ""
-                console.log(callback.status)
+                console.log("Failed to join session:", callback.status)
             }
         })
     }
@@ -197,7 +196,9 @@
             </div>
         </div>
         <div id="initiativeTracker-container">
-
+            {#if $session && $session.dm}
+                TODO
+            {/if}
         </div>
         <div id="playerInfo-container">
             <input id="playerName" placeholder="Username" type="text" class="input boxShadow" bind:value="{$localStorageStore.playerName}"/>

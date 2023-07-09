@@ -5,13 +5,15 @@
     import InlineSVG from "svelte-inline-svg"
     import Note from "./Note.svelte"
 
+    export const showNotes = false;
+
     onMount(() => {
-        if ($currentCharacter && $currentCharacter != "new") {
+        if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version") {
             loadValues()
         }
 
         currentCharacter.subscribe(value => {
-            if ($currentCharacter && $currentCharacter != "new") {
+            if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version") {
                 loadValues()
             }
         })
@@ -132,9 +134,11 @@
     <div class="note-remover" class:hidden={!showNoteRemover} on:mouseover={() => {deleteNoteOnDrop = true}} on:mouseout={() => {deleteNoteOnDrop = false}}>
         🗑️
     </div>
-    {#each $characters[$currentCharacter].sheetNotes as data}
-        <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
-    {/each}   
+    {#if showNotes}
+        {#each $characters[$currentCharacter].sheetNotes as data}
+            <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
+        {/each}
+    {/if} 
     <form>
         <div id="contentContainer">
             <div id="page1" style="width: 935px; height: 1210px;" class="page">

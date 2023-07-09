@@ -211,7 +211,9 @@
 					<div class="tab-container">
 						<select name="character" id="characterSelect" bind:this="{characterSelect}" on:change="{showCharacterPopup}" bind:value="{$currentCharacter}" on:focus="{characterSelectFocused}">
 							{#each Object.keys($characters) as name, i}
-								<option value="{name}">{name}</option>
+								{#if name != "version"}
+									<option value="{name}">{name}</option>
+								{/if}
 							{/each}
 							<option selected value="new">New Character</option>
 						</select>
@@ -225,15 +227,15 @@
 						<button class="sheet-button" on:click="{createNote}">Add note</button>
 					</div>
 					{#if $currentCharacterObj !== undefined}
-						<div id="charactersheet-container" class:visible={currentCharacterSheet == 0}>
-							<CharacterSheet bind:this={sheetRefs.sheet}/>
-						</div>
-						<div id="characterdetails-container" class:visible={currentCharacterSheet == 1}>
-							<DetailsSheet bind:this={sheetRefs.detail}/>
-						</div>
-						<div id="spellcastingsheet-container" class:visible={currentCharacterSheet == 2}>
-							<SpellcastingSheet bind:this={sheetRefs.spellcasting}/>
-						</div>
+							<div id="charactersheet-container" class:visible={currentCharacterSheet == 0}>
+								<CharacterSheet bind:this={sheetRefs.sheet} showNotes={currentCharacterSheet == 0}/>
+							</div>
+							<div id="characterdetails-container" class:visible={currentCharacterSheet == 1}>
+								<DetailsSheet bind:this={sheetRefs.detail} showNotes={currentCharacterSheet == 1}/>
+							</div>
+							<div id="spellcastingsheet-container" class:visible={currentCharacterSheet == 2}>
+								<SpellcastingSheet bind:this={sheetRefs.spellcasting} showNotes={currentCharacterSheet == 2}/>
+							</div>
 					{:else}
 						<div class="flex-container" id="noCharacterSelected-container">
 							<p>

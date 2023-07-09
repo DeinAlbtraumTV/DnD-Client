@@ -1,17 +1,19 @@
 <script>
     import { onMount } from "svelte";
-    import { characters } from "../../stores/nonPersistentStore"
-    import { currentCharacter, characterSheets } from "../../stores/persistentSettingsStore"
+    import { characters, socket } from "../../stores/nonPersistentStore"
+    import { currentCharacter, characterSheets, sessionCode } from "../../stores/persistentSettingsStore"
     import InlineSVG from "svelte-inline-svg"
-    import Note from "./Note.svelte";
+    import Note from "./Note.svelte"
+
+    export const showNotes = false;
 
     onMount(() => {
-        if ($currentCharacter && $currentCharacter != "new") {
+        if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version") {
             loadValues()
         }
 
         currentCharacter.subscribe(value => {
-            if ($currentCharacter && $currentCharacter != "new") {
+            if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version") {
                 loadValues()
             }
         })
@@ -58,6 +60,20 @@
 
     function onBlur(event) {
         $characters[$currentCharacter].sheet[event.target.getAttribute("id")] = event.target.value
+
+        //Field-specific actions
+        switch (event.target.getAttribute("id")) {
+            case "initiative": {
+                let initiative = Number.parseInt(event.target.value)
+
+                if (isNaN(initiative)) {
+                    initiative = 0
+                }
+
+                $socket.emit("updateInitiative", { session_code: $sessionCode, initiative: initiative} );
+            }
+        }
+
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
@@ -181,9 +197,11 @@
     <div class="note-remover" class:hidden={!showNoteRemover} on:mouseover={() => {deleteNoteOnDrop = true}} on:mouseout={() => {deleteNoteOnDrop = false}}>
         🗑️
     </div>
-    {#each $characters[$currentCharacter].sheetNotes as data}
-        <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
-    {/each}
+    {#if showNotes}
+        {#each $characters[$currentCharacter].sheetNotes as data}
+            <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
+        {/each}
+    {/if}
     <form>
         <div id="contentContainer">
             <div id="page1" style="width: 935px; height: 1210px;" class="page">
