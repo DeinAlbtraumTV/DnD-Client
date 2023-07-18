@@ -78,7 +78,7 @@ function migrateData(data) {
             details: {},
             spellcasting: {},
             sheetNotes: [],
-            detailsNotes: [],
+            detailNotes: [],
             spellcastingNotes: []
         }
 
@@ -126,6 +126,11 @@ function migrateData(data) {
         for (let key in data[key].spellcasting) {
             newData[key].spellcasting[key] = data[key].spellcasting[key]
         }
+
+        //Notes
+        newData[key].sheetNotes = data[key].sheetNotes ?? []
+        newData[key].detailNotes = data[key].detailNotes ?? []
+        newData[key].spellcastingNotes = data[key].spellcastingNotes ?? []
     }
 
     return newData
