@@ -222,6 +222,8 @@
 
                 $socket.emit("updateInitiative", { player: player, session_code: $session.code, initiative: (rand + playerData.initiativeModifier) })
             }
+
+            rollInitiativeForMe()
         }
     }
 </script>
