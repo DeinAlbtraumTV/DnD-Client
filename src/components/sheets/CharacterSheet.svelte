@@ -5,7 +5,7 @@
     import InlineSVG from "svelte-inline-svg"
     import Note from "./Note.svelte"
 
-    export const showNotes = false;
+    export let showNotes = false;
 
     onMount(() => {
         if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version") {

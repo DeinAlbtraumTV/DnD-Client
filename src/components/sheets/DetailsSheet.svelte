@@ -5,7 +5,7 @@
     import InlineSVG from "svelte-inline-svg"
     import Note from "./Note.svelte"
 
-    export const showNotes = false;
+    export let showNotes = false;
 
     onMount(() => {
         if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version") {
@@ -44,13 +44,13 @@
     }
 
     function noteDataUpdate(data) {
-        $characters[$currentCharacter].sheetNotes[data.id] = data.detail
+        $characters[$currentCharacter].detailNotes[data.id] = data.detail
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
     export const createNote = () => {
         let note = {
-            id: $characters[$currentCharacter].sheetNotes.length > 0 ? $characters[$currentCharacter].sheetNotes[$characters[$currentCharacter].sheetNotes.length - 1].id + 1 : 0,
+            id: $characters[$currentCharacter].detailNotes.length > 0 ? $characters[$currentCharacter].detailNotes[$characters[$currentCharacter].detailNotes.length - 1].id + 1 : 0,
             x: 467.5,
             y: 605,
             minX: 0,
@@ -62,10 +62,10 @@
             text: ''
         }
 
-        $characters[$currentCharacter].sheetNotes.push(note)
+        $characters[$currentCharacter].detailNotes.push(note)
         window.characters.storeSheets(JSON.stringify($characters))
 
-        $characters[$currentCharacter].sheetNotes = $characters[$currentCharacter].sheetNotes;
+        $characters[$currentCharacter].detailNotes = $characters[$currentCharacter].detailNotes;
     }
 
     let deleteNoteOnDrop = false;
@@ -73,7 +73,7 @@
 
     function noteDragEnd(event) {
         if (deleteNoteOnDrop) {
-            $characters[$currentCharacter].sheetNotes = $characters[$currentCharacter].sheetNotes.filter(note => note.id != event.detail)
+            $characters[$currentCharacter].detailNotes = $characters[$currentCharacter].detailNotes.filter(note => note.id != event.detail)
             window.characters.storeSheets(JSON.stringify($characters))
         }
 
@@ -135,7 +135,7 @@
         🗑️
     </div>
     {#if showNotes}
-        {#each $characters[$currentCharacter].sheetNotes as data}
+        {#each $characters[$currentCharacter].detailNotes as data}
             <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
         {/each}
     {/if} 

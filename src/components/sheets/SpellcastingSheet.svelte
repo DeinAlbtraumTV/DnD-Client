@@ -110,13 +110,13 @@
         window.characters.storeSheets(JSON.stringify($characters))
     }
     function noteDataUpdate(data) {
-        $characters[$currentCharacter].sheetNotes[data.id] = data.detail
+        $characters[$currentCharacter].spellcastingNotes[data.id] = data.detail
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
     export const createNote = () => {
         let note = {
-            id: $characters[$currentCharacter].sheetNotes.length > 0 ? $characters[$currentCharacter].sheetNotes[$characters[$currentCharacter].sheetNotes.length - 1].id + 1 : 0,
+            id: $characters[$currentCharacter].spellcastingNotes.length > 0 ? $characters[$currentCharacter].spellcastingNotes[$characters[$currentCharacter].spellcastingNotes.length - 1].id + 1 : 0,
             x: 467.5,
             y: 605,
             minX: 0,
@@ -128,10 +128,10 @@
             text: ''
         }
 
-        $characters[$currentCharacter].sheetNotes.push(note)
+        $characters[$currentCharacter].spellcastingNotes.push(note)
         window.characters.storeSheets(JSON.stringify($characters))
 
-        $characters[$currentCharacter].sheetNotes = $characters[$currentCharacter].sheetNotes;
+        $characters[$currentCharacter].spellcastingNotes = $characters[$currentCharacter].spellcastingNotes;
     }
 
     let deleteNoteOnDrop = false;
@@ -139,7 +139,7 @@
 
     function noteDragEnd(event) {
         if (deleteNoteOnDrop) {
-            $characters[$currentCharacter].sheetNotes = $characters[$currentCharacter].sheetNotes.filter(note => note.id != event.detail)
+            $characters[$currentCharacter].spellcastingNotes = $characters[$currentCharacter].spellcastingNotes.filter(note => note.id != event.detail)
             window.characters.storeSheets(JSON.stringify($characters))
         }
 
@@ -236,7 +236,7 @@
         🗑️
     </div>
     {#if showNotes}
-        {#each $characters[$currentCharacter].sheetNotes as data}
+        {#each $characters[$currentCharacter].spellcastingNotes as data}
             <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
         {/each}
     {/if}
