@@ -1,13 +1,13 @@
 <script lang="ts">
     import { localStorageStore } from "../stores/localStorageStore.js"
     import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode, currentCharacter } from "../stores/persistentSettingsStore.js"
-    import { socket, session, characters } from "../stores/nonPersistentStore.js"
+    import { socket, session, characters, playerInfo, PlayerData } from "../stores/nonPersistentStore.js"
 
     let settingsOpened = false
     let activeSettingsCategory = 0
     let mapLink = ""
 
-    let players:any = {}
+    let players:Map<string, PlayerData> = new Map<string, PlayerData>()
 
     $socket.on("connect", () => {
         $socket.emit("sync", { session_code: $sessionCode }, (callback: any) => {
@@ -28,7 +28,7 @@
     $socket.on("disconnect", () => {
         $sessionCode = ""
         $session = undefined
-        players = {}
+        players = new Map<string, PlayerData>()
         console.log("Lost connection to server!")
     })
 
@@ -42,12 +42,16 @@
 
     $socket.on("addPlayer", (data: any) => {
         console.log("Added player", data.player)
-        players[data.player] = data.playerName
+        players.set(data.player, {
+            name: data.player,
+            initiative: 0,
+            initiativeModifier: data.initiativeModifier
+        })
     })
 
     $socket.on("removePlayer", (data: any) => {
         console.log("Removed player", data.player)
-        delete players[data.player]
+        players.delete(data.player)
 
         players = players
     })
@@ -57,6 +61,26 @@
             $socket.emit("syncPlayerData",
                 { session_code: $session.code, playerName: $localStorageStore.playerName }
             )
+        }
+    })
+
+    $socket.on("updateInitiative", (data: any) => {
+        if (players.has(data.player)) {
+            players.set(data.player, {
+                name: data.player,
+                initiative: data.initiative,
+                initiativeModifier: players.get(data.player)?.initiativeModifier || 0
+            })
+        }
+    })
+
+    $socket.on("updateInitiativeModifier", (data: any) => {
+        if (players.has(data.player)) {
+            players.set(data.player, {
+                name: data.player,
+                initiative: players.get(data.player)?.initiative || 0,
+                initiativeModifier: data.initiativeModifier
+            })
         }
     })
 
@@ -79,6 +103,8 @@
                 }
 
                 $sessionCode = callback.session_code
+                players = new Map<string, PlayerData>()
+                rollInitiativeForMe()
                 console.log("Created session", $sessionCode)
             }
         })
@@ -90,7 +116,7 @@
             $socket.emit("leaveSession", { session_code: $session.code }, (callback: any) => {
                 if (callback && callback.left) {
                     $session = undefined
-                    players = {}
+                    players = new Map<string, PlayerData>()
                     console.log("Left session", $sessionCode)
                 }
             })
@@ -104,7 +130,8 @@
                     url: callback.url,
                     dm: false
                 }
-                players = {}
+                players = new Map<string, PlayerData>()
+                rollInitiativeForMe()
                 console.log("Joined session", $sessionCode)
             } else {
                 $sessionCode = ""
@@ -120,7 +147,7 @@
             if (callback && callback.left) {
                 $session = undefined
                 $sessionCode = ""
-                players = {}
+                players = new Map<string, PlayerData>()
                 console.log("Left session", sessionCode)
             }
         })
@@ -158,7 +185,44 @@
             $session.role = "Player"
         }
 
-        players = {}
+        players = new Map<string, PlayerData>()
+    }
+
+    function rollInitiativeForMe() {
+        if ($session) {
+            let rand = Math.floor(Math.random() * 20) + 1;
+            $playerInfo.initiative = rand;
+            $socket.emit("updateInitiative", { player: $playerInfo.id, session_code: $session.code, initiative: rand + $playerInfo.initiativeModifier })
+        }
+    }
+
+    function rollInitiativeForPlayer(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+        let target = event.currentTarget
+        let player = target.parentElement?.getAttribute("data-player-id")
+
+        if (!player) return
+
+        let rand = Math.floor(Math.random() * 20) + 1
+
+        let playerData = players.get(player)
+
+        if ($session && playerData) {
+            $socket.emit("updateInitiative", { player: player, session_code: $session.code, initiative: rand + playerData.initiativeModifier })
+        }
+    }
+
+    function rollInitiativeForAll() {
+        if ($session) {
+            for (let player in players) {
+                let rand = Math.floor(Math.random() * 20) + 1
+
+                let playerData = players.get(player)
+
+                if (!playerData) continue
+
+                $socket.emit("updateInitiative", { player: player, session_code: $session.code, initiative: (rand + playerData.initiativeModifier) })
+            }
+        }
     }
 </script>
 
@@ -174,20 +238,23 @@
                     <button class="sessionControl-button" on:click="{joinSession}">Join Session</button>
                     <button class="sessionControl-button" disabled="{!$session}" on:click="{leaveSession}">Leave Session</button>
                 </form>
-                {#if $session && $session.dm}
+                {#if $session}
                 <form on:submit|preventDefault>
+                    {#if $session.dm}
                     <p class="dungeonControlRoom-text">Dungeon Control Room</p>
                     <p class="dungeonControlRoom-inlineText">Load a map:</p>
                     <input id="mapLinkInput" class="dungeonControlRoom-input input boxShadow" type="text" bind:value="{mapLink}">
                     <button class="dungeonControlRoom-button" on:click="{loadMapForSelf}">Load Map for yourself</button>
                     <button class="dungeonControlRoom-button" on:click="{loadMapForAll}">Load Map for everyone</button>
-
-                    <div id="playerList">
+                    {/if}
+                    <div class="playerList">
                         <p class="dungeonControlRoom-text">Players in the session:</p>
-                        {#each Object.entries(players) as key}
+                        {#each [...players] as [key, value]}
                         <div data-player-id="{key[0]}">
-                            <p class="playerName">{players[key[0]]}</p>
-                            <button class="dungeonControlRoom-button" on:click="{transferDm}">Make DM</button>
+                            <p class="playerName">{value.name}</p>
+                            {#if $session.dm}
+                                <button class="dungeonControlRoom-button" on:click="{transferDm}">Make DM</button>
+                            {/if}
                         </div>
                         {/each}
                     </div>
@@ -196,8 +263,25 @@
             </div>
         </div>
         <div id="initiativeTracker-container">
-            {#if $session && $session.dm}
-                TODO
+            {#if $session}
+                <form on:submit|preventDefault>
+                    <p class="dungeonControlRoom-text" id="initiativeTrackerTitle">Initiative Tracker</p>
+                    {#if $session.dm}
+                        <button class="dungeonControlRoom-button" on:click={rollInitiativeForAll}>Roll for everyone</button>
+                    {/if}
+                    <button class="dungeonControlRoom-button" on:click={rollInitiativeForMe}>Roll for me</button>
+                    <div class="playerList" id="initiativeList">
+                        <p class="playerName">{$localStorageStore.playername}: {$playerInfo.initiative + $playerInfo.initiativeModifier} ({$playerInfo.initiative} + {$playerInfo.initiativeModifier})</p>
+                        {#each [...players] as [key, value]}
+                            <div data-player-id="{key[0]}">
+                                <p class="playerName">{value.name}: {value.initiative} ({value.initiative - value.initiativeModifier} + {value.initiativeModifier})</p>
+                                {#if $session.dm}
+                                    <button class="dungeonControlRoom-button" on:click="{rollInitiativeForPlayer}">Roll</button>
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+                </form>
             {/if}
         </div>
         <div id="playerInfo-container">
@@ -305,6 +389,7 @@ hr {
 #sidebar-expanded-container {
     width: 350px;
     background-color: #141414;
+    height: 100%;
 }
 
 #sidebarItem-expanded-container {
@@ -314,6 +399,15 @@ hr {
 
 #initiativeTracker-container {
     height: 45%;
+}
+
+#initiativeTrackerTitle {
+    margin-top: 0;
+    padding-top: 16px;
+}
+
+#initiativeList {
+    margin-top: 16px;
 }
 
 #sessionControls {
@@ -620,6 +714,10 @@ input[type=range] {
 
 #mapLinkInput {
     width: 211px;
+}
+
+.playerList {
+    margin-top: 5px;   
 }
 
 .playerName {

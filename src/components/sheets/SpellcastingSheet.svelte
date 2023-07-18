@@ -521,11 +521,11 @@
                         {#if popup.showing}
                             <div class="popup-wrapper" style="top: {popup.target.offsetTop - 234.5}px; {(popup.left ? "left: " + (popup.target.offsetLeft - 320) + "px" : "right: " + (popup.target.offsetLeft + 240) + "px")}; color: {$characterSheets == "dark" ? "white" : "black"} !important;">
                                 <style>
-                                    a {
+                                    .popup-wrapper a {
                                         color: var(--primary);
                                     }
 
-                                    p {
+                                    .popup-wrapper p {
                                         margin-block-start: 5px;
                                         margin-block-end: 5px;
                                     }

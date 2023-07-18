@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { characters, socket } from "../../stores/nonPersistentStore"
+    import { characters, socket, playerInfo } from "../../stores/nonPersistentStore"
     import { currentCharacter, characterSheets, sessionCode } from "../../stores/persistentSettingsStore"
     import InlineSVG from "svelte-inline-svg"
     import Note from "./Note.svelte"
@@ -52,6 +52,8 @@
                 }
             }
         })
+
+        $playerInfo.initiativeModifier = Number.parseInt($characters[$currentCharacter].sheet.initiative) || 0
     }
 
     function onDrop() {
@@ -70,7 +72,8 @@
                     initiative = 0
                 }
 
-                $socket.emit("updateInitiative", { session_code: $sessionCode, initiative: initiative} );
+                $playerInfo.initiativeModifier = initiative;
+                $socket.emit("updateInitiativeModifier", { session_code: $sessionCode, initiativeModifier: initiative} );
             }
         }
 
