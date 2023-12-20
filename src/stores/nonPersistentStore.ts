@@ -1,5 +1,4 @@
 import type { Socket } from "socket.io-client";
-import type { init } from "svelte/internal";
 import { type Writable, writable } from "svelte/store";
 
 export const characters: Writable<{[key: string]: any}> = writable({})

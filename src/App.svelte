@@ -9,12 +9,20 @@
 	import SpellcastingSheet from "./components/sheets/SpellcastingSheet.svelte"
 	import { io } from "socket.io-client"
     import type { SvelteComponent } from "svelte";
+	import NotifyBar from "./components/NotifyBar.svelte"
+	import { NotificationType, notifications } from "./stores/notificationStore"
 
-	$socket = io("ws://neah.gamewithfire.de:4134")
-	//$socket = io("ws://127.0.0.1:4134")
+	const CLIENT_VERSION = "1.0.1"
+
+	//$socket = io("ws://neah.gamewithfire.de:4134")
+	$socket = io("ws://127.0.0.1:4134")
 
 	$socket.on("connect", () => {
 		console.log("Connected to websocket server")
+	})
+
+	$socket.on("version-check", (data) => {
+		checkIfVersionMatchesServer(data.minClientVer)
 	})
 
 	$characters = window.characters.loadSheets()
@@ -31,6 +39,47 @@
 		"sheet": null,
 		"detail": null,
 		"spellcasting": null
+	}
+
+	function checkIfVersionMatchesServer(requiredVersion: string) {
+		let requiredVersionParts = requiredVersion.split(".");
+		let clientVersionParts = CLIENT_VERSION.split(".")
+
+		if (requiredVersionParts.length != clientVersionParts.length) {
+			notifications.push({
+				type: NotificationType.ERROR,
+				content: "Client and Server Version-format mismatch.",
+				timeout: -1
+			})
+			return;
+		}
+
+		for (let i = 0; i < requiredVersionParts.length; i++) {
+			let requiredVersionPart = Number.parseInt(requiredVersionParts[i])
+			let clientVersionPart = Number.parseInt(clientVersionParts[i])
+
+			if (requiredVersionPart == Number.NaN || clientVersionPart == Number.NaN) {
+				notifications.push({
+					type: NotificationType.ERROR,
+					content: "Version contains invalid characters.",
+					timeout: -1
+				})
+				return;
+			}
+
+			if (requiredVersionPart > clientVersionPart) {
+				notifications.push({
+					type: NotificationType.ERROR,
+					content: `Client and Server Version mismatch. Server wants: min. ${requiredVersion}, Client has: ${CLIENT_VERSION}`,
+					timeout: -1
+				})
+				return;
+			}
+		}
+	}
+
+	function checkForNewClientVersion() {
+		//TODO
 	}
 
 	function toggleCharacterSheet(event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement } | KeyboardEvent) {
@@ -196,6 +245,7 @@
 
 <svelte:window on:keydown={keyDown} on:keyup={keyUp}/>
 <main>
+	<NotifyBar></NotifyBar>
 	<Sidebar>
 		<div class="flex-container">
 			<MiniBrowser/>
@@ -276,6 +326,8 @@
 	main {
 		height: 100%;
 		width: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.flex-container {
@@ -432,7 +484,7 @@
 		width: 0;
 		position: absolute;
 		right: 0;
-		height: 100%;
+		height: -webkit-fill-available;
 		-webkit-transition: width 0.3s ease-in-out;
         -ms-transition: width 0.3s ease-in-out;
         transition: width 0.3s ease-in-out;
