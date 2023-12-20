@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import Sidebar from "./components/Sidebar.svelte"
 	import MiniBrowser from "./components/MiniBrowser.svelte"
 	import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, currentCharacter, characterSheets, primaryColor, sheetZoom } from "./stores/persistentSettingsStore"
@@ -8,14 +8,13 @@
 	import DetailsSheet from "./components/sheets/DetailsSheet.svelte"
 	import SpellcastingSheet from "./components/sheets/SpellcastingSheet.svelte"
 	import { io } from "socket.io-client"
-    import type { SvelteComponent } from "svelte";
 	import NotifyBar from "./components/NotifyBar.svelte"
 	import { NotificationType, notifications } from "./stores/notificationStore"
 
 	const CLIENT_VERSION = "1.0.1"
 
-	//$socket = io("ws://neah.gamewithfire.de:4134")
-	$socket = io("ws://127.0.0.1:4134")
+	$socket = io("ws://neah.gamewithfire.de:4134")
+	//$socket = io("ws://127.0.0.1:4134")
 
 	$socket.on("connect", () => {
 		console.log("Connected to websocket server")
@@ -31,17 +30,17 @@
 	let showCharacterDeletionPopup = false
 
 	let prevSelected = ""
-	let characterSelect: HTMLSelectElement
-	let characterSheetsExpanded: boolean = false
-	let newCharacterName: string = ""
-	let currentCharacterSheet: number = 0
-	let sheetRefs: {"sheet": SvelteComponent | null, "detail": SvelteComponent | null, "spellcasting": SvelteComponent | null} = {
+	let characterSelect
+	let characterSheetsExpanded = false
+	let newCharacterName = ""
+	let currentCharacterSheet = 0
+	let sheetRefs = {
 		"sheet": null,
 		"detail": null,
 		"spellcasting": null
 	}
 
-	function checkIfVersionMatchesServer(requiredVersion: string) {
+	function checkIfVersionMatchesServer(requiredVersion) {
 		let requiredVersionParts = requiredVersion.split(".");
 		let clientVersionParts = CLIENT_VERSION.split(".")
 
@@ -78,11 +77,7 @@
 		}
 	}
 
-	function checkForNewClientVersion() {
-		//TODO
-	}
-
-	function toggleCharacterSheet(event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement } | KeyboardEvent) {
+	function toggleCharacterSheet() {
 		characterSheetsExpanded = !characterSheetsExpanded
 	}
 
@@ -140,7 +135,7 @@
 		set("characterSheetsTertiary", "#000000")
 	}
 
-	function showCharacterPopup(event: any) {
+	function showCharacterPopup(event) {
 		if (event.target.value == "new") {
 			showNewCharacterPopup = true
 		} else {
@@ -148,7 +143,7 @@
 		}
 	}
 
-	function characterSelectFocused(event: any) {
+	function characterSelectFocused(event) {
 		if (event.target.value != "new") {
 			prevSelected = event.target.value
 		}
@@ -200,7 +195,7 @@
 	let ctrl_down = false;
 	let n_down = false;
 
-	function keyDown(event: KeyboardEvent) {
+	function keyDown(event) {
 		if (event.repeat) return;
 
 		switch (event.key) {
@@ -231,12 +226,12 @@
 		}
 	}
 
-	function keyUp(event: KeyboardEvent) {
+	function keyUp() {
 		ctrl_down = false;
 		n_down = false;
 	}
 
-	function sheetExpanderKeydown(event: KeyboardEvent) {
+	function sheetExpanderKeydown(event) {
 		if (event.key == "Enter") {
 			toggleCharacterSheet(event)
 		}
@@ -260,7 +255,7 @@
 				<div id="characterSheets" class:active={characterSheetsExpanded} class:dark={$characterSheets == "dark"}>
 					<div class="tab-container">
 						<select name="character" id="characterSelect" bind:this="{characterSelect}" on:change="{showCharacterPopup}" bind:value="{$currentCharacter}" on:focus="{characterSelectFocused}">
-							{#each Object.keys($characters) as name, i}
+							{#each Object.keys($characters) as name}
 								{#if name != "version"}
 									<option value="{name}">{name}</option>
 								{/if}

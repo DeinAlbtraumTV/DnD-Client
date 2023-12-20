@@ -10,17 +10,23 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "concurrently \"sirv public --no-clear\" \"electron-forge start\"",
+    "start": "concurrently \"sirv public --no-clear\" \"electron .\"",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "electron-forge package",
-    "make": "npm run build && electron-forge make"
+    "preelectron-pack": "npm run build",
+    "electron-pack": "electron-builder"
+  },
+  "build": {
+    "icon": "public/favicon.png",
+    "productName": "DnD Client",
+    "files": [
+      "public/**/*",
+      "client/**/*"
+    ],
+    "win": {},
+    "linux": {},
+    "mac": {}
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.61",
-    "@electron-forge/maker-deb": "^6.0.0-beta.61",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.61",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
-    "@electron-forge/maker-zip": "^6.0.0-beta.61",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
@@ -36,43 +42,15 @@
     "svelte-check": "^2.0.0",
     "svelte-preprocess": "^4.0.0",
     "tslib": "^2.0.0",
-    "typescript": "^4.0.0"
+    "typescript": "^4.0.0",
+    "sirv-cli": "^1.0.0",
+    "socket.io-client": "^4.5.2",
+    "svelte-inline-svg": "^1.1.3"
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
     "cheerio": "^1.0.0-rc.10",
     "custom-electron-titlebar": "^4.2.3",
-    "discord-rpc": "^4.0.1",
-    "electron-squirrel-startup": "^1.0.0",
-    "sirv-cli": "^1.0.0",
-    "socket.io-client": "^4.5.2",
-    "svelte-inline-svg": "^1.1.3"
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "DnD-Client"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
+    "discord-rpc": "^4.0.1"
   }
 }

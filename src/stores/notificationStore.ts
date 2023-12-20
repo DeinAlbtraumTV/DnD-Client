@@ -1,7 +1,7 @@
 import { type Writable, writable } from "svelte/store";
 
 function createNotificationStore() {
-    const { subscribe, set, update }: Writable<BarNotification[]> = writable([])
+    const { subscribe, update }: Writable<BarNotification[]> = writable([])
 
     return {
         subscribe,

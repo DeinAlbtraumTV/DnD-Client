@@ -89,7 +89,7 @@
         document.querySelector("webview[data-index=\"" +  currentTab + "\"]").reload()
     }
 
-    function addTab(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+    function addTab() {
         let tab: Tab = {
             title: "Empty Tab",
             url: "",

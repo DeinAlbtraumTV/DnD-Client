@@ -16,7 +16,7 @@
         }
 
         currentCharacter.subscribe(value => {
-            if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version") {
+            if (value && value != "new" && value != "version") {
                 loadValues()
             }
         })

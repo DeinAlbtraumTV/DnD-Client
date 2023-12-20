@@ -3,8 +3,6 @@
     import { sheetZoom } from "../../stores/persistentSettingsStore";
 
     let dispatch = createEventDispatcher();
-    let offsetHeight = 0;
-    let offsetWidth = 0;
 
     export let data = {
         id: 0,
@@ -52,7 +50,7 @@
         }
     }
 
-    function mouseUp(event) {
+    function mouseUp() {
         if (isMouseDown) {
             dispatch("dragEnd", data.id);
             dispatch("dataUpdate", data);
@@ -179,7 +177,7 @@
 </style>
 
 <svelte:window on:mousemove={mouseMove} on:mouseup={mouseUp}/>
-<div class="note" class:expanded={data.expanded == true} on:mousedown={mouseDown} style={`top:${data.y}px; left:${data.x}px;`} bind:offsetHeight={offsetHeight} bind:offsetWidth={offsetWidth} bind:clientHeight={data.height} bind:clientWidth={data.width}>
+<div class="note" class:expanded={data.expanded == true} on:mousedown={mouseDown} style={`top:${data.y}px; left:${data.x}px;`} bind:clientHeight={data.height} bind:clientWidth={data.width}>
     <div class="note-row">
         <div class="note-expander" on:keydown={noteExpanderKeydown} on:click={noteExpanderClicked} on:mousedown|stopPropagation>
             <div>{data.expanded ? "-" : "+"}</div>
