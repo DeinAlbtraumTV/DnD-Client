@@ -9,7 +9,7 @@ XP,xp
 STR,strMod
 STRmod,str
 DEX,dexMod
-DEXmod,dex
+DEXmod ,dex
 CON,conMod
 CONmod,con
 INT,intMod
@@ -93,7 +93,7 @@ Wpn Name 3,wpnName3
 Wpn3 AtkBonus  ,wpnAtk3
 Wpn3 Damage ,wpnDmg3
 AttacksSpellcasting,attacksSpells
-PersonalityTraits,traits
+PersonalityTraits ,traits
 Ideals,ideals
 Bonds,bonds
 Flaws,flaws

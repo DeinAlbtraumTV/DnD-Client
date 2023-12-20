@@ -9,15 +9,15 @@
 
     let players:Map<string, PlayerData> = new Map<string, PlayerData>()
 
+    let dummyAddData = {
+        name: "Dummy",
+        initiativeModifier: 0
+    }
+
     $socket.on("connect", () => {
         $socket.emit("sync", { session_code: $sessionCode }, (callback: any) => {
             if (callback.session_exists) {
-                $session = {
-                    code: $sessionCode,
-                    role: "Player",
-                    dm: false,
-                    url: callback.url
-                }
+                joinSession()
             } else {
                 $session = undefined
                 $sessionCode = ""
@@ -41,16 +41,17 @@
     })
 
     $socket.on("addPlayer", (data: any) => {
-        console.log("Added player", data.player)
         players.set(data.player, {
-            name: data.player,
-            initiative: 0,
-            initiativeModifier: data.initiativeModifier
+            name: data.playerName,
+            initiative: data.initiative ?? 0,
+            initiativeModifier: Number.parseInt(data.initiativeModifier ?? 0),
+            isDummy: data.isDummy
         })
+
+        players = players
     })
 
     $socket.on("removePlayer", (data: any) => {
-        console.log("Removed player", data.player)
         players.delete(data.player)
 
         players = players
@@ -59,7 +60,7 @@
     $socket.on("syncPlayerData", () => {
         if ($session) {
             $socket.emit("syncPlayerData",
-                { session_code: $session.code, playerName: $localStorageStore.playerName }
+                { session_code: $sessionCode, playerName: $localStorageStore.playerName, initiative: $playerInfo.initiative, initiativeModifier: ($characters[$currentCharacter] ? $characters[$currentCharacter].sheet["initiative"] : 0) }
             )
         }
     })
@@ -67,20 +68,34 @@
     $socket.on("updateInitiative", (data: any) => {
         if (players.has(data.player)) {
             players.set(data.player, {
-                name: data.player,
+                name: players.get(data.player)?.name || "",
                 initiative: data.initiative,
-                initiativeModifier: players.get(data.player)?.initiativeModifier || 0
+                initiativeModifier: players.get(data.player)?.initiativeModifier || 0,
+                isDummy: players.get(data.player)?.isDummy || false
             })
+
+            players = players
+        }
+
+        if ($socket.id == data.player) {
+            $playerInfo.initiative = data.initiative
         }
     })
 
     $socket.on("updateInitiativeModifier", (data: any) => {
         if (players.has(data.player)) {
             players.set(data.player, {
-                name: data.player,
+                name: players.get(data.player)?.name || "",
                 initiative: players.get(data.player)?.initiative || 0,
-                initiativeModifier: data.initiativeModifier
+                initiativeModifier: data.initiativeModifier,
+                isDummy: players.get(data.player)?.isDummy || false
             })
+
+            players = players
+        }
+
+        if ($socket.id == data.player) {
+            $playerInfo.initiativeModifier = data.initiativeModifier
         }
     })
 
@@ -111,7 +126,6 @@
     }
 
     function joinSession() {
-        console.log($session)
         if ($session) {
             $socket.emit("leaveSession", { session_code: $session.code }, (callback: any) => {
                 if (callback && callback.left) {
@@ -122,7 +136,7 @@
             })
         }
 
-        $socket.emit("joinSession", { session_code: $sessionCode, playerName: $localStorageStore.playerName, initiativeModifier: $characters[$currentCharacter].sheet["initiative"] }, (callback: any) => {
+        $socket.emit("joinSession", { session_code: $sessionCode, playerName: $localStorageStore.playerName, initiative: $playerInfo.initiative, initiativeModifier: ($characters[$currentCharacter] ? $characters[$currentCharacter].sheet["initiative"] : 0) }, (callback: any) => {
             if (callback && callback.joined) {
                 $session = {
                     code: $sessionCode,
@@ -176,7 +190,9 @@
 
     function transferDm(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
         let target = event.currentTarget
-        let player = target.parentElement?.getAttribute("data-player-id")
+        let parent = target.parentElement
+
+        let player = parent?.getAttribute("data-player-id")
 
         if ($session) {
             $socket.emit("transferDm", { player: player, session_code: $session.code })
@@ -192,72 +208,141 @@
         if ($session) {
             let rand = Math.floor(Math.random() * 20) + 1;
             $playerInfo.initiative = rand;
-            $socket.emit("updateInitiative", { player: $playerInfo.id, session_code: $session.code, initiative: rand + $playerInfo.initiativeModifier })
+            $socket.emit("updateInitiative", { player: $socket.id, session_code: $session.code, initiative: rand })
         }
     }
 
     function rollInitiativeForPlayer(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
-        let target = event.currentTarget
-        let player = target.parentElement?.getAttribute("data-player-id")
+        if ($session) {
+            let target = event.currentTarget
+            let parent = target.parentElement
 
-        if (!player) return
+            let player = parent?.getAttribute("data-player-id")
 
-        let rand = Math.floor(Math.random() * 20) + 1
+            if (!player) return
 
-        let playerData = players.get(player)
+            let rand = Math.floor(Math.random() * 20) + 1
 
-        if ($session && playerData) {
-            $socket.emit("updateInitiative", { player: player, session_code: $session.code, initiative: rand + playerData.initiativeModifier })
+            let playerData = players.get(player)
+
+            if (!playerData) return
+
+            players.set(player, {
+                name: playerData.name,
+                initiative: rand,
+                initiativeModifier: playerData.initiativeModifier,
+                isDummy: playerData.isDummy
+            })
+
+            players = players
+
+            $socket.emit("updateInitiative", { player: player, session_code: $session.code, initiative: rand })
         }
     }
 
     function rollInitiativeForAll() {
         if ($session) {
-            for (let player in players) {
+            for (let [key, value] of players) {
                 let rand = Math.floor(Math.random() * 20) + 1
 
-                let playerData = players.get(player)
+                players.set(key, {
+                    name: value.name,
+                    initiative: rand,
+                    initiativeModifier: value.initiativeModifier,
+                    isDummy: value.isDummy
+                })
 
-                if (!playerData) continue
-
-                $socket.emit("updateInitiative", { player: player, session_code: $session.code, initiative: (rand + playerData.initiativeModifier) })
+                $socket.emit("updateInitiative", { player: key, session_code: $session.code, initiative: rand })
             }
+            
+            players = players
 
             rollInitiativeForMe()
+        }
+    }
+
+    function addDummyToInitiativeTracker() {
+        if ($session) {
+            let dummyId = Math.random().toString(36).substring(2, 11)
+
+            let rand = Math.floor(Math.random() * 20) + 1
+
+            players.set(dummyId, {
+                name: dummyAddData.name,
+                initiative: rand,
+                initiativeModifier: dummyAddData.initiativeModifier,
+                isDummy: true
+            })
+
+            players = players
+
+            $socket.emit("addDummy", { dummyId: dummyId, name: dummyAddData.name, session_code: $session.code, initiative: rand, initiativeModifier: dummyAddData.initiativeModifier })
+
+            dummyAddData = {
+                name: "Dummy",
+                initiativeModifier: 0
+            }
+        }
+    }
+
+    function removeDummy(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+        let target = event.currentTarget
+        let parent = target.parentElement
+
+        let player = parent?.getAttribute("data-player-id")
+
+        if (!player) return
+
+        if ($session) {
+            players.delete(player)
+
+            players = players
+
+            $socket.emit("removeDummy", { player: player, session_code: $session.code })
         }
     }
 </script>
 
 <div id="sidebar-container">
-    <div id="sidebar-expanded-container">
-        <div id="sidebarItem-expanded-container">
+    <div id="sidebar-content-container">
+        <div id="dungeonControlRoom-container">
             <div id="sessionControls">
                 <form on:submit|preventDefault>
                     <p id="sessionRole-indicator">Your role: {$session ? $session.role : "none"}</p>
-                    <p id="sessionCode-text">Join a Session:</p>
-                    <input id="sessionCodeInput" class="sessionControl-input input boxShadow" type="text" bind:value="{$sessionCode}">
-                    <button class="sessionControl-button" on:click="{createSession}">Create Session</button>
-                    <button class="sessionControl-button" on:click="{joinSession}">Join Session</button>
-                    <button class="sessionControl-button" disabled="{!$session}" on:click="{leaveSession}">Leave Session</button>
+                    <div class="dungeonControlRoom-inputRow">
+                        <p class="dungeonControlRoom-inlineText">Join a Session:</p>
+                        <input class="dungeonControlRoom-input input boxShadow" type="text" bind:value="{$sessionCode}">
+                    </div>
+                    <div class="dungeonControlRoom-inputRow">
+                        <button class="dungeonControlRoom-button" on:click="{createSession}">Create Session</button>
+                        <button class="dungeonControlRoom-button" on:click="{joinSession}">Join Session</button>
+                        <button class="dungeonControlRoom-button" disabled="{!$session}" on:click="{leaveSession}">Leave Session</button>
+                    </div>
                 </form>
                 {#if $session}
                 <form on:submit|preventDefault>
                     {#if $session.dm}
                     <p class="dungeonControlRoom-text">Dungeon Control Room</p>
-                    <p class="dungeonControlRoom-inlineText">Load a map:</p>
-                    <input id="mapLinkInput" class="dungeonControlRoom-input input boxShadow" type="text" bind:value="{mapLink}">
-                    <button class="dungeonControlRoom-button" on:click="{loadMapForSelf}">Load Map for yourself</button>
-                    <button class="dungeonControlRoom-button" on:click="{loadMapForAll}">Load Map for everyone</button>
+                    <div class="dungeonControlRoom-inputRow">
+                        <p class="dungeonControlRoom-inlineText">Load a map:</p>
+                        <input class="dungeonControlRoom-input input boxShadow" type="text" bind:value="{mapLink}">
+                    </div>
+                    <div class="dungeonControlRoom-inputRow">
+                        <button class="dungeonControlRoom-button" on:click="{loadMapForSelf}">Load Map for yourself</button>
+                        <button class="dungeonControlRoom-button" on:click="{loadMapForAll}">Load Map for everyone</button>
+                    </div>
                     {/if}
                     <div class="playerList">
                         <p class="dungeonControlRoom-text">Players in the session:</p>
                         {#each [...players] as [key, value]}
-                        <div data-player-id="{key[0]}">
-                            <p class="playerName">{value.name}</p>
-                            {#if $session.dm}
-                                <button class="dungeonControlRoom-button" on:click="{transferDm}">Make DM</button>
+                            {#if !value.isDummy}
+                                <div class="dungeonControlRoom-inputRow" data-player-id="{key}">
+                                    <p class="dungeonControlRoom-inlineText">{value.name}</p>
+                                    {#if $session.dm}
+                                        <button class="dungeonControlRoom-button" on:click="{transferDm}">Make DM</button>
+                                    {/if}
+                                </div>
                             {/if}
-                        </div>
                         {/each}
                     </div>
                 </form>
@@ -268,17 +353,38 @@
             {#if $session}
                 <form on:submit|preventDefault>
                     <p class="dungeonControlRoom-text" id="initiativeTrackerTitle">Initiative Tracker</p>
+                    <div class="dungeonControlRoom-inputRow">
+                        {#if $session.dm}
+                            <button class="dungeonControlRoom-button" on:click={rollInitiativeForAll}>Roll for everyone</button>
+                        {/if}
+                        <button class="dungeonControlRoom-button" on:click={rollInitiativeForMe}>Roll for me</button>
+                    </div>
                     {#if $session.dm}
-                        <button class="dungeonControlRoom-button" on:click={rollInitiativeForAll}>Roll for everyone</button>
+                        <div class="sidebar-subgroup">
+                            <p class="dungeonControlRoom-text">Add a dummy</p>
+                            <div class="dungeonControlRoom-inputRow">
+                                <p class="dungeonControlRoom-inlineText">Initiative Modifier:</p>
+                                <input id="dummyInitiativeModifierInput" class="dungeonControlRoom-input input boxShadow" type="number" placeholder="Initiative Modifier" bind:value={dummyAddData.initiativeModifier}>
+                            </div>
+                            <div class="dungeonControlRoom-inputRow">
+                                <p class="dungeonControlRoom-inlineText">Name:</p>
+                                <input class="dungeonControlRoom-input input boxShadow" type="text" placeholder="Name" bind:value={dummyAddData.name}>
+                            </div>
+                            <div class="dungeonControlRoom-inputRow">
+                                <button class="dungeonControlRoom-button" on:click={addDummyToInitiativeTracker}>Add</button>
+                            </div>
+                        </div>
                     {/if}
-                    <button class="dungeonControlRoom-button" on:click={rollInitiativeForMe}>Roll for me</button>
                     <div class="playerList" id="initiativeList">
-                        <p class="playerName">{$localStorageStore.playername}: {$playerInfo.initiative + $playerInfo.initiativeModifier} ({$playerInfo.initiative} + {$playerInfo.initiativeModifier})</p>
+                        <p class="playerName">{$localStorageStore.playerName}: {$playerInfo.initiative + $playerInfo.initiativeModifier} ({$playerInfo.initiative} + {$playerInfo.initiativeModifier})</p>
                         {#each [...players] as [key, value]}
-                            <div data-player-id="{key[0]}">
-                                <p class="playerName">{value.name}: {value.initiative} ({value.initiative - value.initiativeModifier} + {value.initiativeModifier})</p>
+                            <div class="dungeonControlRoom-inputRow" data-player-id="{key}">
+                                <p class="dungeonControlRoom-inlineText">{value.name}: {value.initiative + value.initiativeModifier} ({value.initiative} + {value.initiativeModifier})</p>
                                 {#if $session.dm}
                                     <button class="dungeonControlRoom-button" on:click="{rollInitiativeForPlayer}">Roll</button>
+                                    {#if value.isDummy}
+                                        <button class="dungeonControlRoom-button" on:click="{removeDummy}">Remove</button>
+                                    {/if}
                                 {/if}
                             </div>
                         {/each}
@@ -388,19 +494,23 @@ hr {
     height: 100%;
 }
 
-#sidebar-expanded-container {
+#sidebar-content-container {
     width: 350px;
     background-color: #141414;
     height: 100%;
 }
 
-#sidebarItem-expanded-container {
+#dungeonControlRoom-container {
     width: 100%;
     height: 50%;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #initiativeTracker-container {
     height: 45%;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #initiativeTrackerTitle {
@@ -412,8 +522,11 @@ hr {
     margin-top: 16px;
 }
 
-#sessionControls {
-    height: 100%;
+#sessionRole-indicator {
+    margin-top: 0;
+    margin-bottom: 5px;
+    padding-top: 10px;
+    padding-left: 5px;
 }
 
 #playerInfo-container {
@@ -580,8 +693,8 @@ hr {
     padding-left: 8px;
     padding-right: 8px;
     margin: 0;
-    margin-left: 8px;
-    margin-right: 8px;
+    margin-left: 5px;
+    margin-right: 5px;
     background-color: #252525;
     border-radius: 5px;
     color: white;
@@ -635,62 +748,26 @@ input[type=range] {
     cursor: pointer;
 }
 
-#sessionRole-indicator {
-    margin-top: 0;
-    margin-bottom: 5px;
-    padding-top: 10px;
-    padding-left: 5px;
-}
-
-#sessionCode-text {
-    display: inline;
-    margin-left: 5px;
-}
-
-.sessionControl-input {
-    width: auto;
-    display: inline;
-}
-
-.sessionControl-button {
-    color: white;
-	padding: 8px;
-    border: none;
-    outline: none;
-	background-color: #252525;
-	box-shadow: 0px 0px 10px 1px rgb(0 0 0 / 50%);
-	border-radius: 5px;
-	cursor: pointer;
-    margin-left: 5px;
-    width: fit-content;
-    margin-top: 5px;
-}
-
-.sessionControl-button:hover {
-    outline: 2px solid var(--primary);
-}
-
-.sessionControl-button:disabled {
-    box-shadow: none;
-    cursor: unset;
-    color: rgb(100, 100, 100);
-}
-
-.sessionControl-button:disabled {
-    outline: none;
-}
-
 .dungeonControlRoom-text {
     margin-left: 5px;
+    margin-bottom: 5px;
 }
 
 .dungeonControlRoom-inlineText {
     display: inline;
     margin-left: 5px;
+    min-width: fit-content;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.dungeonControlRoom-inputRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .dungeonControlRoom-input {
-    width: auto;
     display: inline;
 }
 
@@ -704,7 +781,8 @@ input[type=range] {
 	border-radius: 5px;
 	cursor: pointer;
     margin-left: 5px;
-    width: fit-content;
+    min-width: fit-content;
+    width: 100%;
     margin-top: 5px;
     padding-left: 11px;
     padding-right: 11px;
@@ -714,8 +792,15 @@ input[type=range] {
     outline: var(--primary) solid 2px;
 }
 
-#mapLinkInput {
-    width: 211px;
+.dungeonControlRoom-button:disabled {
+    box-shadow: none;
+    cursor: unset;
+    color: rgb(100, 100, 100);
+    outline: none;
+}
+
+.dungeonControlRoom-button:last-of-type {
+    margin-right: 5px;
 }
 
 .playerList {

@@ -13,7 +13,7 @@
     "start": "concurrently \"sirv public --no-clear\" \"electron-forge start\"",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "npm run build && electron-forge make"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.61",

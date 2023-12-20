@@ -30,5 +30,6 @@ export type PlayerInfo = {
 export type PlayerData = {
     name: string,
     initiative: number,
-    initiativeModifier: number
+    initiativeModifier: number,
+    isDummy: boolean,
 }

@@ -36,8 +36,8 @@
 
             let elem = document.querySelector("[id=\"" + key + "\"]")
 
-            if (elem == null) {
-                console.log(key)
+            if (!elem || elem == null) {
+                return
             }
 
             if (elem.type == "checkbox") {

@@ -1,7 +1,7 @@
 const fs = require("fs")
 
-const characterStoragePath = process.env.APPDATA + "\\dnd_characters"
-const characterStorageFile = characterStoragePath + "\\characters.json"
+const characterStoragePath = `${process.env.APPDATA}\\dnd_characters`
+const characterStorageFile = `${characterStoragePath}\\characters.json`
 
 const SAVE_VERSION = 2;
 
@@ -20,6 +20,8 @@ module.exports = {
         if (!data.version) data.version = 1
 
         if (data.version < SAVE_VERSION) {
+            fs.writeFileSync(`${characterStoragePath}\\characters_migration_backup.json`, characterStorageFileContent, "utf-8")
+
             data = migrateData(data)
             data.version = SAVE_VERSION
             fs.writeFileSync(characterStorageFile, JSON.stringify(data), "utf-8")
@@ -34,21 +36,21 @@ module.exports = {
 }
 
 function migrateData(data) {
-    //read csv file from ./data/saveFormat.csv
+    //read csv file from ${process.resourcesPath}/app/client/data/saveFormat.csv
     //replace all instances of the old keys with the new keys, version is the column name
     //return the new data
 
-    if (!fs.existsSync("./client/data/sheetSaveFormat.csv")) {
+    if (!fs.existsSync(`${process.resourcesPath}\\app\\client\\data\\sheetSaveFormat.csv`)) {
         console.log("No sheet save format file found, skipping migration")
         return data
     }
 
-    if (!fs.existsSync("./client/data/detailsSaveFormat.csv")) {
+    if (!fs.existsSync(`${process.resourcesPath}\\app\\client\\data\\detailsSaveFormat.csv`)) {
         console.log("No detail save format file found, skipping migration")
         return data
     }
 
-    if (!fs.existsSync("./client/data/spellcastingSaveFormat.csv")) {
+    if (!fs.existsSync(`${process.resourcesPath}\\app\\client\\data\\spellcastingSaveFormat.csv`)) {
         console.log("No spellcasting save format file found, skipping migration")
         return data
     }
@@ -61,11 +63,11 @@ function migrateData(data) {
 
     let newData = {}
 
-    let sheetCsvLines = fs.readFileSync("./client/data/sheetSaveFormat.csv", "utf8").replaceAll("\r", "").split("\n")
+    let sheetCsvLines = fs.readFileSync(`${process.resourcesPath}\\app\\client\\data\\sheetSaveFormat.csv`, "utf8").replaceAll("\r", "").split("\n")
 
-    let detailCsvLines = fs.readFileSync("./client/data/detailsSaveFormat.csv", "utf8").replaceAll("\r", "").split("\n")
+    let detailCsvLines = fs.readFileSync(`${process.resourcesPath}\\app\\client\\data\\detailsSaveFormat.csv`, "utf8").replaceAll("\r", "").split("\n")
 
-    let spellcastingCsvLines = fs.readFileSync("./client/data/spellcastingSaveFormat.csv", "utf8").replaceAll("\r", "").split("\n")
+    let spellcastingCsvLines = fs.readFileSync(`${process.resourcesPath}\\app\\client\\data\\spellcastingSaveFormat.csv`, "utf8").replaceAll("\r", "").split("\n")
 
     for (let key in data) {
         if (key == "version") {
@@ -93,8 +95,8 @@ function migrateData(data) {
             delete data[key].sheet[oldKey]
         }
 
-        for (let key in data[key].sheet) {
-            newData[key].sheet[key] = data[key].sheet[key]
+        for (let sheetKey in data[key].sheet) {
+            newData[key].sheet[sheetKey] = data[key].sheet[sheetKey]
         }
 
         for (let i = 1; i < detailCsvLines.length; i++) {
@@ -108,8 +110,8 @@ function migrateData(data) {
             delete data[key].details[oldKey]
         }
 
-        for (let key in data[key].details) {
-            newData[key].details[key] = data[key].details[key]
+        for (let detailKey in data[key].details) {
+            newData[key].details[detailKey] = data[key].details[detailKey]
         }
 
         for (let i = 1; i < spellcastingCsvLines.length; i++) {
@@ -123,14 +125,14 @@ function migrateData(data) {
             delete data[key].spellcasting[oldKey]
         }
 
-        for (let key in data[key].spellcasting) {
-            newData[key].spellcasting[key] = data[key].spellcasting[key]
+        for (let spellcastingKey in data[key].spellcasting) {
+            newData[key].spellcasting[spellcastingKey] = data[key].spellcasting[spellcastingKey]
         }
 
         //Notes
-        newData[key].sheetNotes = data[key].sheetNotes ?? []
-        newData[key].detailNotes = data[key].detailNotes ?? []
-        newData[key].spellcastingNotes = data[key].spellcastingNotes ?? []
+        newData[key].sheetNotes = data[key].sheetNotes != undefined && Array.isArray(data[key].sheetNotes) ? data[key].sheetNotes : [];
+        newData[key].detailNotes = data[key].detailNotes != undefined && Array.isArray(data[key].detailNotes) ? data[key].detailNotes : [];
+        newData[key].spellcastingNotes = data[key].spellcastingNotes != undefined && Array.isArray(data[key].spellcastingNotes) ? data[key].spellcastingNotes : [];
     }
 
     return newData

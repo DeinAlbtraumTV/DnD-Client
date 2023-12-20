@@ -26,6 +26,10 @@
             
             let elem = document.querySelector("[id=\"" + key + "\"]")
 
+            if (!elem || elem == null) {
+                return
+            }
+
             if (elem.type == "checkbox") {
                 elem.checked = value
             } else {
