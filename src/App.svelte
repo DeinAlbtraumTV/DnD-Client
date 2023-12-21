@@ -11,10 +11,16 @@
 	import NotifyBar from "./components/NotifyBar.svelte"
 	import { NotificationType, notifications } from "./stores/notificationStore"
 
-	const CLIENT_VERSION = "1.0.1"
-
-	$socket = io("ws://neah.gamewithfire.de:4134")
-	//$socket = io("ws://127.0.0.1:4134")
+	if (PRE_REP_DEV_ENVIRONMENT) {
+		$socket = io("ws://127.0.0.1:4134")
+		notifications.push({
+			type: NotificationType.WARNING,
+			content: "Running in Dev Mode",
+			timeout: -1
+		})
+	} else {
+		$socket = io("ws://neah.gamewithfire.de:4134")
+	}
 
 	$socket.on("connect", () => {
 		console.log("Connected to websocket server")
@@ -42,7 +48,7 @@
 
 	function checkIfVersionMatchesServer(requiredVersion) {
 		let requiredVersionParts = requiredVersion.split(".");
-		let clientVersionParts = CLIENT_VERSION.split(".")
+		let clientVersionParts = PRE_REP_CLIENT_VERSION.split(".")
 
 		if (requiredVersionParts.length != clientVersionParts.length) {
 			notifications.push({
@@ -69,7 +75,7 @@
 			if (requiredVersionPart > clientVersionPart) {
 				notifications.push({
 					type: NotificationType.ERROR,
-					content: `Client and Server Version mismatch. Server wants: min. ${requiredVersion}, Client has: ${CLIENT_VERSION}`,
+					content: `Client and Server Version mismatch. Server wants: min. ${requiredVersion}, Client has: ${PRE_REP_CLIENT_VERSION}`,
 					timeout: -1
 				})
 				return;

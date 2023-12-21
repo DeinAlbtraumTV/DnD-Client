@@ -43,7 +43,13 @@ export default {
 		nodePolyfills(),
 
 		svelte({
-			preprocess: sveltePreprocess({ sourceMap: !production }),
+			preprocess: sveltePreprocess({
+				sourceMap: !production,
+				replace: [
+					[/PRE_REP_CLIENT_VERSION/g, JSON.stringify(require("./package.json").version)],
+					[/PRE_REP_DEV_ENVIRONMENT/g, !production]
+				]
+			}),
 			compilerOptions: {
 				// enable run-time checks when not in production
 				dev: !production
