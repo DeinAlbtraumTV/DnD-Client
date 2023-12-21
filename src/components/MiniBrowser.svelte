@@ -330,7 +330,7 @@
         </div>
         {#each webviewTabs as tab, i (tab)}
             <div class="tab" class:active={ currentTab == i} data-url="{tab.url}" data-index="{i}">
-                <webview src="{tab.url}" allowpopups autosize data-index="{i}" on:did-finish-load="{webviewLoaded}" on:new-window="{addTabWithUrl}" on:will-navigate="{webviewLoaded}" on:did-navigate-in-page="{webviewLoaded}">
+                <webview src="{tab.url}" allowpopups autosize data-index="{i}" on:did-finish-load="{webviewLoaded}" on:new-window="{addTabWithUrl}">
 
                 </webview>
             </div>
