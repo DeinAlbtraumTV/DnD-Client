@@ -4,39 +4,10 @@ const DiscordRPC = require('discord-rpc')
 const path = require('path')
 const remoteMain = require('@electron/remote/main')
 const { autoUpdater } = require('electron-updater')
-const fs = require('fs')
 
 remoteMain.initialize()
 setupTitlebar()
 
-//LOAD USER PREFS NEEDED BEFORE CLIENT LOADS
-const userPrefStoragePath = `${process.env.APPDATA}\\dnd_characters\\userprefs.json`
-
-function readUserPrefs() {
-	try {
-		if (fs.existsSync(userPrefStoragePath)) {
-			const userPrefsData = fs.readFileSync(userPrefStoragePath, 'utf8')
-			return userPrefs = JSON.parse(userPrefsData)
-		} else {
-			return {}
-		}
-	} catch (err) {
-		console.error('Error reading userPrefs:', err)
-		return {}
-	}
-}
-
-function writeUserPrefs(userPrefs) {
-	try {
-		if (fs.existsSync(userPrefStoragePath)) {
-			fs.writeFileSync(userPrefStoragePath, JSON.stringify(userPrefs))
-		}
-	} catch (err) {
-		console.error('Error writing userPrefs:', err)
-	}
-}
-
-let userPrefs = readUserPrefs()
 let updaterWindow = null;
 
 function createUpdaterWindow() {
@@ -147,10 +118,6 @@ app.on('ready', () => {
 })
 
 autoUpdater.on("update-available", (info) => {
-	if (info.version == userPrefs.ignoredVersion) {
-		initMainApp()
-	}
-
 	updaterWindow.webContents.send("update-found", autoUpdater.currentVersion.version, info.version)
 })
 
