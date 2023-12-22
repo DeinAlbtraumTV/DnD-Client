@@ -1,0 +1,48 @@
+:root{
+	--primary: #FA422C;
+}
+
+html, body {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+html {
+	background-image: var(--backgroundImage);
+	background-size: var(--backgroundImageSize);
+	background-color: var(--backgroundColor);
+	background-position: var(--backgroundPosition);
+}
+
+body {
+	color: white;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: Whitney, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	background-color: var(--backgroundOverlay);
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+.cet-menubar {
+	display: none !important;
+}
+
+/*input, button, select, textarea {
+	font-family: inherit;
+	font-size: inherit;
+	-webkit-padding: 0.4em 0;
+	padding: 0.4em;
+	margin: 0 0 0.5em 0;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+}*/

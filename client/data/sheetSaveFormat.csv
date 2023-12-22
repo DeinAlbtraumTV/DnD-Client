@@ -1,0 +1,107 @@
+V1,V2
+CharacterName,charactername
+ClassLevel,class
+Background,background
+PlayerName,playername
+Race ,race
+Alignment,alignment
+XP,xp
+STR,strMod
+STRmod,str
+DEX,dexMod
+DEXmod ,dex
+CON,conMod
+CONmod,con
+INT,intMod
+INTmod,int
+WIS,wisMod
+WISmod,wis
+CHA,chaMod
+CHamod,cha
+Inspiration,inspiration
+ProfBonus,proficiency
+Check Box 11,strSaveProf
+ST Strength,strSave
+Check Box 18,dexSaveProf
+ST Dexterity,dexSave
+Check Box 19,conSaveProf
+ST Constitution,conSave
+Check Box 20,intSaveProf
+ST Intelligence,intSave
+Check Box 21,wisSaveProf
+ST Wisdom,wisSave
+Check Box 22,chaSaveProf
+ST Charisma,chaSave
+Check Box 23,acrobaticsProf
+Acrobatics,acrobatics
+Check Box 24,animalProf
+Animal,animal
+Check Box 25,arcanaProf
+Arcana,arcana
+Check Box 26,athleticsProf
+Athletics,athletics
+Check Box 27,deceptionProf
+Deception ,deception
+Check Box 28,historyProf
+History ,history
+Check Box 29,insightProf
+Insight,insight
+Check Box 30,intimidationProf
+Intimidation,intimidation
+Check Box 31,investigationProf
+Investigation ,investigation
+Check Box 32,medicineProf
+Medicine,medicine
+Check Box 33,natureProf
+Nature,nature
+Check Box 34,perceptionProf
+Perception ,perception
+Check Box 35,performanceProf
+Performance,performance
+Check Box 36,persuasionProf
+Persuasion,persuasion
+Check Box 37,religionProf
+Religion,religion
+Check Box 38,sleightOfHandProf
+SleightofHand,sleightOfHand
+Check Box 39,stealthProf
+Stealth ,stealth
+Check Box 40,survivalProf
+Survival,survival
+Passive,passivePerception
+AC,ac
+Initiative,initiative
+Speed,speed
+HPMax,hpMax
+HPCurrent,hpCurrent
+HPTemp,hpTemp
+HDTotal,hitDiceTotal
+HD,hitDice
+Check Box 12,success1
+Check Box 13,success2
+Check Box 14,success3
+Check Box 15,failure1
+Check Box 16,failure2
+Check Box 17,failure3
+Wpn Name,wpnName1
+Wpn1 AtkBonus,wpnAtk1
+Wpn1 Damage,wpnDmg1
+Wpn Name 2,wpnName2
+Wpn2 AtkBonus ,wpnAtk2
+Wpn2 Damage ,wpnDmg2
+Wpn Name 3,wpnName3
+Wpn3 AtkBonus  ,wpnAtk3
+Wpn3 Damage ,wpnDmg3
+AttacksSpellcasting,attacksSpells
+PersonalityTraits ,traits
+Ideals,ideals
+Bonds,bonds
+Flaws,flaws
+ProficienciesLang,langs
+CP,cp
+SP,sp
+EP,ep
+GP,gp
+PP,pp
+Equipment,equipment
+Features and Traits,features

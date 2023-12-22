@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DnD-Client Updater</title>
+</head>
+<body>
+    <script>
+        let updateCountdownTimer = null
+        let countdownTimer = 30
+        let currentVer = ""
+        let newVer = ""
+
+        window.ipc.on("update-found", (event, args) => {
+            console.log("Update found!", args)
+            currentVer = args[0]
+            newVer = args[1]
+            document.getElementById("update-text").innerHTML = `<span>Update found:</span><span>${currentVer} => ${newVer}</span><span>Downloading update, please wait</span>`
+            document.getElementById("update-progress").style.display = "flex"
+        })
+
+        window.ipc.on("update-download-progress", (event, args) => {
+            console.log("Update download progress!")
+            document.getElementById("download-inner-progress").style.width = `${args[0]}%`
+            document.getElementById("download-speed").innerText = `${(Number.parseInt(args[1]) / 125000).toFixed(2)} Mbps`
+        })
+
+    </script>
+    <div class="wrapper center-content column">
+        <div id="update-text">
+            Checking for updates
+        </div>
+        <div class="center-content row" id="update-progress">
+            <div class="progress-bar outer">
+                <div class="progress-bar inner" id="download-inner-progress">
+
+                </div>
+            </div>
+            <span id="download-speed"></span>
+        </div>
+    </div>
+    <style>
+        html {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            font-family: Whitney, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        body, .wrapper {
+            display: flex;
+            flex: 1 1 auto;
+        }
+
+        .center-content {
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .column {
+            flex-direction: column;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        .progress-bar.outer {
+            border-radius: 5px;
+            width: 250px;
+            height: 15px;
+            border: 2px solid white;
+        }
+
+        .progress-bar.inner {
+            height: 15px;
+            background-color: #FA422C;
+        }
+
+        #update-text {
+            color: white;
+            font-weight: bold;
+            font-size: large;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #update-progress {
+            display: none;
+            margin: 5px 0 5px 0;
+        }
+
+        #download-speed {
+            color: white;
+            font-weight: bold;
+            font-size: medium;
+            padding-left: 10px;
+        }
+    </style>
+</body>
+</html>
