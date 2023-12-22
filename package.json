@@ -6,6 +6,9 @@
   },
   "description": "A simple program for playing DnD with friends",
   "private": true,
+  "repository": {
+    "url": "https://github.com/DeinAlbtraumTV/DnD-Client"
+  },
   "main": "./client/index.js",
   "scripts": {
     "build": "rollup -c",
