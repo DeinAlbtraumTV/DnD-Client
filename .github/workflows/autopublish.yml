@@ -23,6 +23,9 @@ jobs:
           node-version: 20
           cache: yarn
           
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v2
+
       - name: Install Packages
         run: yarn install --frozen-lockfile
 
