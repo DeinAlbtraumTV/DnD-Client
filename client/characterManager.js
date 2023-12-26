@@ -49,13 +49,17 @@ module.exports = {
 }
 
 function migrateData(data) {
-    //read csv file from ${process.resourcesPath}/app/client/data/saveFormat.csv
+    //read csv file from ${process.resourcesPath}/app.asar/client/data/saveFormat.csv
     //replace all instances of the old keys with the new keys, version is the column name
     //return the new data
 
-    let sheetFormatPath = path.normalize(`${process.resourcesPath}/app/client/data/sheetSaveFormat.csv`)
-    let detailFormatPath = path.normalize(`${process.resourcesPath}/app/client/data/detailsSaveFormat.csv`)
-    let spellFormatPath = path.normalize(`${process.resourcesPath}/app/client/data/spellcastingSaveFormat.csv`)
+    let sheetFormatPath = path.normalize(`${process.resourcesPath}/app.asar/client/data/sheetSaveFormat.csv`)
+    let detailFormatPath = path.normalize(`${process.resourcesPath}/app.asar/client/data/detailsSaveFormat.csv`)
+    let spellFormatPath = path.normalize(`${process.resourcesPath}/app.asar/client/data/spellcastingSaveFormat.csv`)
+
+    console.log(sheetFormatPath)
+    console.log(detailFormatPath)
+    console.log(spellFormatPath)
 
     if (!fs.existsSync(sheetFormatPath)) {
         console.log("No sheet save format file found, skipping migration")
