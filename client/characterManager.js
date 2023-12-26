@@ -10,16 +10,13 @@ const SAVE_VERSION = 2;
 module.exports = {
     initialize(userdataPath) {
         userData = userdataPath
-        characterStoragePath = `${userdataPath}\\dnd_characters`
-        characterStorageFile = `${characterStoragePath}\\characters.json`
-
-        console.log(characterStoragePath)
-        console.log(characterStorageFile)
+        characterStoragePath = path.normalize(`${userdataPath}/dnd_characters`)
+        characterStorageFile = path.normalize(`${characterStoragePath}/characters.json`)
     },
     loadSheets() {
         //migrate old file to new storage location
-        if (process.platform == "win32" && fs.existsSync(`${process.env.APPDATA}\\dnd_characters\\characters.json`)) {
-            fs.renameSync(`${process.env.APPDATA}\\dnd_characters\\characters.json`, characterStorageFile)
+        if (process.platform == "win32" && fs.existsSync(path.normalize(`${process.env.APPDATA}/dnd_characters/characters.json`))) {
+            fs.renameSync(path.normalize(`${process.env.APPDATA}/dnd_characters/characters.json`), characterStorageFile)
         }
 
         if (!fs.existsSync(characterStoragePath)) {
@@ -30,15 +27,13 @@ module.exports = {
             fs.writeFileSync(characterStorageFile, "{}", "utf-8")
         }
 
-        console.log("Loading sheets")
-
         let characterStorageFileContent = fs.readFileSync(characterStorageFile, "utf8");
         let data = JSON.parse(characterStorageFileContent ?? "{}")
 
         if (!data.version) data.version = 1
 
         if (data.version < SAVE_VERSION) {
-            fs.writeFileSync(`${characterStoragePath}\\characters_migration_backup.json`, characterStorageFileContent, "utf-8")
+            fs.writeFileSync(path.normalize(`${characterStoragePath}/characters_migration_backup.json`), characterStorageFileContent, "utf-8")
 
             data = migrateData(data)
             data.version = SAVE_VERSION
@@ -58,18 +53,21 @@ function migrateData(data) {
     //replace all instances of the old keys with the new keys, version is the column name
     //return the new data
 
-    //TODO Fix paths so they work on linux lol
-    if (!fs.existsSync(`${process.resourcesPath}\\app\\client\\data\\sheetSaveFormat.csv`)) {
+    let sheetFormatPath = path.normalize(`${process.resourcesPath}/app/client/data/sheetSaveFormat.csv`)
+    let detailFormatPath = path.normalize(`${process.resourcesPath}/app/client/data/detailsSaveFormat.csv`)
+    let spellFormatPath = path.normalize(`${process.resourcesPath}/app/client/data/spellcastingSaveFormat.csv`)
+
+    if (!fs.existsSync(sheetFormatPath)) {
         console.log("No sheet save format file found, skipping migration")
         return data
     }
 
-    if (!fs.existsSync(`${process.resourcesPath}\\app\\client\\data\\detailsSaveFormat.csv`)) {
+    if (!fs.existsSync(detailFormatPath)) {
         console.log("No detail save format file found, skipping migration")
         return data
     }
 
-    if (!fs.existsSync(`${process.resourcesPath}\\app\\client\\data\\spellcastingSaveFormat.csv`)) {
+    if (!fs.existsSync(spellFormatPath)) {
         console.log("No spellcasting save format file found, skipping migration")
         return data
     }
@@ -82,11 +80,11 @@ function migrateData(data) {
 
     let newData = {}
 
-    let sheetCsvLines = fs.readFileSync(`${process.resourcesPath}\\app\\client\\data\\sheetSaveFormat.csv`, "utf8").replaceAll("\r", "").split("\n")
+    let sheetCsvLines = fs.readFileSync(sheetFormatPath, "utf8").replaceAll("\r", "").split("\n")
 
-    let detailCsvLines = fs.readFileSync(`${process.resourcesPath}\\app\\client\\data\\detailsSaveFormat.csv`, "utf8").replaceAll("\r", "").split("\n")
+    let detailCsvLines = fs.readFileSync(detailFormatPath, "utf8").replaceAll("\r", "").split("\n")
 
-    let spellcastingCsvLines = fs.readFileSync(`${process.resourcesPath}\\app\\client\\data\\spellcastingSaveFormat.csv`, "utf8").replaceAll("\r", "").split("\n")
+    let spellcastingCsvLines = fs.readFileSync(spellFormatPath, "utf8").replaceAll("\r", "").split("\n")
 
     for (let key in data) {
         if (key == "version") {

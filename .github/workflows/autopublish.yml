@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         os: [
-          windows-latest #, 
-          # ubuntu-latest
+          windows-latest, 
+          ubuntu-latest
         ]
 
     steps:
