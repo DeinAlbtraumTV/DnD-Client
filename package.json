@@ -15,7 +15,7 @@
     "dev": "rollup -c -w",
     "start": "concurrently \"sirv public --no-clear\" \"electron .\"",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "preelectron-pack": "npm run build",
+    "preelectron-pack": "$npm_execpath run build",
     "electron-pack": "electron-builder",
     "publish": "electron-builder --win --x64 --ia32 -p always"
   },
@@ -35,6 +35,8 @@
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
     "@tsconfig/svelte": "^2.0.1",
+    "concurrently": "^8.2.2",
+    "detect-package-manager": "^3.0.1",
     "electron": "^25.0.0",
     "electron-builder": "^24.9.1",
     "rollup": "^2.3.4",

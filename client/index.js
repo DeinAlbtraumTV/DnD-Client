@@ -23,6 +23,8 @@ function createUpdaterWindow() {
 		resizable: !app.isPackaged
 	})
 
+	win.setMenuBarVisibility(false)
+
 	win.loadFile(path.join(__dirname, "updater.html"))
 
 	win.once('ready-to-show', () => {
@@ -66,7 +68,7 @@ function createMainWindow() {
 
 	win.webContents.on('did-attach-webview', (e, contents) => {
 		contents.on('new-window', (e, windowURL, frameName, disposition, options) => {
-		e.preventDefault()
+			e.preventDefault()
 		})
 	})
 	
@@ -90,6 +92,10 @@ function initMainApp() {
 }
 
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy')
+
+ipcMain.on("get-userdata-path", event => {
+	event.returnValue = app.getPath("userData")
+})
 
 //UPDATER RELATED EVENTS
 app.on('ready', () => {
@@ -126,7 +132,7 @@ autoUpdater.on("update-not-available", (info) => {
 })
 
 autoUpdater.on("download-progress", (info) => {
-	updaterWindow.webContents.send("update-download-progress", info.percent, info.bytesPerSecond)
+	updaterWindow.webContents.send("update-download-progress", info.percent)
 })
 
 autoUpdater.on("update-downloaded", (event) => {

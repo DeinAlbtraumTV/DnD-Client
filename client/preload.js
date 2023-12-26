@@ -2,14 +2,21 @@ const { CustomTitlebar, TitlebarColor } = require('custom-electron-titlebar')
 const { contextBridge, ipcRenderer } = require("electron")
 const cheerio = require('cheerio')
 const path = require('path')
-const { loadSheets, storeSheets } = require("./characterManager.js")
+const { initialize, loadSheets, storeSheets } = require("./characterManager.js")
 
-window.addEventListener('DOMContentLoaded', () => {
-    new CustomTitlebar({
-        backgroundColor: TitlebarColor.fromHex('#0a0a0a'),
-        titleHorizontalAlignment: "left"
+const userdataPath = ipcRenderer.sendSync("get-userdata-path")
+
+initialize(userdataPath)
+
+if (process.platform == "darwin" 
+    || process.platform == "win32") {
+    window.addEventListener('DOMContentLoaded', () => {
+        new CustomTitlebar({
+            backgroundColor: TitlebarColor.fromHex('#0a0a0a'),
+            titleHorizontalAlignment: "left"
+        })
     })
-})
+}
 
 contextBridge.exposeInMainWorld(
     "spells", {

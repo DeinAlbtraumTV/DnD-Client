@@ -13,23 +13,19 @@
         let newVer = ""
 
         window.ipc.on("update-found", (event, args) => {
-            console.log("Update found!", args)
             currentVer = args[0]
             newVer = args[1]
-            document.getElementById("update-text").innerHTML = `<span>Update found:</span><span>${currentVer} => ${newVer}</span><span>Downloading update, please wait</span>`
-            document.getElementById("update-progress").style.display = "flex"
+            document.getElementById("update-progress").style.visibility = "visible"
         })
 
         window.ipc.on("update-download-progress", (event, args) => {
-            console.log("Update download progress!")
             document.getElementById("download-inner-progress").style.width = `${args[0]}%`
-            document.getElementById("download-speed").innerText = `${(Number.parseInt(args[1]) / 125000).toFixed(2)} Mbps`
         })
 
     </script>
     <div class="wrapper center-content column">
         <div id="update-text">
-            Checking for updates
+            Checking for updates...
         </div>
         <div class="center-content row" id="update-progress">
             <div class="progress-bar outer">
@@ -37,7 +33,6 @@
 
                 </div>
             </div>
-            <span id="download-speed"></span>
         </div>
     </div>
     <style>
@@ -72,20 +67,21 @@
         }
 
         .progress-bar.outer {
-            border-radius: 5px;
+            border-radius: 7.5px;
             width: 250px;
-            height: 15px;
-            border: 2px solid white;
+            height: 7.5px;
+            background-color: #141414;
+            overflow: hidden;
         }
 
         .progress-bar.inner {
-            height: 15px;
+            height: 7.5px;
             background-color: #FA422C;
+            width: 0px;
         }
 
         #update-text {
             color: white;
-            font-weight: bold;
             font-size: large;
             display: flex;
             justify-content: center;
@@ -94,15 +90,8 @@
         }
 
         #update-progress {
-            display: none;
+            visibility: hidden;
             margin: 5px 0 5px 0;
-        }
-
-        #download-speed {
-            color: white;
-            font-weight: bold;
-            font-size: medium;
-            padding-left: 10px;
         }
     </style>
 </body>

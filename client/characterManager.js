@@ -1,12 +1,27 @@
-const fs = require("fs")
+const fs = require("fs");
+const path = require("path");
 
-const characterStoragePath = `${process.env.APPDATA}\\dnd_characters`
-const characterStorageFile = `${characterStoragePath}\\characters.json`
+let userData = ""
+let characterStoragePath = ""
+let characterStorageFile = ""
 
 const SAVE_VERSION = 2;
 
 module.exports = {
+    initialize(userdataPath) {
+        userData = userdataPath
+        characterStoragePath = `${userdataPath}\\dnd_characters`
+        characterStorageFile = `${characterStoragePath}\\characters.json`
+
+        console.log(characterStoragePath)
+        console.log(characterStorageFile)
+    },
     loadSheets() {
+        //migrate old file to new storage location
+        if (process.platform == "win32" && fs.existsSync(`${process.env.APPDATA}\\dnd_characters\\characters.json`)) {
+            fs.renameSync(`${process.env.APPDATA}\\dnd_characters\\characters.json`, characterStorageFile)
+        }
+
         if (!fs.existsSync(characterStoragePath)) {
             fs.mkdirSync(characterStoragePath)
         }
@@ -14,6 +29,9 @@ module.exports = {
         if (!fs.existsSync(characterStorageFile)) {
             fs.writeFileSync(characterStorageFile, "{}", "utf-8")
         }
+
+        console.log("Loading sheets")
+
         let characterStorageFileContent = fs.readFileSync(characterStorageFile, "utf8");
         let data = JSON.parse(characterStorageFileContent ?? "{}")
 
@@ -40,6 +58,7 @@ function migrateData(data) {
     //replace all instances of the old keys with the new keys, version is the column name
     //return the new data
 
+    //TODO Fix paths so they work on linux lol
     if (!fs.existsSync(`${process.resourcesPath}\\app\\client\\data\\sheetSaveFormat.csv`)) {
         console.log("No sheet save format file found, skipping migration")
         return data
