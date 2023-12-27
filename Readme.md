@@ -11,4 +11,5 @@ Just download and run the installer linked in the latest release! The Client wil
 
 # Linux
 You can either download the AppImage linked in the latest release or get the client via snap: https://snapcraft.io/dnd-client
+
 `sudo snap install dnd-client --edge`
