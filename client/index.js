@@ -4,6 +4,9 @@ const DiscordRPC = require('discord-rpc')
 const path = require('path')
 const remoteMain = require('@electron/remote/main')
 const { autoUpdater } = require('electron-updater')
+const { error } = require('console')
+
+const DISABLE_AUTOMATIC_UPDATES = false
 
 remoteMain.initialize()
 setupTitlebar()
@@ -100,8 +103,12 @@ ipcMain.on("get-userdata-path", event => {
 //UPDATER RELATED EVENTS
 app.on('ready', () => {
 	if (app.isPackaged) {
-		updaterWindow = createUpdaterWindow()
-		autoUpdater.checkForUpdates()
+		if (DISABLE_AUTOMATIC_UPDATES || process.platform == 'darwin') {
+			initMainApp()
+		} else {
+			updaterWindow = createUpdaterWindow()
+			autoUpdater.checkForUpdates()
+		}
 	} else {
 		//Simulate update so we can see how the UI behaves
 		updaterWindow = createUpdaterWindow()
@@ -137,6 +144,10 @@ autoUpdater.on("download-progress", (info) => {
 
 autoUpdater.on("update-downloaded", (event) => {
 	autoUpdater.quitAndInstall()
+})
+
+autoUpdater.on("error", (error) => {
+	initMainApp()
 })
 
 //APP RELATED EVENTS
