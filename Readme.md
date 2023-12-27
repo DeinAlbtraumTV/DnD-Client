@@ -20,6 +20,7 @@ Both versions will automatically update themselves
 
 # MacOS
 MacOS isn't officialy supported but you can try building it yourself, see [Build it yourself](https://github.com/DeinAlbtraumTV/DnD-Client/edit/master/Readme.md#build-it-yourself)
+
 Since MacOS isn't supported, automatic updates will not work.
 
 You might encounter various issues with running the client on MacOS. Please report them and i will try to fix them, but consider MacOS highly experimental
