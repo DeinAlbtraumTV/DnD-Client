@@ -6,3 +6,9 @@ It is also capable of tracking and synchronizing initiative for the entire party
   
 Since the client does not provide a VTT but instead relies on you to bring one, you can just take your favorite tools to the next level instead of learning a completely new VTT!
 
+# Windows
+Just download and run the installer linked in the latest release! The Client will update itself after that.
+
+# Linux
+You can either download the AppImage linked in the latest release or get the client via snap: https://snapcraft.io/dnd-client
+`sudo snap install dnd-client --edge`
