@@ -14,13 +14,13 @@ module.exports = {
         characterStorageFile = path.normalize(`${characterStoragePath}/characters.json`)
     },
     loadSheets() {
+        if (!fs.existsSync(characterStoragePath)) {
+            fs.mkdirSync(characterStoragePath)
+        }
+
         //migrate old file to new storage location
         if (process.platform == "win32" && fs.existsSync(path.normalize(`${process.env.APPDATA}/dnd_characters/characters.json`))) {
             fs.renameSync(path.normalize(`${process.env.APPDATA}/dnd_characters/characters.json`), characterStorageFile)
-        }
-
-        if (!fs.existsSync(characterStoragePath)) {
-            fs.mkdirSync(characterStoragePath)
         }
 
         if (!fs.existsSync(characterStorageFile)) {
