@@ -3,7 +3,7 @@
 	import MiniBrowser from "./components/MiniBrowser.svelte"
 	import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, currentCharacter, characterSheets, primaryColor, sheetZoom } from "./stores/persistentSettingsStore"
 	import { set } from "./util/styleManager"
-	import { characters, currentCharacterObj, socket } from "./stores/nonPersistentStore"
+	import { characters, socket, sheetModules } from "./stores/nonPersistentStore"
 	import CharacterSheet from "./components/sheets/CharacterSheet.svelte"
 	import DetailsSheet from "./components/sheets/DetailsSheet.svelte"
 	import SpellcastingSheet from "./components/sheets/SpellcastingSheet.svelte"
@@ -30,6 +30,7 @@
 		checkIfVersionMatchesServer(data.minClientVer)
 	})
 
+	$sheetModules = window.characters.loadModules()
 	$characters = window.characters.loadSheets()
 
 	let showNewCharacterPopup = false
@@ -39,6 +40,7 @@
 	let characterSelect
 	let characterSheetsExpanded = false
 	let newCharacterName = ""
+	let newCharacterModule = ""
 	let currentCharacterSheet = 0
 	let sheetRefs = {
 		"sheet": null,
@@ -115,8 +117,12 @@
 		set("primary", value)
 	})
 
-	characterSheets.subscribe(value => {
-		if (value == "dark") {
+	sheetZoom.subscribe(value => {
+		set("sheetZoom", value + "%")
+	})
+
+	$:{
+		if ($characterSheets == "dark") {
 			set("characterSheetsPrimary", "#0a0a0a")
 			set("characterSheetsSecondary", "#202225")
 			set("characterSheetsTertiary", "#808080")
@@ -125,20 +131,6 @@
 			set("characterSheetsSecondary", "#FFFFFF")
 			set("characterSheetsTertiary", "#000000")
 		}
-	})
-
-	sheetZoom.subscribe(value => {
-		set("sheetZoom", value + "%")
-	})
-
-	if ($characterSheets == "dark") {
-		set("characterSheetsPrimary", "#0a0a0a")
-		set("characterSheetsSecondary", "#202225")
-		set("characterSheetsTertiary", "#808080")
-	} else {
-		set("characterSheetsPrimary", "#DEDFDF")
-		set("characterSheetsSecondary", "#FFFFFF")
-		set("characterSheetsTertiary", "#000000")
 	}
 
 	function showCharacterPopup(event) {
@@ -158,16 +150,19 @@
 	function createNewCharacter() {
 		if ($characters[newCharacterName] == undefined) {
 			$characters[newCharacterName] = {
-												sheet: {},
-												details: {},
-												spellcasting: {},
-												sheetNotes: [],
-												detailNotes: [],
-												spellcastingNotes: []
-											}
+				sheet: {},
+				details: {},
+				spellcasting: {},
+				sheetNotes: [],
+				detailNotes: [],
+				spellcastingNotes: [],
+				module: {
+					id: newCharacterModule,
+					version: $sheetModules[newCharacterModule].info.version
+				}
+			}
 
 			$currentCharacter = newCharacterName
-			$currentCharacterObj = $characters[$currentCharacter]
 			newCharacterName = ""
 			showNewCharacterPopup = false
 
@@ -179,7 +174,6 @@
 		delete $characters[$currentCharacter]
 
 		$currentCharacter = "";
-		$currentCharacterObj = {};
 
 		showCharacterDeletionPopup = false;
 
@@ -188,15 +182,9 @@
 		window.characters.storeSheets(JSON.stringify($characters))
 	}
 
-	currentCharacter.subscribe(value => {
-		$currentCharacterObj = $characters[value]
-	})
-
 	if ($currentCharacter == "new") {
 		$currentCharacter = ""
 	}
-
-	$currentCharacterObj = $characters[$currentCharacter]
 
 	let ctrl_down = false;
 	let n_down = false;
@@ -246,7 +234,7 @@
 
 <svelte:window on:keydown={keyDown} on:keyup={keyUp}/>
 <main>
-	<NotifyBar></NotifyBar>
+	<NotifyBar/>
 	<Sidebar>
 		<div class="flex-container">
 			<MiniBrowser/>
@@ -277,7 +265,8 @@
 						<button class="sheet-button danger seperated-left" on:click="{() => {showCharacterDeletionPopup = true}}">Banish Character</button>
 						<button class="sheet-button" on:click="{createNote}">Add note</button>
 					</div>
-					{#if $currentCharacterObj !== undefined}
+					{#if $characters[$currentCharacter] !== undefined}
+						<div>
 							<div id="charactersheet-container" class:visible={currentCharacterSheet == 0}>
 								<CharacterSheet bind:this={sheetRefs.sheet} showNotes={currentCharacterSheet == 0}/>
 							</div>
@@ -287,6 +276,8 @@
 							<div id="spellcastingsheet-container" class:visible={currentCharacterSheet == 2}>
 								<SpellcastingSheet bind:this={sheetRefs.spellcasting} showNotes={currentCharacterSheet == 2}/>
 							</div>
+							{@html `<style>@scope {${$sheetModules[$characters[$currentCharacter].module.id]?.css?.shared}}</style>`}
+						</div>
 					{:else}
 						<div class="flex-container" id="noCharacterSelected-container">
 							<p>
@@ -305,6 +296,16 @@
 			</div>
 			<label for="characterName-input" id="characterName-label">Character Name:</label>
 			<input type="text" placeholder="Name" id="characterName-input" bind:value="{newCharacterName}">
+			<label for="characterModule-input" id="characterModule-label">Character Sheet:</label>
+			<select id="characterModule-input" bind:value="{newCharacterModule}">
+				{#each Object.entries($sheetModules) as entry}
+					{#if entry[0].id == "dnd_5e_builtin"}
+						<option selected value="{entry[0]}">{entry[1].info.name}</option>
+					{:else}
+						<option value="{entry[0]}">{entry[1].info.name}</option>
+					{/if}
+				{/each}
+			</select>
 			<div class="flex-column flex-container">
 				<button id="showNewCharacterPopup-button" on:click="{createNewCharacter}">Create</button>
 			</div>
@@ -399,18 +400,21 @@
 	.popup-content {
 		display: flex;
 		flex-direction: column;
-		width: 400px;
-		height: 200px;
+		min-width: 400px;
+		min-height: 200px;
+		width: 40%;
+		height: 40%;
 		background-color: #202225;
 		border-radius: 5px;
 		padding: 4px;
+		border: 2px solid var(--primary);
 	}
 
-	#characterName-label {
+	#characterName-label, #characterModule-label {
 		margin-left: 4px;
 	}
 
-	#characterName-input {
+	#characterName-input, #characterModule-input {
 		display: block;
 		margin: 4px;
 	}

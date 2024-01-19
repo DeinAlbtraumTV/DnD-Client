@@ -407,17 +407,18 @@
         <div id="category-wrapper">
             <div id="category-selector">
                 <hr>
-                <div id="app-settings-title" class="settings-category-title">General Settings</div>
+                <div class="settings-category-title">General Settings</div>
                 <div class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 0}} on:click="{() => {activeSettingsCategory = 0}}" class:active="{activeSettingsCategory == 0}">User Settings</div>
                 <hr>
-                <div id="app-settings-title" class="settings-category-title">App Settings</div>
+                <div class="settings-category-title">App Settings</div>
                 <div class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 1}} on:click="{() => {activeSettingsCategory = 1}}" class:active="{activeSettingsCategory == 1}">Appearance</div>
+                <div class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 2}} on:click="{() => {activeSettingsCategory = 2}}" class:active="{activeSettingsCategory == 2}">Modules</div>
             </div>
             <div id="category-container">
                 <div id="user-settings" class="settings-category" class:active="{activeSettingsCategory == 0}">
                     <h2>User Settings</h2>
                     <div class="input-wrapper">
-                        Username:
+                        <p>Username:</p>
                         <input id="playerName" placeholder="Username" type="text" class="input" bind:value="{$localStorageStore.playerName}"/>
                     </div>
                 </div>

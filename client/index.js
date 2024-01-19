@@ -100,6 +100,10 @@ ipcMain.on("get-userdata-path", event => {
 	event.returnValue = app.getPath("userData")
 })
 
+ipcMain.on("is-dev", event => {
+	event.returnValue = !app.isPackaged
+})
+
 //UPDATER RELATED EVENTS
 app.on('ready', () => {
 	if (app.isPackaged) {

@@ -2,7 +2,7 @@ const { CustomTitlebar, TitlebarColor } = require('custom-electron-titlebar')
 const { contextBridge, ipcRenderer } = require("electron")
 const cheerio = require('cheerio')
 const path = require('path')
-const { initialize, loadSheets, storeSheets } = require("./characterManager.js")
+const { initialize, loadSheets, storeSheets, loadModules } = require("./characterManager.js")
 
 const userdataPath = ipcRenderer.sendSync("get-userdata-path")
 
@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld(
 
 contextBridge.exposeInMainWorld(
     "characters", {
+        loadModules: loadModules,
         loadSheets: loadSheets,
         storeSheets: storeSheets
     }

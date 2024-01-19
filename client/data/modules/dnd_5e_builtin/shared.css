@@ -1,0 +1,114 @@
+.t {
+    transform-origin: bottom left;
+    z-index: 2;
+    position: absolute;
+    white-space: pre;
+    overflow: visible;
+    line-height: 1.5;
+}
+
+@font-face {
+    font-family: ScalaSansOffc-Bold_72;
+    /*include fonts via https urls or fall back to the shipped fonts available in chromium. Don't rely on fonts being in this folder!*/
+    src: url("./sheets/fonts/ScalaSansOffc-Bold_72.woff") format("woff");
+}
+
+@font-face {
+    font-family: ScalaSansOffc_70;
+    /*include fonts via https urls or fall back to the shipped fonts available in chromium. Don't rely on fonts being in this folder!*/
+    src: url("./sheets/fonts/ScalaSansOffc_70.woff") format("woff");
+}
+
+@font-face {
+    font-family: sub_Interstate-Light_nr;
+    /*include fonts via https urls or fall back to the shipped fonts available in chromium. Don't rely on fonts being in this folder!*/
+    src: url("./sheets/fonts/sub_Interstate-Light_nr.woff") format("woff");
+}
+
+#pg1 > svg:focus {
+    outline: none;
+}
+/*use the variables to allow for automatic dark/light theming of your module!*/
+/*here they target the background svg-files*/
+/*alternatively use the dark class (only applied to the sheet root element)*/
+.g0, .g1 {
+    fill: var(--characterSheetsPrimary) !important;
+}
+
+.g2 {
+    fill: var(--characterSheetsSecondary) !important;
+}
+
+.g3 {
+    fill: var(--characterSheetsTertiary) !important;
+    stroke: none !important;
+}
+
+#spellcastingSheet .g3 {
+    fill: none !important;
+    stroke: var(--characterSheetsPrimary) !important;
+}
+
+#spellcastingSheet .g4 {
+    fill: var(--characterSheetsTertiary) !important;
+}
+
+.g5 {
+    fill: var(--characterSheetsTertiary) !important;
+    stroke: none !important;
+}
+
+#spellcastingSheet .g5 {
+    fill: var(--characterSheetsPrimary) !important;
+}
+
+.g6 {
+    fill: var(--characterSheetsSecondary) !important;
+}
+
+#spellcastingSheet .g6 {
+    fill: var(--characterSheetsSecondary) !important;
+}
+
+.ga {
+    fill: var(--characterSheetsTertiary) !important;
+}
+
+#pg1{
+    -webkit-user-select:none;
+    user-select:none;
+}
+
+.dark .t, .dark input, .dark textarea {
+    color: white;
+}
+
+input:focus, textarea:focus {
+    outline: var(--primary) 2px solid;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+input[type="checkbox"] {
+    appearance: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+    outline: none !important;
+    color: black !important;
+    transform: translateY(2px);
+    border-radius: 50% !important;
+}
+
+input[type="checkbox"]:hover, input[type="checkbox"]:focus {
+    outline: 2px solid var(--primary) !important;
+}
+
+.dark input[type="checkbox"]:checked {
+    background-color: var(--characterSheetsTertiary) !important;
+}
+
+input[type="checkbox"]:checked {
+    background-color: black !important;
+    border-radius: 50%;
+}
