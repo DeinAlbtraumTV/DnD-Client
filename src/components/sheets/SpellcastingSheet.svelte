@@ -96,13 +96,13 @@
 
         setTimeout(() => {
             let popupIndex = spellinfoPopups.findIndex(elem => elem.target == event.target);
-
-            if (spellinfoPopups[popupIndex].showing) {
-                spellinfoPopups[popupIndex].showing = false;
-            } else {
-                spellinfoPopups[popupIndex].shouldShow = false;
-            }
-
+                if (spellinfoPopups[popupIndex]) {
+                    if (spellinfoPopups[popupIndex].showing) {
+                        spellinfoPopups[popupIndex].showing = false;
+                    } else {
+                        spellinfoPopups[popupIndex].shouldShow = false;
+                    }
+                }
             //Make svelte rerender all popups
             spellinfoPopups = spellinfoPopups;
         }, 75)
@@ -220,8 +220,8 @@
                         {/each}
                     </div>
                     {#each spellinfoPopups as popup}
-                        {#if popup.showing}
-                            <div class="popup-wrapper" style="top: {popup.target.offsetTop - 234.5}px; {(popup.left ? "left: " + (popup.target.offsetLeft - 320) + "px" : "right: " + (popup.target.offsetLeft + 240) + "px")}; color: {$characterSheets == "dark" ? "white" : "black"} !important;">
+                        {#if popup && popup.showing}
+                            <div class="popup-wrapper" style="top: {popup.target.offsetTop - 234.5}px; {(popup.left ? "left: " + (popup.target.offsetLeft - 315) + "px" : "left: " + (popup.target.offsetLeft + 260) + "px")}; color: {$characterSheets == "dark" ? "white" : "black"} !important;">
                                 <style>
                                     .popup-wrapper a {
                                         color: var(--primary);

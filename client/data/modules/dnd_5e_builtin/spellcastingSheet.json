@@ -754,7 +754,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_1"
+        "id": "spell6_1",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -762,7 +763,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_2"
+        "id": "spell6_2",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -770,7 +772,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_3"
+        "id": "spell6_3",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -778,7 +781,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_4"
+        "id": "spell6_4",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -786,7 +790,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_5"
+        "id": "spell6_5",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -794,7 +799,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_6"
+        "id": "spell6_6",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -802,7 +808,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_7"
+        "id": "spell6_7",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -810,7 +817,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_8"
+        "id": "spell6_8",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -818,7 +826,8 @@
     },
     {
         "type": "spell",
-        "id": "spell6_9"
+        "id": "spell6_9",
+        "class": "popup-left"
     },
     {
         "type": "text",
@@ -834,7 +843,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_1"
+        "id": "spell7_1",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -842,7 +852,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_2"
+        "id": "spell7_2",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -850,7 +861,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_3"
+        "id": "spell7_3",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -858,7 +870,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_4"
+        "id": "spell7_4",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -866,7 +879,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_5"
+        "id": "spell7_5",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -874,7 +888,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_6"
+        "id": "spell7_6",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -882,7 +897,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_7"
+        "id": "spell7_7",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -890,7 +906,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_8"
+        "id": "spell7_8",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -898,7 +915,8 @@
     },
     {
         "type": "spell",
-        "id": "spell7_9"
+        "id": "spell7_9",
+        "class": "popup-left"
     },
     {
         "type": "text",
@@ -914,7 +932,8 @@
     },
     {
         "type": "spell",
-        "id": "spell8_1"
+        "id": "spell8_1",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -922,7 +941,8 @@
     },
     {
         "type": "spell",
-        "id": "spell8_2"
+        "id": "spell8_2",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -930,7 +950,8 @@
     },
     {
         "type": "spell",
-        "id": "spell8_3"
+        "id": "spell8_3",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -938,7 +959,8 @@
     },
     {
         "type": "spell",
-        "id": "spell8_4"
+        "id": "spell8_4",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -946,7 +968,8 @@
     },
     {
         "type": "spell",
-        "id": "spell8_5"
+        "id": "spell8_5",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -954,7 +977,8 @@
     },
     {
         "type": "spell",
-        "id": "spell8_6"
+        "id": "spell8_6",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -962,7 +986,8 @@
     },
     {
         "type": "spell",
-        "id": "spell8_7"
+        "id": "spell8_7",
+        "class": "popup-left"
     },
     {
         "type": "text",
@@ -978,7 +1003,8 @@
     },
     {
         "type": "spell",
-        "id": "spell9_1"
+        "id": "spell9_1",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -986,7 +1012,8 @@
     },
     {
         "type": "spell",
-        "id": "spell9_2"
+        "id": "spell9_2",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -994,7 +1021,8 @@
     },
     {
         "type": "spell",
-        "id": "spell9_3"
+        "id": "spell9_3",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -1002,7 +1030,8 @@
     },
     {
         "type": "spell",
-        "id": "spell9_4"
+        "id": "spell9_4",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -1010,7 +1039,8 @@
     },
     {
         "type": "spell",
-        "id": "spell9_5"
+        "id": "spell9_5",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -1018,7 +1048,8 @@
     },
     {
         "type": "spell",
-        "id": "spell9_6"
+        "id": "spell9_6",
+        "class": "popup-left"
     },
     {
         "type": "check",
@@ -1026,6 +1057,7 @@
     },
     {
         "type": "spell",
-        "id": "spell9_7"
+        "id": "spell9_7",
+        "class": "popup-left"
     }
 ]
