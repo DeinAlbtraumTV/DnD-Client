@@ -2,10 +2,10 @@ const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 
-let userData = ""
-let moduleStoragePath = ""
-let characterStoragePath = ""
-let characterStorageFile = ""
+let userdataPath = ipcRenderer.sendSync("get-userdata-path")
+let moduleStoragePath = path.normalize(`${userdataPath}/sheet_modules`)
+let characterStoragePath = path.normalize(`${userdataPath}/dnd_characters`)
+let characterStorageFile = path.normalize(`${characterStoragePath}/characters.json`)
 
 let sheetModulesLoaded = {}
 let isDev = ipcRenderer.sendSync("is-dev")
@@ -61,12 +61,6 @@ function _loadModule(dirName) {
 }
 
 module.exports = {
-    initialize(userdataPath) {
-        userData = userdataPath
-        moduleStoragePath = path.normalize(`${userdataPath}/sheet_modules`)
-        characterStoragePath = path.normalize(`${userdataPath}/dnd_characters`)
-        characterStorageFile = path.normalize(`${characterStoragePath}/characters.json`)
-    },
     loadModules() {
         if (!fs.existsSync(moduleStoragePath)) {
             fs.mkdirSync(moduleStoragePath)

@@ -14,6 +14,10 @@
     <div class="{data.class ? data.class : ''}" id="{data.id}">
         {#if typeof data.data === 'string' || data.data instanceof String }
             {data.data}
+        {:else if Array.isArray(data.data)}
+            {#each data.data as elem}
+                <svelte:self data="{elem}" onDrop={onDrop} onBlur={onBlur} onClick={onClick} onFocus={onFocus} onStopTyping={onStopTyping}/>
+            {/each}
         {:else}
             <svelte:self data="{data.data}" onDrop={onDrop} onBlur={onBlur} onClick={onClick} onFocus={onFocus} onStopTyping={onStopTyping}/>
         {/if}
