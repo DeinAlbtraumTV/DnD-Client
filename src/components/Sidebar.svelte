@@ -1,7 +1,8 @@
 <script lang="ts">
     import { localStorageStore } from "../stores/localStorageStore.js"
     import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode, currentCharacter } from "../stores/persistentSettingsStore.js"
-    import { socket, session, characters, playerInfo, PlayerData } from "../stores/nonPersistentStore.js"
+    import { socket, session, characters, playerInfo, PlayerData, sheetModules } from "../stores/nonPersistentStore.js"
+    import { generateName } from "../util/nameGenerator.js";
 
     let settingsOpened = false
     let activeSettingsCategory = 0
@@ -15,6 +16,8 @@
     }
 
     $socket.on("connect", () => {
+        console.log("Connected to websocket server")
+        
         $socket.emit("sync", { session_code: $sessionCode }, (callback: any) => {
             if (callback.session_exists) {
                 joinSession()
@@ -301,6 +304,14 @@
             $socket.emit("removeDummy", { player: player, session_code: $session.code })
         }
     }
+
+    function onPlayernameBlur() {
+        if ((!$localStorageStore.playerName || $localStorageStore.playerName == "") &&
+			document.activeElement != document.getElementById("playerName") &&
+			document.activeElement != document.getElementById("playerName_settings")) {
+			$localStorageStore.playerName = generateName()
+		}
+    }
 </script>
 
 <div id="sidebar-container">
@@ -393,7 +404,7 @@
             {/if}
         </div>
         <div id="playerInfo-container">
-            <input id="playerName" placeholder="Username" type="text" class="input boxShadow" bind:value="{$localStorageStore.playerName}"/>
+            <input id="playerName" placeholder="Username" type="text" class="input boxShadow" on:blur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
             <button id="settings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="fas fa-cog"></i></button>
         </div>
     </div>
@@ -419,7 +430,7 @@
                     <h2>User Settings</h2>
                     <div class="input-wrapper">
                         <p>Username:</p>
-                        <input id="playerName" placeholder="Username" type="text" class="input" bind:value="{$localStorageStore.playerName}"/>
+                        <input id="playerName_settings" placeholder="Username" type="text" class="input" on:blur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
                     </div>
                 </div>
                 <div id="appearance" class="settings-category" class:active="{activeSettingsCategory == 1}">
@@ -469,6 +480,34 @@
                             <option selected value="dark">Dark</option>
                             <option value="light">Light</option>
                         </select>
+                    </div>
+                </div>
+                <div id="modules" class="settings-category" class:active={activeSettingsCategory == 2}>
+                    <h2>Modules</h2>
+                    <div class="input-wrapper multiline">
+                        <p>Loaded Modules:</p>
+                        <table>
+                            <tr>
+                                <th>Name</th>
+                                <th>Author</th>
+                                <th>Website</th>
+                                <th>Version</th>
+                            </tr>
+                            {#each Object.values($sheetModules) as module}
+                                <tr>
+                                    <td>{module.info.name}</td>
+                                    <td>{module.info.author ?? "Someone"}</td>
+                                    <td>
+                                        {#if module.info.repo}
+                                            <a href="{module.info.repo}">{new URL(module.info.repo).hostname}</a>
+                                        {:else}
+                                            -
+                                        {/if}
+                                    </td>
+                                    <td>{module.info.version}</td>
+                                </tr>
+                            {/each}
+                        </table>
                     </div>
                 </div>
             </div>
@@ -567,6 +606,7 @@ hr {
 #settings-container {
     display: none;
     position: absolute;
+    user-select: none;
 }
 
 #settings-container.opened {
@@ -688,6 +728,11 @@ hr {
     justify-content: center;
 }
 
+.input-wrapper.multiline {
+    flex-direction: column;
+    align-items: stretch;
+}
+
 .input {
     width: 100%;
     padding: 4px;
@@ -747,6 +792,18 @@ input[type=color]::-webkit-color-swatch-wrapper {
 
 input[type=range] {
     cursor: pointer;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table td {
+    text-align: center;
+}
+
+table tr th {
+    border-bottom: 2px solid var(--primary);
 }
 
 .dungeonControlRoom-text {
