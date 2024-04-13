@@ -60,6 +60,24 @@ function _loadModule(dirName) {
     }
 }
 
+//TODO REMOVE
+function copyDir(source, dest) {
+    if (fs.existsSync(source)) {
+        if (fs.statSync(source)) {
+            let file = dest
+            let dir = path.dirname(file);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            fs.copyFileSync(source, dest)
+        } else if (fs.statSync(source).isDirectory()) {
+            fs.readdirSync(source).forEach((fileOrFolderName) => {
+                copyFileOutsideOfElectronAsar(path.join(source, fileOrFolderName), path.join(dest, fileOrFolderName));
+            });
+        }
+    }
+}
+
 module.exports = {
     loadModules() {
         if (!fs.existsSync(moduleStoragePath)) {
@@ -67,7 +85,13 @@ module.exports = {
         }
 
         //Copy builtin modules to module storage
-        fs.cpSync((isDev ? "./client/data/modules/" : `${process.resourcesPath}/app.asar/client/data/modules/`), moduleStoragePath, {recursive:true})
+        //TODO REMOVE DEBUGGING
+        console.log(process.resourcesPath);
+        console.log((isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)))
+        console.log("exists:", fs.existsSync(isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)))
+
+        fs.cpSync((isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)), moduleStoragePath, {recursive:true})
+        //copyDir((isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)), moduleStoragePath)
 
         let modules = []
         let dirHandle = fs.readdirSync(moduleStoragePath, {withFileTypes:true})
@@ -120,9 +144,11 @@ module.exports = {
     
         return data
     },
-
     storeSheets(sheets) {
         fs.writeFileSync(characterStorageFile, sheets, "utf-8")
+    },
+    getModuleStoragePath() {
+        return moduleStoragePath
     }
 }
 

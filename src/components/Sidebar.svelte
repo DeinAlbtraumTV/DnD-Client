@@ -1,7 +1,7 @@
 <script lang="ts">
     import { localStorageStore } from "../stores/localStorageStore.js"
     import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode, currentCharacter } from "../stores/persistentSettingsStore.js"
-    import { socket, session, characters, playerInfo, PlayerData } from "../stores/nonPersistentStore.js"
+    import { socket, session, characters, playerInfo, PlayerData, sheetModules } from "../stores/nonPersistentStore.js"
 
     let settingsOpened = false
     let activeSettingsCategory = 0
@@ -471,6 +471,37 @@
                         </select>
                     </div>
                 </div>
+                <div id="modules" class="settings-category" class:active="{activeSettingsCategory == 2}">
+                    <h2>Modules</h2>
+                    <div class="input-wrapper">
+                        <p>Installed Modules:</p>
+                        <button class="input button" on:click={() => {window.util.openModuleFolder()}}>Open Module Folder</button>
+                    </div>
+                    <div class="input-wrapper table-wrapper">
+                        <table class="table">
+                            <tr>
+                                <th>Module</th>
+                                <th>Version</th>
+                                <th>Author</th>
+                                <th>Repository</th>
+                            </tr>
+                            {#each Object.values($sheetModules) as module}
+                                <tr>
+                                    <td>{module.info.name}</td>
+                                    <td>{module.info.version}</td>
+                                    <td>{module.info.author ?? "Someone"}</td>
+                                    <td>
+                                        {#if module.info.repo}
+                                            <a class="link" href="{module.info.repo}">{new URL(module.info.repo).hostname}</a>
+                                        {:else}
+                                            -
+                                        {/if}
+                                    </td>
+                                </tr>
+                            {/each}
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -646,7 +677,8 @@ hr {
 }
 
 .category-button:hover, .category-button.active {
-    background-color: rgba(70, 70, 70, 0.4);
+    /*background-color: rgba(70, 70, 70, 0.4);*/
+    background-color: #2d2d2d;
 }
 
 .settings-category {
@@ -696,7 +728,7 @@ hr {
     margin: 0;
     margin-left: 5px;
     margin-right: 5px;
-    background-color: #252525;
+    background-color: #2d2d2d;
     border-radius: 5px;
     color: white;
     border: none;
@@ -727,6 +759,13 @@ hr {
     border-radius: 50%;
 }
 
+.input.button {
+    height: 32px;
+    width: fit-content;
+    padding: 8px;
+    cursor: pointer;
+}
+
 input[type=color]::-webkit-color-swatch {
     border: none;
     border-radius: 50%;
@@ -747,6 +786,47 @@ input[type=color]::-webkit-color-swatch-wrapper {
 
 input[type=range] {
     cursor: pointer;
+}
+
+.table-wrapper {
+    border: white 2px solid;
+    border-radius: 5px;
+}
+
+.table {
+    width: 100%;
+    height: fit-content;
+    border-collapse: collapse;
+    background-color: #2d2d2d;
+    color: white;
+    outline: none;
+    font-size: 16px;
+}
+
+.table th, .table td {
+    text-align: center;
+    padding: 4px;
+}
+
+.table tr:not(:last-child) {
+    border-bottom: white 2px solid;
+}
+
+.table th:not(:first), .table td:not(:first) {
+    border-left: white 2px solid;
+}
+
+.table th:not(:last-of-type), .table td:not(:last-child) {
+    border-right: white 2px solid;
+}
+
+.link {
+    color: white;
+    text-decoration: underline var(--primary) 2px;
+}
+
+.link:hover {
+    text-decoration: underline var(--primary) 2px;
 }
 
 .dungeonControlRoom-text {
@@ -777,7 +857,7 @@ input[type=range] {
 	padding: 8px;
     border: none;
     outline: none;
-	background-color: #252525;
+	background-color: #2d2d2d;
 	box-shadow: 0px 0px 10px 1px rgb(0 0 0 / 50%);
 	border-radius: 5px;
 	cursor: pointer;

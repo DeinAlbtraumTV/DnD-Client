@@ -686,6 +686,14 @@
     },
     {
         "type": "text",
+        "id": "performance"
+    },
+    {
+        "type": "check",
+        "id": "performanceProf"
+    },
+    {
+        "type": "text",
         "id": "persuasion"
     },
     {

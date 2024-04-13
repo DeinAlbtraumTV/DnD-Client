@@ -85,7 +85,7 @@
         position: absolute;
         cursor: move;
         z-index: 100;
-        background-color: #00000080;
+        background-color: #00000090;
         min-width: 15px;
         min-height: 15px;
         display: flex;
@@ -144,13 +144,13 @@
         font-family: inherit;
         font-weight: 400;
         color: white;
-        user-select: auto;
+        user-select: text;
         cursor: text;
         padding: 5px;
     }
 
     .note-text:focus {
-        outline: var(--primary) auto 1px;
+        outline: var(--primary) 2px solid;
     }
 
     .note .note-row {

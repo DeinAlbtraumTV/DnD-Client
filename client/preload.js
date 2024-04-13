@@ -2,7 +2,7 @@ const { CustomTitlebar, TitlebarColor } = require('custom-electron-titlebar')
 const { contextBridge, ipcRenderer } = require("electron")
 const cheerio = require('cheerio')
 const path = require('path')
-const { loadSheets, storeSheets, loadModules } = require("./characterManager.js")
+const { loadSheets, storeSheets, loadModules, getModuleStoragePath } = require("./characterManager.js")
 
 if (process.platform == "darwin" 
     || process.platform == "win32") {
@@ -73,3 +73,35 @@ contextBridge.exposeInMainWorld(
 ipcRenderer.on("open-page-in-new-tab", (event, url) => {
     mainWindowWillNavigateListener(url)
 })
+
+contextBridge.exposeInMainWorld(
+    "util", {
+        openModuleFolder: () => {
+            openExplorerIn(getModuleStoragePath(), () => {})
+        }
+    }
+)
+
+function openExplorerIn(path, callback) {
+    var cmd = ``;
+    switch (require(`os`).platform().toLowerCase().replace(/[0-9]/g, ``).replace(`darwin`, `macos`)) {
+        case `win`:
+            path = path || '=';
+            cmd = `explorer`;
+            break;
+        case `linux`:
+            path = path || '/';
+            cmd = `xdg-open`;
+            break;
+        case `macos`:
+            path = path || '/';
+            cmd = `open`;
+            break;
+    }
+    let p = require(`child_process`).spawn(cmd, [path]);
+    p.on('error', (err) => {
+        console.log(err.message)
+        p.kill();
+        return callback(err);
+    });
+}
