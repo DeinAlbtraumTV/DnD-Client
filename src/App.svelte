@@ -10,6 +10,8 @@
 	import { io } from "socket.io-client"
 	import NotifyBar from "./components/NotifyBar.svelte"
 	import { NotificationType, notifications } from "./stores/notificationStore"
+	import { localStorageStore } from "./stores/localStorageStore"
+	import { generateName } from "./util/nameGenerator"
 
 	if (PRE_REP_DEV_ENVIRONMENT) {
 		$socket = io("ws://127.0.0.1:4134")
@@ -21,10 +23,6 @@
 	} else {
 		$socket = io("ws://neah.gamewithfire.de:4134")
 	}
-
-	$socket.on("connect", () => {
-		console.log("Connected to websocket server")
-	})
 
 	$socket.on("version-check", (data) => {
 		checkIfVersionMatchesServer(data.minClientVer)
@@ -130,6 +128,14 @@
 			set("characterSheetsPrimary", "#DEDFDF")
 			set("characterSheetsSecondary", "#FFFFFF")
 			set("characterSheetsTertiary", "#000000")
+		}
+	}
+
+	$:{
+		if ((!$localStorageStore.playerName || $localStorageStore.playerName == "") &&
+			document.activeElement != document.getElementById("playerName") &&
+			document.activeElement != document.getElementById("playerName_settings")) {
+			$localStorageStore.playerName = generateName()
 		}
 	}
 
@@ -295,9 +301,9 @@
 				<button id="closePopup-button" on:click="{() => {showNewCharacterPopup = false; characterSelect.value = prevSelected; currentCharacter.set(prevSelected)}}"><i class="far fa-times-circle"></i></button>
 			</div>
 			<label for="characterName-input" id="characterName-label">Character Name:</label>
-			<input type="text" placeholder="Name" id="characterName-input" bind:value="{newCharacterName}">
+			<input class="input boxShadow" type="text" placeholder="Name" id="characterName-input" bind:value="{newCharacterName}">
 			<label for="characterModule-input" id="characterModule-label">Character Sheet:</label>
-			<select id="characterModule-input" bind:value="{newCharacterModule}">
+			<select class="input boxShadow select" id="characterModule-input" bind:value="{newCharacterModule}">
 				{#each Object.entries($sheetModules) as entry}
 					{#if entry[0].id == "dnd_5e_builtin"}
 						<option selected value="{entry[0]}">{entry[1].info.name}</option>
@@ -401,13 +407,40 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 400px;
-		min-height: 200px;
-		width: 40%;
-		height: 40%;
+		width: 30%;
 		background-color: #202225;
 		border-radius: 5px;
 		padding: 4px;
 		border: 2px solid var(--primary);
+	}
+
+	.input {
+		padding: 4px;
+		padding-left: 8px;
+		padding-right: 8px;
+		margin: 0;
+		margin-left: 5px;
+		margin-right: 5px;
+		background-color: #252525;
+		border-radius: 5px;
+		color: white;
+		border: none;
+		outline: none;
+		height: 24px;
+		font-size: 1rem;
+	}
+
+	.input.select {
+		height: 32px;
+	}   
+
+	.input.boxShadow {
+		-webkit-box-shadow: 0px 0px 10px 1px rgba(0,0,0,0.5); 
+		box-shadow: 0px 0px 10px 1px rgba(0,0,0,0.5);
+	}
+
+	.input:focus, .input:hover {
+		outline: var(--primary) solid 2px;
 	}
 
 	#characterName-label, #characterModule-label {
@@ -424,10 +457,10 @@
 		border-radius: 5px;
 		color: white;
 		max-width: min-content;
-		padding: 5px;
+		padding: 6px;
 		appearance: none;
 		margin-left: auto;
-		margin-top: auto;
+		margin-top: 4px;
 		margin-right: 4px;
 		margin-bottom: 4px;
 		cursor: pointer;

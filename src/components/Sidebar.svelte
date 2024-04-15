@@ -2,6 +2,7 @@
     import { localStorageStore } from "../stores/localStorageStore.js"
     import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode, currentCharacter } from "../stores/persistentSettingsStore.js"
     import { socket, session, characters, playerInfo, PlayerData, sheetModules } from "../stores/nonPersistentStore.js"
+    import { generateName } from "../util/nameGenerator.js";
 
     let settingsOpened = false
     let activeSettingsCategory = 0
@@ -15,6 +16,8 @@
     }
 
     $socket.on("connect", () => {
+        console.log("Connected to websocket server")
+        
         $socket.emit("sync", { session_code: $sessionCode }, (callback: any) => {
             if (callback.session_exists) {
                 joinSession()
@@ -301,6 +304,14 @@
             $socket.emit("removeDummy", { player: player, session_code: $session.code })
         }
     }
+
+    function onPlayernameBlur() {
+        if ((!$localStorageStore.playerName || $localStorageStore.playerName == "") &&
+			document.activeElement != document.getElementById("playerName") &&
+			document.activeElement != document.getElementById("playerName_settings")) {
+			$localStorageStore.playerName = generateName()
+		}
+    }
 </script>
 
 <div id="sidebar-container">
@@ -393,7 +404,7 @@
             {/if}
         </div>
         <div id="playerInfo-container">
-            <input id="playerName" placeholder="Username" type="text" class="input boxShadow" bind:value="{$localStorageStore.playerName}"/>
+            <input id="playerName" placeholder="Username" type="text" class="input boxShadow" on:blur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
             <button id="settings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="fas fa-cog"></i></button>
         </div>
     </div>
@@ -419,7 +430,7 @@
                     <h2>User Settings</h2>
                     <div class="input-wrapper">
                         <p>Username:</p>
-                        <input id="playerName" placeholder="Username" type="text" class="input" bind:value="{$localStorageStore.playerName}"/>
+                        <input id="playerName_settings" placeholder="Username" type="text" class="input" on:blur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
                     </div>
                 </div>
                 <div id="appearance" class="settings-category" class:active="{activeSettingsCategory == 1}">
@@ -598,6 +609,7 @@ hr {
 #settings-container {
     display: none;
     position: absolute;
+    user-select: none;
 }
 
 #settings-container.opened {
