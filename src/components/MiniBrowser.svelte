@@ -455,8 +455,7 @@
         white-space: nowrap;
         background-color: #252525;
         height: 30px;
-        display: flex;
-        align-items: center;
+        line-height: 30px;
         padding-left: 5px;
         padding-right: 5px;
         border-radius: 5px 5px 0px 0px;

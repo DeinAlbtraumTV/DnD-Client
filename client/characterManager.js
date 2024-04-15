@@ -2,6 +2,7 @@ const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 
+let exeRoot = ipcRenderer.sendSync("get-exeroot-path")
 let userdataPath = ipcRenderer.sendSync("get-userdata-path")
 let moduleStoragePath = path.normalize(`${userdataPath}/sheet_modules`)
 let characterStoragePath = path.normalize(`${userdataPath}/dnd_characters`)
@@ -60,38 +61,13 @@ function _loadModule(dirName) {
     }
 }
 
-//TODO REMOVE
-function copyDir(source, dest) {
-    if (fs.existsSync(source)) {
-        if (fs.statSync(source)) {
-            let file = dest
-            let dir = path.dirname(file);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            fs.copyFileSync(source, dest)
-        } else if (fs.statSync(source).isDirectory()) {
-            fs.readdirSync(source).forEach((fileOrFolderName) => {
-                copyFileOutsideOfElectronAsar(path.join(source, fileOrFolderName), path.join(dest, fileOrFolderName));
-            });
-        }
-    }
-}
-
 module.exports = {
     loadModules() {
         if (!fs.existsSync(moduleStoragePath)) {
             fs.mkdirSync(moduleStoragePath)
         }
 
-        //Copy builtin modules to module storage
-        //TODO REMOVE DEBUGGING
-        console.log(process.resourcesPath);
-        console.log((isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)))
-        console.log("exists:", fs.existsSync(isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)))
-
-        fs.cpSync((isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)), moduleStoragePath, {recursive:true})
-        //copyDir((isDev ? "./client/data/modules/" : path.join(process.resourcesPath, `/app.asar/client/data/modules/`)), moduleStoragePath)
+        fs.cpSync((isDev ? "./client/data/modules/" : path.join(exeRoot, `/data/modules/`)), moduleStoragePath, {recursive:true})
 
         let modules = []
         let dirHandle = fs.readdirSync(moduleStoragePath, {withFileTypes:true})
