@@ -96,6 +96,10 @@ function initMainApp() {
 
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy')
 
+ipcMain.on("get-exeroot-path", event => {
+	event.returnValue = path.dirname(app.getPath("exe"))
+})
+
 ipcMain.on("get-userdata-path", event => {
 	event.returnValue = app.getPath("userData")
 })

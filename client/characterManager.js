@@ -2,6 +2,7 @@ const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 
+let exeRoot = ipcRenderer.sendSync("get-exeroot-path")
 let userdataPath = ipcRenderer.sendSync("get-userdata-path")
 let moduleStoragePath = path.normalize(`${userdataPath}/sheet_modules`)
 let characterStoragePath = path.normalize(`${userdataPath}/dnd_characters`)
@@ -66,8 +67,7 @@ module.exports = {
             fs.mkdirSync(moduleStoragePath)
         }
 
-        //Copy builtin modules to module storage
-        fs.cpSync((isDev ? "./client/data/modules/" : `${process.resourcesPath}/app.asar/client/data/modules/`), moduleStoragePath, {recursive:true})
+        fs.cpSync((isDev ? "./client/data/modules/" : path.join(exeRoot, `/data/modules/`)), moduleStoragePath, {recursive:true})
 
         let modules = []
         let dirHandle = fs.readdirSync(moduleStoragePath, {withFileTypes:true})
@@ -120,9 +120,11 @@ module.exports = {
     
         return data
     },
-
     storeSheets(sheets) {
         fs.writeFileSync(characterStorageFile, sheets, "utf-8")
+    },
+    getModuleStoragePath() {
+        return moduleStoragePath
     }
 }
 

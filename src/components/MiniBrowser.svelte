@@ -289,7 +289,7 @@
 
 <div id="tab-container">
     <div id="tabTop-navigation-container">
-        <div class="flex-container" style="padding-right: 6px;">
+        <div class="flex-container tabTop-wrapper">
             <div id="tabTop-container">
                 <div class="tabTop" id="mapTabTop" class:active={ currentTab == -1} data-url="" data-index="-1" on:keydown={changeToTabKeyboard} on:click="{changeToTab}" title="Map">
                     Map
@@ -316,9 +316,9 @@
             </div>
         </div>
         <div id="navigation-container">
-            <button on:click="{navToPrev}" id="navToPrev" disabled="{currentTab == -1}"><i class="fas fa-arrow-left"></i></button>
-            <button on:click="{navToNext}" id="navToNext" disabled="{currentTab == -1}"><i class="fas fa-arrow-right"></i></button>
-            <button on:click="{reload}" id="reload"><i class="fas fa-redo"></i></button>
+            <button on:click="{navToPrev}" id="navToPrev" disabled="{currentTab == -1}"><i class="fas fa-arrow-left icon"></i></button>
+            <button on:click="{navToNext}" id="navToNext" disabled="{currentTab == -1}"><i class="fas fa-arrow-right icon"></i></button>
+            <button on:click="{reload}" id="reload"><i class="fas fa-redo icon"></i></button>
             <input id="urlInput" type="text" disabled="{currentTab == -1}" placeholder="url" on:change="{loadUrl}">
         </div>
     </div>
@@ -380,8 +380,9 @@
     }
 
     #tabTop-navigation-container {
-        margin-left: 5px;
-        max-width: calc(100vw - 355px);
+        background: #141414;
+        padding-left: 5px;
+        max-width: 100%;
     }
 
     .flex-container {
@@ -390,9 +391,9 @@
 
     #tabTop-container {
         height: 35px;
+        width: 100%;
         display: flex;
         overflow: auto;
-        flex-grow: 1;
     }
 
     #tabTop-container::-webkit-scrollbar {
@@ -401,8 +402,13 @@
         height: 0px;
     }
 
+    .tabTop-wrapper {
+        padding-top: 2px;
+        padding-right: 6px;
+        justify-content: space-between;
+    }
+
     #navigation-container {
-        height: 30px;
         width: 100%;
         display: flex;
         align-items: center;
@@ -413,31 +419,33 @@
         height: 25px;
         border-radius: 50%;
         margin-right: 6px;
-        margin-top: 6px;
-        margin-bottom: 2px;
+        margin-bottom: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
     }
 
+    #navToPrev:hover, #navToNext:hover, #reload:hover {
+        outline: var(--primary) 2px solid;
+    }
+
     #navToPrev:disabled, #navToNext:disabled, #reload:disabled {
         cursor: default;
+        outline: none;
     }
 
     #urlInput {
         width: -webkit-fill-available;
         height: 24px;
         margin-right: 6px;
-        margin-top: 6px;
-        margin-bottom: 2px;
+        margin-bottom: 6px;
         border-radius: 5px;
     }
     
     #tabContent-container {
         width: 100%;
         height: 100%;
-        padding-top: 7px;
     }
 
     .tabTop {
@@ -447,8 +455,7 @@
         white-space: nowrap;
         background-color: #252525;
         height: 30px;
-        display: flex;
-        align-items: center;
+        line-height: 30px;
         padding-left: 5px;
         padding-right: 5px;
         border-radius: 5px 5px 0px 0px;
@@ -473,10 +480,6 @@
         padding-left: 5px;
     }
 
-    #mapTabTop.active {
-        padding-right: 5px;
-    }
-
     .tabTop:hover {
         background-color: var(--primary);
     }
@@ -489,8 +492,13 @@
     #addTab, #addTab-button {
         width: 30px;
         padding: 0;
-        margin: 1px;
+        margin: 0;
         height: 30px;
+        cursor: pointer;
+    }
+
+    #addTab {
+        margin-top: 2px;
     }
 
     #addTab-button:hover {
@@ -546,5 +554,9 @@
 
     .tabContextMenu-button:hover {
         outline: 2px solid var(--primary);
+    }
+
+    .icon {
+        line-height: normal;
     }
 </style>
