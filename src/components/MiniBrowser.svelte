@@ -471,6 +471,8 @@
         transition: background-color 0.2s linear,
                     border-radius 0.1s linear;
         flex-grow: 1;
+        display: grid;
+        columns: 2;
     }
 
     .tabTop.active {
@@ -487,6 +489,8 @@
     #closeTab {
         margin-left: auto;
         padding-left: 5px;
+        grid-area: 1/2;
+        padding-right: 5px;
     }
 
     #addTab, #addTab-button {
