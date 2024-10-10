@@ -4,7 +4,6 @@ const DiscordRPC = require('discord-rpc')
 const path = require('path')
 const remoteMain = require('@electron/remote/main')
 const { autoUpdater } = require('electron-updater')
-const { error } = require('console')
 
 const DISABLE_AUTOMATIC_UPDATES = false
 
