@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { characters, socket, playerInfo, sheetModules } from "../../stores/nonPersistentStore"
     import { currentCharacter, characterSheets, sessionCode } from "../../stores/persistentSettingsStore"
+    import { getAffectedElements, reCalculateValue } from "../../util/inputInheritenceHelper";
     import Note from "./Note.svelte"
     import ModuleElement from "./ModuleElement.svelte";
 
@@ -43,13 +44,23 @@
             if (elem.type == "checkbox") {
                 elem.checked = value
             } else {
-                switch (elem.type) {
-                    case "number":
-                        elem.value = Number.parseInt(value)
-                        break;
-                    default:
-                        elem.value = value
-                }
+                elem.value = value
+            }
+
+            elem.setAttribute("user-edited", true)
+        })
+
+        $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet.forEach(elem => {
+            if (!elem.type) return
+
+            let field = document.querySelector("[id=\"" + elem.id + "\"]")
+            let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
+            if (!field.getAttribute("user-edited")) {
+                if (Number.parseInt(val) > 0)
+                    val = "+" + val
+
+                field.value = val
             }
         })
 
@@ -61,7 +72,48 @@
     }
 
     function onBlur(event) {
-        $characters[$currentCharacter].sheet[event.target.getAttribute("id")] = event.target.value
+        if (event.target.value == "" && $characters[$currentCharacter].sheet[event.target.getAttribute("id")] != "") {
+            event.target.removeAttribute("user-edited")
+            delete $characters[$currentCharacter].sheet[event.target.getAttribute("id")]
+
+            let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
+            if (!event.target.getAttribute("user-edited")) {
+                if (Number.parseInt(selfVal) > 0)
+                    selfVal = "+" + selfVal
+
+                event.target.value = selfVal
+            }
+        } else if (event.target.value != "") {
+            event.target.setAttribute("user-edited", true)
+            $characters[$currentCharacter].sheet[event.target.getAttribute("id")] = event.target.value
+        }
+
+        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet)
+        
+        for (const id of affectedElems) {
+            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
+            let elem = document.querySelector("[id=\"" + id + "\"]")
+
+            if (elem && !elem.getAttribute("user-edited")) {
+                if (Number.parseInt(val) > 0)
+                    val = "+" + val
+
+                elem.value = val
+
+                if (elem.getAttribute("data-initiative")) {
+                    let initiative = Number.parseInt(val)
+
+                    if (isNaN(initiative)) {
+                        initiative = 0
+                    }
+
+                    $playerInfo.initiativeModifier = initiative;
+                    $socket.emit("updateInitiativeModifier", { session_code: $sessionCode, initiativeModifier: initiative} );
+                }
+            }
+        }
 
         //Field-specific actions
         if (event.target.getAttribute("data-initiative")) {
@@ -80,6 +132,33 @@
 
     function onClick(event) {
         $characters[$currentCharacter].sheet[event.target.getAttribute("id")] = event.target.checked
+
+        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet)
+
+        for (const id of affectedElems) {
+            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
+            let elem = document.querySelector("[id=\"" + id + "\"]")
+
+            if (elem && !elem.getAttribute("user-edited")) {
+                if (Number.parseInt(val) > 0)
+                    val = "+" + val
+
+                elem.value = val
+
+                if (elem.getAttribute("data-initiative")) {
+                    let initiative = Number.parseInt(val)
+
+                    if (isNaN(initiative)) {
+                        initiative = 0
+                    }
+
+                    $playerInfo.initiativeModifier = initiative;
+                    $socket.emit("updateInitiativeModifier", { session_code: $sessionCode, initiativeModifier: initiative} );
+                }
+            }
+        }
+
         window.characters.storeSheets(JSON.stringify($characters))
     }
 

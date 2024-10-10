@@ -35,6 +35,22 @@
             } else {
                 elem.value = value
             }
+
+            elem.setAttribute("user-edited", true)
+        })
+
+        $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet.forEach(elem => {
+            if (!elem.type) return
+
+            let field = document.querySelector("[id=\"" + elem.id + "\"]")
+            let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
+
+            if (!field.getAttribute("user-edited")) {
+                if (Number.parseInt(val) > 0)
+                    val = "+" + val
+
+                field.value = val
+            }
         })
     }
 
@@ -43,7 +59,38 @@
     }
 
     function onBlur(event) {
-        $characters[$currentCharacter].details[event.target.getAttribute("id")] = event.target.value
+        if (event.target.value == "" && $characters[$currentCharacter].details[event.target.getAttribute("id")] != "") {
+            event.target.removeAttribute("user-edited")
+            delete $characters[$currentCharacter].details[event.target.getAttribute("id")]
+
+            let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
+
+            if (!event.target.getAttribute("user-edited")) {
+                if (Number.parseInt(selfVal) > 0)
+                    selfVal = "+" + selfVal
+
+                event.target.value = selfVal
+            }
+        } else if (event.target.value != "") {
+            event.target.setAttribute("user-edited", true)
+            $characters[$currentCharacter].details[event.target.getAttribute("id")] = event.target.value
+        }
+
+        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet)
+        
+        for (const id of affectedElems) {
+            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
+
+            let elem = document.querySelector("[id=\"" + id + "\"]")
+
+            if (elem && !elem.getAttribute("user-edited")) {
+                if (Number.parseInt(val) > 0)
+                    val = "+" + val
+
+                elem.value = val
+            }
+        }
+
         window.characters.storeSheets(JSON.stringify($characters))
     }
 

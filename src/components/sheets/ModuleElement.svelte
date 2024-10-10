@@ -8,6 +8,16 @@
     export let onClick = null
     export let onFocus = null
     export let onStopTyping = null
+
+    function clearIfNotEdited(event) {
+        if (!event.target.getAttribute("user-edited")) {
+            event.target.value = ""
+        }
+
+        if (onFocus && event.target.getAttribute("data-field-name") && event.target.getAttribute("data-field-name") == "S" + data.id) {
+            onFocus(event)
+        }
+    }
 </script>
 
 {#if !data.type}
@@ -25,11 +35,11 @@
 {:else if data.type == "svg"}
     <InlineSVG class="{data.class ? data.class : ''}" id="{data.id}" src="{data.src}" width="935" height="1210" style="width:935px; height:1210px; -moz-transform:scale(1); transform: scale(1); z-index: 0; outline: none;"></InlineSVG>
 {:else if data.type == "text"}
-    <input class="{data.class ? data.class : ''}" id="{data.id}" type="text" data-field-name="{data.id}" on:drop="{onDrop}" on:blur="{onBlur}" data-initiative="{data.initiative}"/>
+    <input class="{data.class ? data.class : ''}" id="{data.id}" type="text" data-field-name="{data.id}" on:drop="{onDrop}" on:blur="{onBlur}" on:focus="{clearIfNotEdited}" data-initiative="{data.initiative}"/>
 {:else if data.type == "spell"}
-    <input class="{data.class ? data.class : ''}" id="{data.id}" type="text" data-field-name="S{data.id}" on:blur="{onBlur}" on:drop="{onDrop}" on:focus="{onFocus}" use:stopTyping on:stopTyping="{onFocus}"/>
+    <input class="{data.class ? data.class : ''}" id="{data.id}" type="text" data-field-name="S{data.id}" on:drop="{onDrop}" on:blur="{onBlur}" on:focus="{clearIfNotEdited}" use:stopTyping on:stopTyping="{onStopTyping}"/>
 {:else if data.type == "check"}
     <input class="{data.class ? data.class : ''}" id="{data.id}" type="checkbox" data-field-name="{data.id}" on:change="{onClick}"/>
 {:else if data.type == "text-multiline"}
-    <textarea class="{data.class ? data.class : ''}" id="{data.id}" data-field-name="{data.id}" on:drop="{onDrop}" on:blur="{onBlur}"></textarea>
+    <textarea class="{data.class ? data.class : ''}" id="{data.id}" data-field-name="{data.id}" on:drop="{onDrop}" on:blur="{onBlur}" on:focus="{clearIfNotEdited}"></textarea>
 {/if}

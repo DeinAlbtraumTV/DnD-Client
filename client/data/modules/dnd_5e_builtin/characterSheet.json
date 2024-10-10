@@ -335,7 +335,7 @@
     {
         "id": "text_damage",
         "class": "t s4",
-        "data": "DANAGE/TYPE"
+        "data": "DAMAGE/TYPE"
     },
     {
         "id": "text_total",
@@ -482,7 +482,44 @@
     },
     {
         "type": "text",
-        "id": "strMod"
+        "id": "strMod",
+        "inherits": {
+            "conditional": {
+                "condition": {
+                    "id": "str"
+                },
+                "1": {"value": -5},
+                "2": {"value": -4},
+                "3": {"value": -4},
+                "4": {"value": -3},
+                "5": {"value": -3},
+                "6": {"value": -2},
+                "7": {"value": -2},
+                "8": {"value": -1},
+                "9": {"value": -1},
+                "10": {"value": 0},
+                "11": {"value": 0},
+                "12": {"value": 1},
+                "13": {"value": 1},
+                "14": {"value": 2},
+                "15": {"value": 2},
+                "16": {"value": 3},
+                "17": {"value": 3},
+                "18": {"value": 4},
+                "19": {"value": 4},
+                "20": {"value": 5},
+                "21": {"value": 5},
+                "22": {"value": 6},
+                "23": {"value": 6},
+                "24": {"value": 7},
+                "25": {"value": 7},
+                "26": {"value": 8},
+                "27": {"value": 8},
+                "28": {"value": 9},
+                "29": {"value": 9},
+                "30": {"value": 10}
+            }
+        }
     },
     {
         "type": "text",
@@ -490,7 +527,44 @@
     },
     {
         "type": "text",
-        "id": "dexMod"
+        "id": "dexMod",
+        "inherits": {
+            "conditional": {
+                "condition": {
+                    "id": "dex"
+                },
+                "1": {"value": -5},
+                "2": {"value": -4},
+                "3": {"value": -4},
+                "4": {"value": -3},
+                "5": {"value": -3},
+                "6": {"value": -2},
+                "7": {"value": -2},
+                "8": {"value": -1},
+                "9": {"value": -1},
+                "10": {"value": 0},
+                "11": {"value": 0},
+                "12": {"value": 1},
+                "13": {"value": 1},
+                "14": {"value": 2},
+                "15": {"value": 2},
+                "16": {"value": 3},
+                "17": {"value": 3},
+                "18": {"value": 4},
+                "19": {"value": 4},
+                "20": {"value": 5},
+                "21": {"value": 5},
+                "22": {"value": 6},
+                "23": {"value": 6},
+                "24": {"value": 7},
+                "25": {"value": 7},
+                "26": {"value": 8},
+                "27": {"value": 8},
+                "28": {"value": 9},
+                "29": {"value": 9},
+                "30": {"value": 10}
+            }
+        }
     },
     {
         "type": "text",
@@ -498,7 +572,44 @@
     },
     {
         "type": "text",
-        "id": "conMod"
+        "id": "conMod",
+        "inherits": {
+            "conditional": {
+                "condition": {
+                    "id": "con"
+                },
+                "1": {"value": -5},
+                "2": {"value": -4},
+                "3": {"value": -4},
+                "4": {"value": -3},
+                "5": {"value": -3},
+                "6": {"value": -2},
+                "7": {"value": -2},
+                "8": {"value": -1},
+                "9": {"value": -1},
+                "10": {"value": 0},
+                "11": {"value": 0},
+                "12": {"value": 1},
+                "13": {"value": 1},
+                "14": {"value": 2},
+                "15": {"value": 2},
+                "16": {"value": 3},
+                "17": {"value": 3},
+                "18": {"value": 4},
+                "19": {"value": 4},
+                "20": {"value": 5},
+                "21": {"value": 5},
+                "22": {"value": 6},
+                "23": {"value": 6},
+                "24": {"value": 7},
+                "25": {"value": 7},
+                "26": {"value": 8},
+                "27": {"value": 8},
+                "28": {"value": 9},
+                "29": {"value": 9},
+                "30": {"value": 10}
+            }
+        }
     },
     {
         "type": "text",
@@ -506,7 +617,44 @@
     },
     {
         "type": "text",
-        "id": "intMod"
+        "id": "intMod",
+        "inherits": {
+            "conditional": {
+                "condition": {
+                    "id": "int"
+                },
+                "1": {"value": -5},
+                "2": {"value": -4},
+                "3": {"value": -4},
+                "4": {"value": -3},
+                "5": {"value": -3},
+                "6": {"value": -2},
+                "7": {"value": -2},
+                "8": {"value": -1},
+                "9": {"value": -1},
+                "10": {"value": 0},
+                "11": {"value": 0},
+                "12": {"value": 1},
+                "13": {"value": 1},
+                "14": {"value": 2},
+                "15": {"value": 2},
+                "16": {"value": 3},
+                "17": {"value": 3},
+                "18": {"value": 4},
+                "19": {"value": 4},
+                "20": {"value": 5},
+                "21": {"value": 5},
+                "22": {"value": 6},
+                "23": {"value": 6},
+                "24": {"value": 7},
+                "25": {"value": 7},
+                "26": {"value": 8},
+                "27": {"value": 8},
+                "28": {"value": 9},
+                "29": {"value": 9},
+                "30": {"value": 10}
+            }
+        }
     },
     {
         "type": "text",
@@ -514,7 +662,44 @@
     },
     {
         "type": "text",
-        "id": "wisMod"
+        "id": "wisMod",
+        "inherits": {
+            "conditional": {
+                "condition": {
+                    "id": "wis"
+                },
+                "1": {"value": -5},
+                "2": {"value": -4},
+                "3": {"value": -4},
+                "4": {"value": -3},
+                "5": {"value": -3},
+                "6": {"value": -2},
+                "7": {"value": -2},
+                "8": {"value": -1},
+                "9": {"value": -1},
+                "10": {"value": 0},
+                "11": {"value": 0},
+                "12": {"value": 1},
+                "13": {"value": 1},
+                "14": {"value": 2},
+                "15": {"value": 2},
+                "16": {"value": 3},
+                "17": {"value": 3},
+                "18": {"value": 4},
+                "19": {"value": 4},
+                "20": {"value": 5},
+                "21": {"value": 5},
+                "22": {"value": 6},
+                "23": {"value": 6},
+                "24": {"value": 7},
+                "25": {"value": 7},
+                "26": {"value": 8},
+                "27": {"value": 8},
+                "28": {"value": 9},
+                "29": {"value": 9},
+                "30": {"value": 10}
+            }
+        }
     },
     {
         "type": "text",
@@ -522,7 +707,44 @@
     },
     {
         "type": "text",
-        "id": "chaMod"
+        "id": "chaMod",
+        "inherits": {
+            "conditional": {
+                "condition": {
+                    "id": "cha"
+                },
+                "1": {"value": -5},
+                "2": {"value": -4},
+                "3": {"value": -4},
+                "4": {"value": -3},
+                "5": {"value": -3},
+                "6": {"value": -2},
+                "7": {"value": -2},
+                "8": {"value": -1},
+                "9": {"value": -1},
+                "10": {"value": 0},
+                "11": {"value": 0},
+                "12": {"value": 1},
+                "13": {"value": 1},
+                "14": {"value": 2},
+                "15": {"value": 2},
+                "16": {"value": 3},
+                "17": {"value": 3},
+                "18": {"value": 4},
+                "19": {"value": 4},
+                "20": {"value": 5},
+                "21": {"value": 5},
+                "22": {"value": 6},
+                "23": {"value": 6},
+                "24": {"value": 7},
+                "25": {"value": 7},
+                "26": {"value": 8},
+                "27": {"value": 8},
+                "28": {"value": 9},
+                "29": {"value": 9},
+                "30": {"value": 10}
+            }
+        }
     },
     {
         "type": "text",
@@ -590,7 +812,24 @@
     },
     {
         "type": "text",
-        "id": "acrobatics"
+        "id": "acrobatics",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "acrobaticsProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "dexMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -598,7 +837,24 @@
     },
     {
         "type": "text",
-        "id": "animal"
+        "id": "animal",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "animalProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "wisMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -606,7 +862,24 @@
     },
     {
         "type": "text",
-        "id": "arcana"
+        "id": "arcana",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "arcanaProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "intMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -614,7 +887,24 @@
     },
     {
         "type": "text",
-        "id": "athletics"
+        "id": "athletics",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "athleticsProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "strMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -622,7 +912,24 @@
     },
     {
         "type": "text",
-        "id": "deception"
+        "id": "deception",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "deceptionProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "chaMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -630,7 +937,24 @@
     },
     {
         "type": "text",
-        "id": "history"
+        "id": "history",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "historyProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "intMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -638,7 +962,24 @@
     },
     {
         "type": "text",
-        "id": "insight"
+        "id": "insight",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "insightProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "wisMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -646,7 +987,24 @@
     },
     {
         "type": "text",
-        "id": "intimidation"
+        "id": "intimidation",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "intimidationProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "chaMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -654,7 +1012,24 @@
     },
     {
         "type": "text",
-        "id": "investigation"
+        "id": "investigation",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "investigationProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "intMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -662,7 +1037,24 @@
     },
     {
         "type": "text",
-        "id": "medicine"
+        "id": "medicine",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "medicineProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "wisMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -670,7 +1062,24 @@
     },
     {
         "type": "text",
-        "id": "nature"
+        "id": "nature",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "natureProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "intMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -678,15 +1087,24 @@
     },
     {
         "type": "text",
-        "id": "perception"
-    },
-    {
-        "type": "check",
-        "id": "persuasionProf"
-    },
-    {
-        "type": "text",
-        "id": "performance"
+        "id": "perception",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "perceptionProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "wisMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -694,7 +1112,49 @@
     },
     {
         "type": "text",
-        "id": "persuasion"
+        "id": "performance",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "performanceProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "chaMod"
+                }
+            ]
+        }
+    },
+    {
+        "type": "check",
+        "id": "persuasionProf"
+    },
+    {
+        "type": "text",
+        "id": "persuasion",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "persuasionProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "chaMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -702,7 +1162,24 @@
     },
     {
         "type": "text",
-        "id": "religion"
+        "id": "religion",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "religionProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "intMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -710,7 +1187,24 @@
     },
     {
         "type": "text",
-        "id": "sleightOfHand"
+        "id": "sleightOfHand",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "sleightOfHandProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "dexMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -718,7 +1212,24 @@
     },
     {
         "type": "text",
-        "id": "stealth"
+        "id": "stealth",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "stealthProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "dexMod"
+                }
+            ]
+        }
     },
     {
         "type": "check",
@@ -726,11 +1237,38 @@
     },
     {
         "type": "text",
-        "id": "survival"
+        "id": "survival",
+        "inherits": {
+            "add": [
+                {
+                    "conditional": {
+                        "condition": {
+                            "id": "survivalProf"
+                        },
+                        "true": {
+                            "id": "proficiency"
+                        }
+                    }
+                },
+                {
+                    "id": "wisMod"
+                }
+            ]
+        }
     },
     {
         "type": "text",
-        "id": "passivePerception"
+        "id": "passivePerception",
+        "inherits": {
+            "add": [
+                {
+                    "id": "perception"
+                },
+                {
+                    "value": 10
+                }
+            ]
+        }
     },
     {
         "type": "text",
@@ -739,7 +1277,10 @@
     {
         "type": "text",
         "id": "initiative",
-        "initiative": true
+        "initiative": true,
+        "inherits": {
+            "id": "dexMod"
+        }
     },
     {
         "type": "text",
