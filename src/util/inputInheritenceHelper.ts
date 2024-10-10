@@ -117,12 +117,13 @@ export function reCalculateValue(id: string, tree: InputJsonNode[], data: any, h
     history.push(id)
 
     let field = findElemById(id, tree)
+    let elem = <HTMLInputElement> document.querySelector("[id=\"" + id + "\"]")
 
-    if (!field) {
+    if (!field || !elem) {
         return ""
     }
 
-    if (!field.inherits || field.inherits.length == 0) {
+    if (!field.inherits || field.inherits.length == 0 || elem.hasAttribute("user-edited")) {
         return data[id] ?? ""
     }
 
@@ -212,9 +213,9 @@ function doCalculationWalk(start: InheritsJsonNode, tree: InputJsonNode[], data:
                 //Conditionals fall back to 0 if no value is set for a path. Careful when using them in mul/div groups!
                 if (conditionFieldType === "check") {
                     value = conditionFieldValue ? (
-                            Object.keys(val).includes("true") ? doCalculationWalk(val.true, tree, data, history) : 0
+                            Object.keys(val).includes("true") ? doCalculationWalk(val["true"], tree, data, history) : 0
                         ) : (
-                            Object.keys(val).includes("false") ? doCalculationWalk(val.false, tree, data, history) : 0
+                            Object.keys(val).includes("false") ? doCalculationWalk(val["false"], tree, data, history) : 0
                         )
                 } else if (val[conditionFieldValue]) {
                     value = doCalculationWalk(val[conditionFieldValue], tree, data, history)

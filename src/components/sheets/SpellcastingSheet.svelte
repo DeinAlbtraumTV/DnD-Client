@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { characters, sheetModules } from "../../stores/nonPersistentStore"
     import { currentCharacter, characterSheets } from "../../stores/persistentSettingsStore"
+    import { getAffectedElements, reCalculateValue } from "../../util/inputInheritenceHelper";
     import Note from "./Note.svelte"
     import ModuleElement from "./ModuleElement.svelte"
 
@@ -39,6 +40,21 @@
             }
 
             elem.setAttribute("user-edited", true)
+        })
+
+        $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet.forEach(elem => {
+            if (!elem.type) return
+
+            let field = document.querySelector("[id=\"" + elem.id + "\"]")
+
+            if (!field.getAttribute("user-edited")) {
+                let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet, $characters[$currentCharacter].spellcasting)
+
+                if (Number.parseInt(val) > 0)
+                    val = "+" + val
+
+                field.value = val
+            }
         })
     }
 
@@ -97,9 +113,9 @@
             event.target.removeAttribute("user-edited")
             delete $characters[$currentCharacter].spellcasting[event.target.getAttribute("id")]
 
-            let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet, $characters[$currentCharacter].spellcasting)
-
             if (!event.target.getAttribute("user-edited")) {
+                let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet, $characters[$currentCharacter].spellcasting)
+
                 if (Number.parseInt(selfVal) > 0)
                     selfVal = "+" + selfVal
 
@@ -113,11 +129,11 @@
         let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet)
         
         for (const id of affectedElems) {
-            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet, $characters[$currentCharacter].spellcasting)
-
             let elem = document.querySelector("[id=\"" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
+                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet, $characters[$currentCharacter].spellcasting)
+
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
 
@@ -147,11 +163,11 @@
         let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet)
 
         for (const id of affectedElems) {
-            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet, $characters[$currentCharacter].spellcasting)
-
             let elem = document.querySelector("[id=\"" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
+                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.spellcastingSheet, $characters[$currentCharacter].spellcasting)
+
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
 

@@ -54,9 +54,10 @@
             if (!elem.type) return
 
             let field = document.querySelector("[id=\"" + elem.id + "\"]")
-            let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
 
             if (!field.getAttribute("user-edited")) {
+                let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
 
@@ -76,9 +77,9 @@
             event.target.removeAttribute("user-edited")
             delete $characters[$currentCharacter].sheet[event.target.getAttribute("id")]
 
-            let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
-
             if (!event.target.getAttribute("user-edited")) {
+                let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
                 if (Number.parseInt(selfVal) > 0)
                     selfVal = "+" + selfVal
 
@@ -92,11 +93,11 @@
         let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet)
         
         for (const id of affectedElems) {
-            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
-
             let elem = document.querySelector("[id=\"" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
+                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
 
@@ -109,8 +110,8 @@
                         initiative = 0
                     }
 
-                    $playerInfo.initiativeModifier = initiative;
-                    $socket.emit("updateInitiativeModifier", { session_code: $sessionCode, initiativeModifier: initiative} );
+                    $playerInfo.initiativeModifier = initiative
+                    $socket.emit("updateInitiativeModifier", { session_code: $sessionCode, initiativeModifier: initiative} )
                 }
             }
         }
@@ -123,8 +124,8 @@
                 initiative = 0
             }
 
-            $playerInfo.initiativeModifier = initiative;
-            $socket.emit("updateInitiativeModifier", { session_code: $sessionCode, initiativeModifier: initiative} );
+            $playerInfo.initiativeModifier = initiative
+            $socket.emit("updateInitiativeModifier", { session_code: $sessionCode, initiativeModifier: initiative} )
         }
 
         window.characters.storeSheets(JSON.stringify($characters))
@@ -136,11 +137,11 @@
         let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet)
 
         for (const id of affectedElems) {
-            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
-
             let elem = document.querySelector("[id=\"" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
+                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
 

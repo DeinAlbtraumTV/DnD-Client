@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { characters, sheetModules } from "../../stores/nonPersistentStore"
     import { currentCharacter, characterSheets } from "../../stores/persistentSettingsStore"
+    import { getAffectedElements, reCalculateValue } from "../../util/inputInheritenceHelper"
     import Note from "./Note.svelte"
     import ModuleElement from "./ModuleElement.svelte"
 
@@ -43,9 +44,10 @@
             if (!elem.type) return
 
             let field = document.querySelector("[id=\"" + elem.id + "\"]")
-            let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
 
             if (!field.getAttribute("user-edited")) {
+                let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
+
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
 
@@ -63,9 +65,9 @@
             event.target.removeAttribute("user-edited")
             delete $characters[$currentCharacter].details[event.target.getAttribute("id")]
 
-            let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
-
             if (!event.target.getAttribute("user-edited")) {
+                let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
+
                 if (Number.parseInt(selfVal) > 0)
                     selfVal = "+" + selfVal
 
@@ -79,11 +81,11 @@
         let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet)
         
         for (const id of affectedElems) {
-            let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
-
             let elem = document.querySelector("[id=\"" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
+                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.detailSheet, $characters[$currentCharacter].details)
+
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
 
