@@ -45,18 +45,34 @@ export function getAffectedElements(changed: string, elements: InputJsonNode[]):
         }
     }
 
+    let doCheck = true
+
+    while (doCheck) {
+        if (doAffectedChecks(elements, affected)) {
+            doCheck = false
+        }
+    }
+
+    return affected
+}
+
+function doAffectedChecks(elements: InputJsonNode[], affected: string[]) {
     for (let elem of elements) {
         if (!elem.inherits) continue
 
         let inherit = elem.inherits
 
         for (let affectedElem of affected) {
-            if (doAffectedWalk(inherit, affectedElem))
-                affected.push(elem.id)
+            if (doAffectedWalk(inherit, affectedElem)) {
+                if (!affected.includes(elem.id)) {
+                    affected.push(elem.id)
+                    return false
+                }
+            }
         }
     }
 
-    return affected
+    return true
 }
 
 function doAffectedWalk(start: InheritsJsonNode, changed: string, conditionalEntered: boolean = false): boolean {
