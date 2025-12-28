@@ -11,12 +11,4 @@ Feel free to use this module as a base for your own module creations
 Mandatory files are:
 - moduleInfo.json
 - shared.css
-- characterSheet.json
-- characterSheet.css
-- characterSheet.csv
-- detailSheet.json
-- detailSheet.css
-- detailSheet.csv
-- spellcastingSheet.json
-- spellcastingSheet.css
-- spellcastingSheet.csv
+- *.json, *.css, *.csv for all sheets defined in moduleInfo.json (Make sure filenames match!)

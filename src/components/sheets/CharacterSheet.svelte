@@ -7,6 +7,9 @@
     import ModuleElement from "./ModuleElement.svelte";
 
     export let showNotes = false;
+    export let sheetKey = "";
+
+    let spellinfoPopups = [];
 
     onMount(() => {
         if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version" && $characters[$currentCharacter]) {
@@ -31,7 +34,7 @@
             }
         })
 
-        Object.entries($characters[$currentCharacter].sheet).forEach((pair) => {
+        Object.entries($characters[$currentCharacter][sheetKey]).forEach((pair) => {
             let key = pair[0]
             let value = pair[1]
 
@@ -50,13 +53,13 @@
             elem.setAttribute("user-edited", true)
         })
 
-        $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet.forEach(elem => {
+        $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey].forEach(elem => {
             if (!elem.type) return
 
             let field = document.querySelector("[id=\"" + elem.id + "\"]")
 
             if (!field.getAttribute("user-edited")) {
-                let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+                let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
 
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
@@ -65,7 +68,7 @@
             }
         })
 
-        $playerInfo.initiativeModifier = Number.parseInt($characters[$currentCharacter].sheet.initiative) || 0
+        $playerInfo.initiativeModifier = Number.parseInt($characters[$currentCharacter][sheetKey].initiative) || 0
     }
 
     function onDrop() {
@@ -73,12 +76,12 @@
     }
 
     function onBlur(event) {
-        if (event.target.value == "" && $characters[$currentCharacter].sheet[event.target.getAttribute("id")] != "") {
+        if (event.target.value == "" && $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")] != "") {
             event.target.removeAttribute("user-edited")
-            delete $characters[$currentCharacter].sheet[event.target.getAttribute("id")]
+            delete $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")]
 
             if (!event.target.getAttribute("user-edited")) {
-                let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+                let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
 
                 if (Number.parseInt(selfVal) > 0)
                     selfVal = "+" + selfVal
@@ -87,16 +90,16 @@
             }
         } else if (event.target.value != "") {
             event.target.setAttribute("user-edited", true)
-            $characters[$currentCharacter].sheet[event.target.getAttribute("id")] = event.target.value
+            $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")] = event.target.value
         }
 
-        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet)
+        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
         
         for (const id of affectedElems) {
             let elem = document.querySelector("[id=\"" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
-                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
 
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
@@ -129,18 +132,31 @@
         }
 
         window.characters.storeSheets(JSON.stringify($characters))
+
+        setTimeout(() => {
+            let popupIndex = spellinfoPopups.findIndex(elem => elem.target == event.target);
+                if (spellinfoPopups[popupIndex]) {
+                    if (spellinfoPopups[popupIndex].showing) {
+                        spellinfoPopups[popupIndex].showing = false;
+                    } else {
+                        spellinfoPopups[popupIndex].shouldShow = false;
+                    }
+                }
+            //Make svelte rerender all popups
+            spellinfoPopups = spellinfoPopups;
+        }, 75)
     }
 
     function onClick(event) {
-        $characters[$currentCharacter].sheet[event.target.getAttribute("id")] = event.target.checked
+        $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")] = event.target.checked
 
-        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet)
+        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
 
         for (const id of affectedElems) {
             let elem = document.querySelector("[id=\"" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
-                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet, $characters[$currentCharacter].sheet)
+                let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
 
                 if (Number.parseInt(val) > 0)
                     val = "+" + val
@@ -163,14 +179,60 @@
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
+    function onFocus(event) {
+        let target = event.currentTarget;
+        let spellname = target.value.replace(/ *\([^)]*\) */g, "");
+
+        let popupIndex = spellinfoPopups.findIndex(elem => elem.target == target);
+
+        if (popupIndex > -1) {
+            if (spellinfoPopups[popupIndex].spellname != spellname) {
+                spellinfoPopups[popupIndex].spellname = spellname;
+                spellinfoPopups[popupIndex].promise = loadSpellDesc(target, spellname, target.classList.contains("popup-left"));
+                spellinfoPopups[popupIndex].shouldShow = true;
+            } else {
+                spellinfoPopups[popupIndex].showing = true;
+            }
+        } else {
+            spellinfoPopups.push({
+                target: target,
+                spellname: spellname,
+                promise: loadSpellDesc(target, spellname, target.classList.contains("popup-left")),
+                showing: false,
+                shouldShow: true,
+                popupContent: "",
+                left: false,
+            });
+        }
+
+        //Make svelte rerender all popups
+        spellinfoPopups = spellinfoPopups;
+    }
+
+    async function loadSpellDesc(target, spellname, left = false) {
+        let desc = await window.spells.getSpellInfo("http://dnd5e.wikidot.com/spell:" + spellname)
+
+        let popupIndex = spellinfoPopups.findIndex(elem => elem.target == target);
+
+        if (spellinfoPopups[popupIndex].spellname == spellname) {
+            spellinfoPopups[popupIndex].popupContent = desc;
+            spellinfoPopups[popupIndex].showing = spellinfoPopups[popupIndex].shouldShow;
+            spellinfoPopups[popupIndex].shouldShow = false;
+            spellinfoPopups[popupIndex].left = left;
+        }
+
+        //Make svelte rerender all popups
+        spellinfoPopups = spellinfoPopups;
+    }
+
     function noteDataUpdate(data) {
-        $characters[$currentCharacter].sheetNotes[data.id] = data.detail
+        $characters[$currentCharacter][sheetKey + "Notes"][data.id] = data.detail
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
     export const createNote = () => {
         let note = {
-            id: $characters[$currentCharacter].sheetNotes.length > 0 ? $characters[$currentCharacter].sheetNotes[$characters[$currentCharacter].sheetNotes.length - 1].id + 1 : 0,
+            id: $characters[$currentCharacter][sheetKey + "Notes"].length > 0 ? $characters[$currentCharacter][sheetKey + "Notes"][$characters[$currentCharacter][sheetKey + "Notes"].length - 1].id + 1 : 0,
             x: 467.5,
             y: 605,
             minX: 0,
@@ -182,10 +244,10 @@
             text: ''
         }
 
-        $characters[$currentCharacter].sheetNotes.push(note)
+        $characters[$currentCharacter][sheetKey + "Notes"].push(note)
         window.characters.storeSheets(JSON.stringify($characters))
 
-        $characters[$currentCharacter].sheetNotes = $characters[$currentCharacter].sheetNotes;
+        $characters[$currentCharacter][sheetKey + "Notes"] = $characters[$currentCharacter][sheetKey + "Notes"];
     }
 
     let deleteNoteOnDrop = false;
@@ -193,7 +255,7 @@
 
     function noteDragEnd(event) {
         if (deleteNoteOnDrop) {
-            $characters[$currentCharacter].sheetNotes = $characters[$currentCharacter].sheetNotes.filter(note => note.id != event.detail)
+            $characters[$currentCharacter][sheetKey + "Notes"] = $characters[$currentCharacter][sheetKey + "Notes"].filter(note => note.id != event.detail)
             window.characters.storeSheets(JSON.stringify($characters))
         }
 
@@ -246,7 +308,7 @@
         🗑️
     </div>
     {#if showNotes}
-        {#each $characters[$currentCharacter].sheetNotes as data}
+        {#each $characters[$currentCharacter][sheetKey + "Notes"] as data}
             <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
         {/each}
     {/if}
@@ -255,10 +317,27 @@
             <div id="page1" style="width: 935px; height: 1210px;" class="page">
                 <div class="page-inner" style="width: 935px; height: 1210px;">
                     <div id="p1" class="pageArea" style="overflow: hidden; position: relative; width: 935px; height: 1210px;margin-left:auto; margin-right:auto;">
-                        {#each $sheetModules[$characters[$currentCharacter].module.id].data.characterSheet as elem}
-                            <ModuleElement data={elem} onBlur={onBlur} onDrop={onDrop} onClick={onClick}/>
+                        {#each $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey] as elem}
+                            <ModuleElement data={elem} onBlur={onBlur} onDrop={onDrop} onClick={onClick} onFocus={onFocus} onStopTyping={onFocus}/>
                         {/each}
                     </div>
+                    {#each spellinfoPopups as popup}
+                        {#if popup && popup.showing}
+                            <div class="popup-wrapper" style="top: {popup.target.offsetTop - 234.5}px; {(popup.left ? "left: " + (popup.target.offsetLeft - 315) + "px" : "left: " + (popup.target.offsetLeft + 260) + "px")}; color: {$characterSheets == "dark" ? "white" : "black"} !important;">
+                                <style>
+                                    .popup-wrapper a {
+                                        color: var(--primary);
+                                    }
+
+                                    .popup-wrapper p {
+                                        margin-block-start: 5px;
+                                        margin-block-end: 5px;
+                                    }
+                                </style>
+                                {@html popup.popupContent}
+                            </div>
+                        {/if}
+                    {/each}
                 </div>
             </div>
         </div>

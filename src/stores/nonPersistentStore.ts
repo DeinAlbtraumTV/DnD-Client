@@ -51,5 +51,7 @@ export type SheetModule = {
         version: number,
         author: string | undefined | null,
         repo: string | undefined | null,
+        format: number,
+        sheets: {fileName: string,displayName: string,saveName: string}[]
     }
 }

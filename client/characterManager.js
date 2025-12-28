@@ -25,22 +25,16 @@ function _loadModule(dirName) {
         }
         let moduleInfoFile = path.normalize(`${moduleStoragePath}/${dirName}/moduleInfo.json`)
         let sharedStyleFile = path.normalize(`${moduleStoragePath}/${dirName}/shared.css`)
-        let characterSheetDataFile = path.normalize(`${moduleStoragePath}/${dirName}/characterSheet.json`)
-        let characterSheetStyleFile = path.normalize(`${moduleStoragePath}/${dirName}/characterSheet.css`)
-        let characterSheetMigrationFile = path.normalize(`${moduleStoragePath}/${dirName}/characterSheet.csv`)
-        let detailSheetDataFile = path.normalize(`${moduleStoragePath}/${dirName}/detailSheet.json`)
-        let detailSheetStyleFile = path.normalize(`${moduleStoragePath}/${dirName}/detailSheet.css`)
-        let detailSheetMigrationFile = path.normalize(`${moduleStoragePath}/${dirName}/detailSheet.csv`)
-        let spellcastingSheetDataFile = path.normalize(`${moduleStoragePath}/${dirName}/spellcastingSheet.json`)
-        let spellcastingSheetStyleFile = path.normalize(`${moduleStoragePath}/${dirName}/spellcastingSheet.css`)
-        let spellcastingSheetMigrationFile = path.normalize(`${moduleStoragePath}/${dirName}/spellcastingSheet.csv`)
 
         let moduleInfo = JSON.parse(fs.readFileSync(moduleInfoFile, "utf-8"))
         module.info.name = moduleInfo.name
         module.info.version = parseInt(moduleInfo.version)
         module.info.author = moduleInfo.author
         module.info.repo = moduleInfo.repo
+        module.info.format = moduleInfo.formatVersion ?? 1
+        module.info.sheets = moduleInfo.sheets
 
+/* TODO add Fallback for formatVersion 1 modules
         module.data.characterSheet = JSON.parse(fs.readFileSync(characterSheetDataFile, "utf-8"))
         module.data.detailSheet = JSON.parse(fs.readFileSync(detailSheetDataFile, "utf-8"))
         module.data.spellcastingSheet = JSON.parse(fs.readFileSync(spellcastingSheetDataFile, "utf-8"))
@@ -53,6 +47,28 @@ function _loadModule(dirName) {
         module.migration.characterSheet = characterSheetMigrationFile
         module.migration.detailSheet = detailSheetMigrationFile
         module.migration.spellcastingSheet = spellcastingSheetMigrationFile
+*/
+        for (let sheet of moduleInfo.sheets) {
+            let basePath = path.normalize(`${moduleStoragePath}/${dirName}/${sheet.fileName}`)
+            if (!fs.existsSync(basePath + ".json")) {
+                console.error(`Missing data file for module ${moduleInfo.name}. This sheet (${sheet.displayName}) will not work as expected!`)
+                continue
+            }
+            if (!fs.existsSync(basePath + ".css")) {
+                console.error(`Missing style file for module ${moduleInfo.name}. This sheet (${sheet.displayName}) will not work as expected!`)
+                continue
+            }
+            if (!fs.existsSync(basePath + ".csv")) {
+                console.warn(`Missing migration file for module ${moduleInfo.name}. This sheet (${sheet.displayName}) might not work as expected if its version changes!`)
+                continue
+            }
+
+            module.data[sheet.fileName] = JSON.parse(fs.readFileSync(basePath + ".json", "utf-8"))
+            module.css[sheet.fileName] = fs.readFileSync(basePath + ".css", "utf-8")
+            module.migration[sheet.fileName] = basePath + ".csv"
+        }
+
+        module.css.shared = fs.readFileSync(sharedStyleFile, "utf-8")
 
         return module;
     } catch (e) {
@@ -149,6 +165,7 @@ function migrateData(data) {
         }
 
         let version = data[key].module.version
+        let format = data[key].module.format ?? 1
     
         if (version == -1) {
             continue
@@ -159,7 +176,7 @@ function migrateData(data) {
         console.log("Starting character migration for:", key)
 
         if (!module) {
-            console.log("Missing module", data[key].module.id, ", skipping migration for character:", key)
+            console.log("Missing module", data[key].module.id + ",", "skipping migration for character:", key)
             newData[key] = data[key]
             continue
         }

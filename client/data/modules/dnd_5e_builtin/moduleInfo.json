@@ -2,5 +2,30 @@
     "name": "DnD 5e",
     "version": 2,
     "author": "DeinAlbtraumTV",
-    "repo": "https://github.com/DeinAlbtraumTV/DnD-Client"
+    "repo": "https://github.com/DeinAlbtraumTV/DnD-Client",
+    "format": 2,
+    "sheets": [
+        "characterSheet",
+        "detailSheet",
+        "spellcastingSheet"
+    ],
+    "sheetMigration": {
+        "1": [
+            {
+                "fileName": "characterSheet",
+                "displayName": "Character Stats",
+                "saveName": "sheet"
+            },
+            {
+                "fileName": "detailSheet",
+                "displayName":"Character Details",
+                "saveName": "details"
+            },
+            {
+                "fileName": "spellcastingSheet",
+                "displayName": "Spellcasting",
+                "saveName": "spellcasting"
+            }
+        ]
+    }
 }
