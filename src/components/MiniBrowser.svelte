@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { to_number } from "svelte/internal";
     import { localStorageStore } from "../stores/localStorageStore"
     import { socket, session } from "../stores/nonPersistentStore"
 
@@ -13,8 +12,8 @@
         title: string
     }
 
-    let tabTopTabs: Array<Tab> = $state()
-    let webviewTabs: Array<Tab> = $state()
+    let tabTopTabs: Array<Tab> = $state() as any
+    let webviewTabs: Array<Tab> = $state() as any
 
     let tabContextMenuTarget = -1
     let tabContextMenuVisible = $state(false)
@@ -41,9 +40,9 @@
         tabContextMenuVisible = false
         let target = event.currentTarget
 
-        let index = to_number(target.getAttribute("data-index"))
+        let index = Number.parseInt(target.getAttribute("data-index") ?? "-1")
 
-        if (index == -1) {
+        if (index < 0 || index >= tabTopTabs.length) {
             (<HTMLInputElement> document.getElementById("urlInput")).value = ""
         } else {
             (<HTMLInputElement> document.getElementById("urlInput")).value = tabTopTabs[index].url
@@ -61,9 +60,9 @@
                 return
             }
 
-            let index = to_number(target.getAttribute("data-index"))
+            let index = Number.parseInt(target.getAttribute("data-index") ?? "-1")
 
-            if (index == -1) {
+            if (index < 0 || index >= tabTopTabs.length) {
                 (<HTMLInputElement> document.getElementById("urlInput")).value = ""
             } else {
                 (<HTMLInputElement> document.getElementById("urlInput")).value = tabTopTabs[index].url
@@ -111,7 +110,11 @@
     function addTabWithUrl(event: any) {
         let target: any = event.target
 
-        let index = to_number(target.getAttribute("data-index"))
+        let index = Number.parseInt(target.getAttribute("data-index"))
+
+        if (Number.isNaN(index)) {
+            index = 0
+        }
 
         let tab: Tab = {
             title: "Empty Tab",
@@ -151,6 +154,7 @@
         $localStorageStore.tabs = JSON.stringify(tabTopTabs)
     }
 
+    //@ts-ignore
     //TODO add window type extensions for ipcRendererListener
     window.ipcRendererListener.register.mainWindowWillNavigateListener(openUrlInTabAtEnd)
 
@@ -167,16 +171,16 @@
             target = target.parentElement
         }
 
-        let index = to_number(target.getAttribute("data-index"))
+        let index = Number.parseInt(target.getAttribute("data-index") ?? "-1")
         tabTopTabs.splice(index, 1)
         webviewTabs.splice(index, 1)
         tabTopTabs = tabTopTabs
         webviewTabs = webviewTabs
 
-        if (index - 1 == -1)
-            (<HTMLInputElement>document.getElementById("urlInput")).value = ""
-        else
+        if (index >= 1)
             (<HTMLInputElement>document.getElementById("urlInput")).value = tabTopTabs[index - 1].url
+        else
+            (<HTMLInputElement>document.getElementById("urlInput")).value = ""
         
         currentTab = index - 1
 
@@ -197,16 +201,16 @@
                 target = target.parentElement
             }
 
-            let index = to_number(target.getAttribute("data-index"))
+            let index = Number.parseInt(target.getAttribute("data-index") ?? "-1")
             tabTopTabs.splice(index, 1)
             webviewTabs.splice(index, 1)
             tabTopTabs = tabTopTabs
             webviewTabs = webviewTabs
 
-            if (index - 1 == -1)
-                (<HTMLInputElement>document.getElementById("urlInput")).value = ""
-            else
+            if (index >= 1)
                 (<HTMLInputElement>document.getElementById("urlInput")).value = tabTopTabs[index - 1].url
+            else
+                (<HTMLInputElement>document.getElementById("urlInput")).value = ""
 
             currentTab = index - 1
 
@@ -291,34 +295,34 @@
     <div id="tabTop-navigation-container">
         <div class="flex-container tabTop-wrapper">
             <div id="tabTop-container">
-                <div class="tabTop" id="mapTabTop" class:active={ currentTab == -1} data-url="" data-index="-1" onkeydown={changeToTabKeyboard} onclick={changeToTab} title="Map">
+                <div role="tab" tabindex=0 class="tabTop" id="mapTabTop" class:active={ currentTab == -1} data-url="" data-index="-1" onkeydown={changeToTabKeyboard} onclick={changeToTab} title="Map">
                     Map
                 </div>
                 {#each tabTopTabs as tab, i (tab)}
-                    <div class="tabTop" class:active={currentTab == i} data-url="{tab.url}" data-index="{i}" onkeydown={changeToTabKeyboard} onclick={changeToTab} title="{tab.title}" oncontextmenu={toggleTabContextMenu}>
+                    <div role="tab" tabindex=0 class="tabTop" class:active={currentTab == i} data-url="{tab.url}" data-index="{i}" onkeydown={changeToTabKeyboard} onclick={changeToTab} title="{tab.title}" oncontextmenu={toggleTabContextMenu}>
                         {tab.title}
                         {#if currentTab == i}
-                            <div id="closeTab" data-index="{i}" onkeydown={closeTabKeyboard} onclick={closeTab}>
+                            <div role="button" tabindex=0 id="closeTab" data-index="{i}" onkeydown={closeTabKeyboard} onclick={closeTab}>
                                 <i class="fas fa-times"></i>
                             </div>
                         {/if}
                     </div>
                 {/each}
-                <div class="tabContextMenuBackground" class:visible="{tabContextMenuVisible}" onkeydown={toggleTabContextMenu} onclick={toggleTabContextMenu}></div>
+                <div role="dialog" tabindex="0" class="tabContextMenuBackground" class:visible="{tabContextMenuVisible}" onkeydown={toggleTabContextMenu} onclick={toggleTabContextMenu}></div>
                 <div class="tabContextMenu-container" class:visible="{tabContextMenuVisible}" style="top: {mouseY}px; left: {mouseX}px;">
                     <button class="tabContextMenu-button" onclick={duplicateTab}>Duplicate Tab</button>
                 </div>
             </div>
             <div id="addTab">
-                <button onclick={addTab} id="addTab-button">
+                <button aria-label="Add a new tab" onclick={addTab} id="addTab-button">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
         </div>
         <div id="navigation-container">
-            <button onclick={navToPrev} id="navToPrev" disabled="{currentTab == -1}"><i class="fas fa-arrow-left icon"></i></button>
-            <button onclick={navToNext} id="navToNext" disabled="{currentTab == -1}"><i class="fas fa-arrow-right icon"></i></button>
-            <button onclick={reload} id="reload"><i class="fas fa-redo icon"></i></button>
+            <button aria-label="Navigate backwards" onclick={navToPrev} id="navToPrev" disabled="{currentTab == -1}"><i class="fas fa-arrow-left icon"></i></button>
+            <button aria-label="Navigate forwards" onclick={navToNext} id="navToNext" disabled="{currentTab == -1}"><i class="fas fa-arrow-right icon"></i></button>
+            <button aria-label="Reload" onclick={reload} id="reload"><i class="fas fa-redo icon"></i></button>
             <input id="urlInput" type="text" disabled="{currentTab == -1}" placeholder="url" onchange={loadUrl}>
         </div>
     </div>
@@ -330,7 +334,7 @@
         </div>
         {#each webviewTabs as tab, i (tab)}
             <div class="tab" class:active={ currentTab == i} data-url="{tab.url}" data-index="{i}">
-                <webview src="{tab.url}" allowpopups autosize data-index="{i}" ondid-finish-load={webviewLoaded} onnew-window={addTabWithUrl}>
+                <webview src="{tab.url}" allowpopups autosize data-index="{i}" ondidfinishload={webviewLoaded} onnew-window={addTabWithUrl}>
 
                 </webview>
             </div>

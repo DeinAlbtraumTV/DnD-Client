@@ -1,5 +1,6 @@
 import type { Socket } from "socket.io-client";
 import { type Writable, writable } from "svelte/store";
+import type { ModuleData } from "../types/types";
 
 export const characters: Writable<{[key: string]: any}> = writable({})
 
@@ -42,9 +43,7 @@ export type SheetModule = {
         spellcastingSheet: string
     },
     data: {
-        characterSheet: any,
-        detailSheet: any,
-        spellcastingSheet: any
+        [key: string]: Array<ModuleData>
     },
     info: {
         name: string,

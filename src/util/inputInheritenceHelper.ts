@@ -1,28 +1,6 @@
-export interface InputJsonNode {
-    type?: "svg" | "text" | "spell" | "check" | "text-multiline"
-    id: string
-    initiative?: boolean
-    class?: string
-    data?: string
-    inherits: InheritsJsonNode
-}
+import type { InheritData, ModuleData } from "../types/types"
 
-export interface InheritsJsonNode {
-    add?: InheritsJsonNode[]
-    sub?: InheritsJsonNode[]
-    mul?: InheritsJsonNode[]
-    div?: InheritsJsonNode[]
-    id: string
-    value?: string | number
-    conditional?: ConditionalJsonNode
-}
-
-export interface ConditionalJsonNode {
-    condition: InheritsJsonNode
-    [key: string]: InheritsJsonNode
-}
-
-export function getAffectedElements(changed: string, elements: InputJsonNode[]): string[] {
+export function getAffectedElements(changed: string, elements: ModuleData[]): string[] {
     let affected: string[] = []
 
     for (let elem of elements) {
@@ -56,7 +34,7 @@ export function getAffectedElements(changed: string, elements: InputJsonNode[]):
     return affected
 }
 
-function doAffectedChecks(elements: InputJsonNode[], affected: string[]) {
+function doAffectedChecks(elements: ModuleData[], affected: string[]) {
     for (let elem of elements) {
         if (!elem.inherits) continue
 
@@ -75,7 +53,7 @@ function doAffectedChecks(elements: InputJsonNode[], affected: string[]) {
     return true
 }
 
-function doAffectedWalk(start: InheritsJsonNode, changed: string, conditionalEntered: boolean = false): boolean {
+function doAffectedWalk(start: InheritData, changed: string, conditionalEntered: boolean = false): boolean {
     let affected: boolean = false
 
     for (const [key, i_val] of Object.entries(start)) {
@@ -119,7 +97,7 @@ function doAffectedWalk(start: InheritsJsonNode, changed: string, conditionalEnt
     return affected
 }
 
-export function reCalculateValue(id: string, tree: InputJsonNode[], data: any, history: string[] = []): string {
+export function reCalculateValue(id: string, tree: ModuleData[], data: any, history: string[] = []): string {
     if (history.includes(id)) {
         console.warn(
             "Circular inheritence detected. This is a problem with the module you are using and should be reported to the module author.\n" +
@@ -166,7 +144,7 @@ export function reCalculateValue(id: string, tree: InputJsonNode[], data: any, h
     }
 }
 
-function doCalculationWalk(start: InheritsJsonNode, tree: InputJsonNode[], data: any, history: string[]): number {
+function doCalculationWalk(start: ModuleData, tree: ModuleData[], data: any, history: string[]): number {
     let value: number = 0
 
     for (const [key, i_val] of Object.entries(start)) {
@@ -252,7 +230,7 @@ function doCalculationWalk(start: InheritsJsonNode, tree: InputJsonNode[], data:
     return value
 }
 
-function findElemById(id: string, tree: InputJsonNode[]): any {
+function findElemById(id: string, tree: ModuleData[]): any {
     for (const elem of tree) {
         if (elem.id == id) {
             return elem;

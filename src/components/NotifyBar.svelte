@@ -1,7 +1,5 @@
 <script>
     import { NotificationType, notifications } from "../stores/notificationStore";
-
-
 </script>
 
 <div>

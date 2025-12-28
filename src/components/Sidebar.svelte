@@ -1,9 +1,7 @@
-<!-- @migration-task Error while migrating Svelte code: `<tr>` cannot be a child of `<table>`. `<table>` only allows these children: `<caption>`, `<colgroup>`, `<tbody>`, `<thead>`, `<tfoot>`, `<style>`, `<script>`, `<template>`. The browser will 'repair' the HTML (by moving, removing, or inserting elements) which breaks Svelte's assumptions about the structure of your components.
-https://svelte.dev/e/node_invalid_placement -->
 <script lang="ts">
     import { localStorageStore } from "../stores/localStorageStore.js"
     import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode, currentCharacter } from "../stores/persistentSettingsStore.js"
-    import { socket, session, characters, playerInfo, PlayerData, sheetModules } from "../stores/nonPersistentStore.js"
+    import { socket, session, characters, playerInfo, type PlayerData, sheetModules } from "../stores/nonPersistentStore.js"
     import { generateName } from "../util/nameGenerator.js";
 
     let settingsOpened = false
@@ -407,7 +405,7 @@ https://svelte.dev/e/node_invalid_placement -->
         </div>
         <div id="playerInfo-container">
             <input id="playerName" placeholder="Username" type="text" class="input boxShadow" on:blur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
-            <button id="settings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="fas fa-cog"></i></button>
+            <button aria-label="Open Settings" id="settings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="fas fa-cog"></i></button>
         </div>
     </div>
     <div id="content-container" class="">
@@ -416,16 +414,16 @@ https://svelte.dev/e/node_invalid_placement -->
 </div>
 <div id="settings-container" class:opened="{settingsOpened}">
     <div id="settings">
-        <button id="closeSettings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="far fa-times-circle"></i></button>
+        <button aria-label="Close Settings" id="closeSettings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="far fa-times-circle"></i></button>
         <div id="category-wrapper">
             <div id="category-selector">
                 <hr>
                 <div class="settings-category-title">General Settings</div>
-                <div class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 0}} on:click="{() => {activeSettingsCategory = 0}}" class:active="{activeSettingsCategory == 0}">User Settings</div>
+                <div role="menu" tabindex=0 class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 0}} on:click="{() => {activeSettingsCategory = 0}}" class:active="{activeSettingsCategory == 0}">User Settings</div>
                 <hr>
                 <div class="settings-category-title">App Settings</div>
-                <div class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 1}} on:click="{() => {activeSettingsCategory = 1}}" class:active="{activeSettingsCategory == 1}">Appearance</div>
-                <div class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 2}} on:click="{() => {activeSettingsCategory = 2}}" class:active="{activeSettingsCategory == 2}">Modules</div>
+                <div role="menu" tabindex=0 class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 1}} on:click="{() => {activeSettingsCategory = 1}}" class:active="{activeSettingsCategory == 1}">Appearance</div>
+                <div role="menu" tabindex=0 class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 2}} on:click="{() => {activeSettingsCategory = 2}}" class:active="{activeSettingsCategory == 2}">Modules</div>
             </div>
             <div id="category-container">
                 <div id="user-settings" class="settings-category" class:active="{activeSettingsCategory == 0}">
@@ -492,26 +490,28 @@ https://svelte.dev/e/node_invalid_placement -->
                     </div>
                     <div class="input-wrapper table-wrapper">
                         <table class="table">
-                            <tr>
-                                <th>Module</th>
-                                <th>Version</th>
-                                <th>Author</th>
-                                <th>Repository</th>
-                            </tr>
-                            {#each Object.values($sheetModules) as module}
+                            <tbody>
                                 <tr>
-                                    <td>{module.info.name}</td>
-                                    <td>{module.info.version}</td>
-                                    <td>{module.info.author ?? "Someone"}</td>
-                                    <td>
-                                        {#if module.info.repo}
-                                            <a class="link" href="{module.info.repo}">{new URL(module.info.repo).hostname}</a>
-                                        {:else}
-                                            -
-                                        {/if}
-                                    </td>
+                                    <th>Module</th>
+                                    <th>Version</th>
+                                    <th>Author</th>
+                                    <th>Repository</th>
                                 </tr>
-                            {/each}
+                                {#each Object.values($sheetModules) as module}
+                                    <tr>
+                                        <td>{module.info.name}</td>
+                                        <td>{module.info.version}</td>
+                                        <td>{module.info.author ?? "Someone"}</td>
+                                        <td>
+                                            {#if module.info.repo}
+                                                <a class="link" href="{module.info.repo}">{new URL(module.info.repo).hostname}</a>
+                                            {:else}
+                                                -
+                                            {/if}
+                                        </td>
+                                    </tr>
+                                {/each}
+                            </tbody>
                         </table>
                     </div>
                 </div>

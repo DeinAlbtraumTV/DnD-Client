@@ -5,6 +5,7 @@
     import { getAffectedElements, reCalculateValue } from "../../util/inputInheritenceHelper";
     import Note from "./Note.svelte"
     import ModuleElement from "./ModuleElement.svelte";
+    import type { NoteData, SpellInfoPopup } from "../../types/types";
 
     interface Props {
         showNotes?: boolean;
@@ -13,7 +14,7 @@
 
     let { showNotes = false, sheetKey = "" }: Props = $props();
 
-    let spellinfoPopups = $state([]);
+    let spellinfoPopups: Array<SpellInfoPopup> = $state([]);
 
     onMount(() => {
         if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version" && $characters[$currentCharacter]) {
@@ -28,7 +29,7 @@
     })
 
     function loadValues() {
-        let elems = document.querySelectorAll("[data-field-name]")
+        let elems = document.querySelectorAll("[data-field-name]") as NodeListOf<HTMLInputElement>
 
         elems.forEach(elem => {
             if (elem.type == "checkbox") {
@@ -42,25 +43,25 @@
             let key = pair[0]
             let value = pair[1]
 
-            let elem = document.querySelector("[id=\"" + key + "\"]")
+            let elem = document.querySelector("[id=\"" + key + "\"]") as HTMLInputElement
 
             if (!elem || elem == null) {
                 return
             }
 
             if (elem.type == "checkbox") {
-                elem.checked = value
+                elem.checked = value as boolean
             } else {
-                elem.value = value
+                elem.value = value as string
             }
 
-            elem.setAttribute("user-edited", true)
+            elem.setAttribute("user-edited", "true")
         })
 
         $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey].forEach(elem => {
             if (!elem.type) return
 
-            let field = document.querySelector("[id=\"" + elem.id + "\"]")
+            let field = document.querySelector("[id=\"" + elem.id + "\"]") as HTMLInputElement
 
             if (!field.getAttribute("user-edited")) {
                 let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
@@ -79,13 +80,23 @@
         return false;
     }
 
-    function onBlur(event) {
-        if (event.target.value == "" && $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")] != "") {
+    function onBlur(event: FocusEvent) {
+        if (!(event.target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        let targetId = event.target.getAttribute("id")
+
+        if (targetId == null) {
+            return;
+        }
+
+        if (event.target.value == "" && $characters[$currentCharacter][sheetKey][targetId] != "") {
             event.target.removeAttribute("user-edited")
-            delete $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")]
+            delete $characters[$currentCharacter][sheetKey][targetId]
 
             if (!event.target.getAttribute("user-edited")) {
-                let selfVal = reCalculateValue(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
+                let selfVal = reCalculateValue(targetId, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
 
                 if (Number.parseInt(selfVal) > 0)
                     selfVal = "+" + selfVal
@@ -93,14 +104,14 @@
                 event.target.value = selfVal
             }
         } else if (event.target.value != "") {
-            event.target.setAttribute("user-edited", true)
-            $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")] = event.target.value
+            event.target.setAttribute("user-edited", "true")
+            $characters[$currentCharacter][sheetKey][targetId] = event.target.value
         }
 
-        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
+        let affectedElems = getAffectedElements(targetId, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
         
         for (const id of affectedElems) {
-            let elem = document.querySelector("[id=\"" + id + "\"]")
+            let elem = document.querySelector("[id=\"" + id + "\"]") as HTMLInputElement
 
             if (elem && !elem.getAttribute("user-edited")) {
                 let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
@@ -151,13 +162,23 @@
         }, 75)
     }
 
-    function onClick(event) {
-        $characters[$currentCharacter][sheetKey][event.target.getAttribute("id")] = event.target.checked
+    function onClick(event: MouseEvent) {
+        if (!(event.target instanceof HTMLInputElement)) {
+            return
+        }
 
-        let affectedElems = getAffectedElements(event.target.getAttribute("id"), $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
+        let targetId = event.target.getAttribute("id")
+
+        if (targetId == null) {
+            return
+        }
+
+        $characters[$currentCharacter][sheetKey][targetId] = event.target.checked
+
+        let affectedElems = getAffectedElements(targetId, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
 
         for (const id of affectedElems) {
-            let elem = document.querySelector("[id=\"" + id + "\"]")
+            let elem = document.querySelector("[id=\"" + id + "\"]") as HTMLInputElement
 
             if (elem && !elem.getAttribute("user-edited")) {
                 let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
@@ -183,8 +204,13 @@
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
-    function onFocus(event) {
+    function onFocus(event: FocusEvent) {
+        if (!(event.currentTarget instanceof HTMLInputElement)) {
+            return;
+        }
+
         let target = event.currentTarget;
+
         let spellname = target.value.replace(/ *\([^)]*\) */g, "");
 
         let popupIndex = spellinfoPopups.findIndex(elem => elem.target == target);
@@ -213,7 +239,7 @@
         spellinfoPopups = spellinfoPopups;
     }
 
-    async function loadSpellDesc(target, spellname, left = false) {
+    async function loadSpellDesc(target: HTMLInputElement, spellname: string, left = false) {
         let desc = await window.spells.getSpellInfo("http://dnd5e.wikidot.com/spell:" + spellname)
 
         let popupIndex = spellinfoPopups.findIndex(elem => elem.target == target);
@@ -229,8 +255,8 @@
         spellinfoPopups = spellinfoPopups;
     }
 
-    function noteDataUpdate(data) {
-        $characters[$currentCharacter][sheetKey + "Notes"][data.id] = data.detail
+    function noteDataUpdate(data: NoteData) {
+        $characters[$currentCharacter][sheetKey + "Notes"][data.id] = data
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
@@ -257,9 +283,9 @@
     let deleteNoteOnDrop = $state(false);
     let showNoteRemover = $state(false);
 
-    function noteDragEnd(event) {
+    function noteDragEnd(id: number) {
         if (deleteNoteOnDrop) {
-            $characters[$currentCharacter][sheetKey + "Notes"] = $characters[$currentCharacter][sheetKey + "Notes"].filter(note => note.id != event.detail)
+            $characters[$currentCharacter][sheetKey + "Notes"] = $characters[$currentCharacter][sheetKey + "Notes"].filter((note: NoteData) => note.id != id)
             window.characters.storeSheets(JSON.stringify($characters))
         }
 
@@ -313,7 +339,7 @@
     </div>
     {#if showNotes}
         {#each $characters[$currentCharacter][sheetKey + "Notes"] as data}
-            <Note data={data} on:dragStart={() => {showNoteRemover = true}} on:dragEnd={noteDragEnd} on:dataUpdate={noteDataUpdate}></Note>
+            <Note data={data} dragStart={() => {showNoteRemover = true}} dragEnd={noteDragEnd} dataUpdate={noteDataUpdate}></Note>
         {/each}
     {/if}
     <form>

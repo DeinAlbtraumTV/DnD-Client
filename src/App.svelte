@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Sidebar from "./components/Sidebar.svelte"
 	import MiniBrowser from "./components/MiniBrowser.svelte"
 	import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, currentCharacter, characterSheets, primaryColor, sheetZoom } from "./stores/persistentSettingsStore"
@@ -117,7 +115,7 @@
 		set("sheetZoom", value + "%")
 	})
 
-	run(() => {
+	$effect(() => {
 		if ($characterSheets == "dark") {
 			set("characterSheetsPrimary", "#0a0a0a")
 			set("characterSheetsSecondary", "#202225")
@@ -127,9 +125,7 @@
 			set("characterSheetsSecondary", "#FFFFFF")
 			set("characterSheetsTertiary", "#000000")
 		}
-	});
 
-	run(() => {
 		if ((!$localStorageStore.playerName || $localStorageStore.playerName == "") &&
 			document.activeElement != document.getElementById("playerName") &&
 			document.activeElement != document.getElementById("playerName_settings")) {

@@ -1,41 +1,31 @@
 <script lang="ts">
-    import { createBubbler, stopPropagation } from 'svelte/legacy';
+    import { stopPropagation } from '../../util/eventExtensions';
 
-    const bubble = createBubbler();
-    import { createEventDispatcher } from "svelte";
     import { sheetZoom } from "../../stores/persistentSettingsStore";
+    import type { NoteData } from '../../types/types';
 
-    let dispatch = createEventDispatcher();
-
-    let { data = $bindable({
-        id: 0,
-        x: 0,
-        y: 0,
-        minX: 0,
-        minY: 0,
-        maxX: 0,
-        maxY: 0,
-        width: 0,
-        height: 0,
-        expanded: false,
-        text: ''
-    }) } = $props();
+    let { data = $bindable(), dragStart, dragEnd, dataUpdate }: {
+        data: NoteData,
+        dragStart: () => void,
+        dragEnd: (id: number) => void,
+        dataUpdate: (data: NoteData) => void
+    } = $props();
 
     let isMouseDown = false;
 
     let startX = 0, startY = 0, nowX = 0, nowY = 0;
 
-    function mouseDown(event) {
+    function mouseDown(event: MouseEvent) {
         let zoomFactor = $sheetZoom / 100;
 
         startX = event.clientX / zoomFactor;
         startY = event.clientY / zoomFactor;
 
         isMouseDown = true;
-        dispatch("dragStart")
+        dragStart()
     }
 
-    function mouseMove(event) {
+    function mouseMove(event: MouseEvent) {
         if (isMouseDown) {
             let zoomFactor = $sheetZoom / 100;
 
@@ -55,31 +45,35 @@
 
     function mouseUp() {
         if (isMouseDown) {
-            dispatch("dragEnd", data.id);
-            dispatch("dataUpdate", data);
+            dragEnd(data.id)
+            dataUpdate(data)
 
             isMouseDown = false;
         }
     }
 
-    function textChanged(event) {
+    function textChanged(event: FocusEvent) {
+        if (!(event.target instanceof HTMLDivElement)) {
+            return
+        }
+
         data.text = event.target.innerText;
-        dispatch("dataUpdate", data);
+        dataUpdate(data)
     }
 
-    function noteExpanderClicked(event) {
+    function noteExpanderClicked(event: MouseEvent) {
         event.stopPropagation();
         isMouseDown = false;
         data.expanded = !data.expanded;
-        dispatch("dataUpdate", data);
+        dataUpdate(data);
     }
 
-    function noteExpanderKeydown(event) {
+    function noteExpanderKeydown(event: KeyboardEvent) {
         if (event.key == "Enter") {
             event.stopPropagation();
             isMouseDown = false;
             data.expanded = !data.expanded;
-            dispatch("dataUpdate", data);
+            dataUpdate(data);
         }
     }
 </script>
@@ -180,14 +174,14 @@
 </style>
 
 <svelte:window onmousemove={mouseMove} onmouseup={mouseUp}/>
-<div class="note" class:expanded={data.expanded == true} onmousedown={mouseDown} style={`top:${data.y}px; left:${data.x}px;`} bind:clientHeight={data.height} bind:clientWidth={data.width}>
+<div role="none" class="note" class:expanded={data.expanded == true} onmousedown={mouseDown} style={`top:${data.y}px; left:${data.x}px;`} bind:clientHeight={data.height} bind:clientWidth={data.width}>
     <div class="note-row">
-        <div class="note-expander" onkeydown={noteExpanderKeydown} onclick={noteExpanderClicked} onmousedown={stopPropagation(bubble('mousedown'))}>
+        <div role="button" tabindex=0 class="note-expander" onkeydown={noteExpanderKeydown} onclick={noteExpanderClicked} onmousedown={stopPropagation()}>
             <div>{data.expanded ? "-" : "+"}</div>
         </div>
         <div class="note-mover">
             <div>&equiv;</div>
         </div>
     </div>
-    <div class="note-text" onmousedown={stopPropagation(bubble('mousedown'))} onblur={textChanged} contenteditable="true" bind:innerText={data.text}></div>
+    <div role="textbox" tabindex=0 class="note-text" onmousedown={stopPropagation()} onblur={textChanged} contenteditable="true" bind:innerText={data.text}></div>
 </div>

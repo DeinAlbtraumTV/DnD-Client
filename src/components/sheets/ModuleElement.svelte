@@ -1,6 +1,6 @@
 <script lang="ts">
     import ModuleElement from './ModuleElement.svelte';
-    import InlineSVG from "svelte-inline-svg"
+    import { inlineSvg } from "@svelte-put/inline-svg"
     import { stopTyping } from "../../util/nodeExtensions"
 
     interface Props {
@@ -21,7 +21,11 @@
         onStopTyping = null
     }: Props = $props();
 
-    function clearIfNotEdited(event) {
+    function clearIfNotEdited(event: FocusEvent) {
+        if (!(event.target instanceof HTMLInputElement)) {
+            return;
+        }
+
         if (!event.target.getAttribute("user-edited")) {
             event.target.value = ""
         }
@@ -38,14 +42,14 @@
             {data.data}
         {:else if Array.isArray(data.data)}
             {#each data.data as elem}
-                <ModuleElement data="{elem}" onDrop={onDrop} onBlur={onBlur} onClick={onClick} onFocus={onFocus} onStopTyping={onStopTyping}/>
+                <ModuleElement data={elem} onDrop={onDrop} onBlur={onBlur} onClick={onClick} onFocus={onFocus} onStopTyping={onStopTyping}/>
             {/each}
         {:else}
-            <ModuleElement data="{data.data}" onDrop={onDrop} onBlur={onBlur} onClick={onClick} onFocus={onFocus} onStopTyping={onStopTyping}/>
+            <ModuleElement data={data.data} onDrop={onDrop} onBlur={onBlur} onClick={onClick} onFocus={onFocus} onStopTyping={onStopTyping}/>
         {/if}
     </div>
 {:else if data.type == "svg"}
-    <InlineSVG class="{data.class ? data.class : ''}" id="{data.id}" src="{data.src}" width="935" height="1210" style="width:935px; height:1210px; -moz-transform:scale(1); transform: scale(1); z-index: 0; outline: none;"></InlineSVG>
+    <svg use:inlineSvg={data.src} class={data.class ? data.class : ''} id={data.id} width="935" height="1210" style="width:935px; height:1210px; -moz-transform:scale(1); transform: scale(1); z-index: 0; outline: none;"></svg>
 {:else if data.type == "text"}
     <input class="{data.class ? data.class : ''}" id="{data.id}" type="text" data-field-name="{data.id}" ondrop={onDrop} onblur={onBlur} onfocus={clearIfNotEdited} data-initiative="{data.initiative}"/>
 {:else if data.type == "spell"}
