@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import { characters, socket, playerInfo, sheetModules } from "../../stores/nonPersistentStore"
     import { currentCharacter, characterSheets, sessionCode } from "../../stores/persistentSettingsStore"
@@ -6,10 +6,14 @@
     import Note from "./Note.svelte"
     import ModuleElement from "./ModuleElement.svelte";
 
-    export let showNotes = false;
-    export let sheetKey = "";
+    interface Props {
+        showNotes?: boolean;
+        sheetKey?: string;
+    }
 
-    let spellinfoPopups = [];
+    let { showNotes = false, sheetKey = "" }: Props = $props();
+
+    let spellinfoPopups = $state([]);
 
     onMount(() => {
         if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version" && $characters[$currentCharacter]) {
@@ -250,8 +254,8 @@
         $characters[$currentCharacter][sheetKey + "Notes"] = $characters[$currentCharacter][sheetKey + "Notes"];
     }
 
-    let deleteNoteOnDrop = false;
-    let showNoteRemover = false;
+    let deleteNoteOnDrop = $state(false);
+    let showNoteRemover = $state(false);
 
     function noteDragEnd(event) {
         if (deleteNoteOnDrop) {
@@ -303,8 +307,8 @@
 
 <div id="characterSheet" class="tabcontent" class:dark={$characterSheets == "dark"}>
     {@html `<style>@scope{${$sheetModules[$characters[$currentCharacter].module.id]?.css?.characterSheet}}</style>`}
-    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-    <div class="note-remover" class:hidden={!showNoteRemover} on:mouseover={() => {deleteNoteOnDrop = true}} on:mouseout={() => {deleteNoteOnDrop = false}}>
+    <!-- svelte-ignore a11y_mouse_events_have_key_events -->
+    <div class="note-remover" class:hidden={!showNoteRemover} onmouseover={() => {deleteNoteOnDrop = true}} onmouseout={() => {deleteNoteOnDrop = false}}>
         🗑️
     </div>
     {#if showNotes}

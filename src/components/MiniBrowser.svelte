@@ -13,13 +13,13 @@
         title: string
     }
 
-    let tabTopTabs: Array<Tab>
-    let webviewTabs: Array<Tab>
+    let tabTopTabs: Array<Tab> = $state()
+    let webviewTabs: Array<Tab> = $state()
 
     let tabContextMenuTarget = -1
-    let tabContextMenuVisible = false
+    let tabContextMenuVisible = $state(false)
 
-    let mouseX: any, mouseY: any
+    let mouseX: any = $state(), mouseY: any = $state()
 
     if (tabJson !== undefined) {
         tabTopTabs = JSON.parse(tabJson)
@@ -29,7 +29,7 @@
         webviewTabs = []
     }
 
-    let currentTab = -1
+    let currentTab = $state(-1)
 
     $socket.on("loadMap", (data: any) => {
         if ($session) {
@@ -291,46 +291,46 @@
     <div id="tabTop-navigation-container">
         <div class="flex-container tabTop-wrapper">
             <div id="tabTop-container">
-                <div class="tabTop" id="mapTabTop" class:active={ currentTab == -1} data-url="" data-index="-1" on:keydown={changeToTabKeyboard} on:click="{changeToTab}" title="Map">
+                <div class="tabTop" id="mapTabTop" class:active={ currentTab == -1} data-url="" data-index="-1" onkeydown={changeToTabKeyboard} onclick={changeToTab} title="Map">
                     Map
                 </div>
                 {#each tabTopTabs as tab, i (tab)}
-                    <div class="tabTop" class:active={currentTab == i} data-url="{tab.url}" data-index="{i}" on:keydown={changeToTabKeyboard} on:click="{changeToTab}" title="{tab.title}" on:contextmenu="{toggleTabContextMenu}">
+                    <div class="tabTop" class:active={currentTab == i} data-url="{tab.url}" data-index="{i}" onkeydown={changeToTabKeyboard} onclick={changeToTab} title="{tab.title}" oncontextmenu={toggleTabContextMenu}>
                         {tab.title}
                         {#if currentTab == i}
-                            <div id="closeTab" data-index="{i}" on:keydown={closeTabKeyboard} on:click="{closeTab}">
+                            <div id="closeTab" data-index="{i}" onkeydown={closeTabKeyboard} onclick={closeTab}>
                                 <i class="fas fa-times"></i>
                             </div>
                         {/if}
                     </div>
                 {/each}
-                <div class="tabContextMenuBackground" class:visible="{tabContextMenuVisible}" on:keydown={toggleTabContextMenu} on:click="{toggleTabContextMenu}"></div>
+                <div class="tabContextMenuBackground" class:visible="{tabContextMenuVisible}" onkeydown={toggleTabContextMenu} onclick={toggleTabContextMenu}></div>
                 <div class="tabContextMenu-container" class:visible="{tabContextMenuVisible}" style="top: {mouseY}px; left: {mouseX}px;">
-                    <button class="tabContextMenu-button" on:click="{duplicateTab}">Duplicate Tab</button>
+                    <button class="tabContextMenu-button" onclick={duplicateTab}>Duplicate Tab</button>
                 </div>
             </div>
             <div id="addTab">
-                <button on:click="{addTab}" id="addTab-button">
+                <button onclick={addTab} id="addTab-button">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
         </div>
         <div id="navigation-container">
-            <button on:click="{navToPrev}" id="navToPrev" disabled="{currentTab == -1}"><i class="fas fa-arrow-left icon"></i></button>
-            <button on:click="{navToNext}" id="navToNext" disabled="{currentTab == -1}"><i class="fas fa-arrow-right icon"></i></button>
-            <button on:click="{reload}" id="reload"><i class="fas fa-redo icon"></i></button>
-            <input id="urlInput" type="text" disabled="{currentTab == -1}" placeholder="url" on:change="{loadUrl}">
+            <button onclick={navToPrev} id="navToPrev" disabled="{currentTab == -1}"><i class="fas fa-arrow-left icon"></i></button>
+            <button onclick={navToNext} id="navToNext" disabled="{currentTab == -1}"><i class="fas fa-arrow-right icon"></i></button>
+            <button onclick={reload} id="reload"><i class="fas fa-redo icon"></i></button>
+            <input id="urlInput" type="text" disabled="{currentTab == -1}" placeholder="url" onchange={loadUrl}>
         </div>
     </div>
     <div id="tabContent-container">
         <div class="tab" class:active={ currentTab == -1} id="mapTab" data-url="" data-index="-1">
-            <webview autosize id="mapEmbed" data-index="-1" on:new-window="{addTabWithUrl}" src="{$session ? $session.url : ''}" on:did-finish-load="{injectAdBlockCss}">
+            <webview autosize id="mapEmbed" data-index="-1" onnew-window={addTabWithUrl} src="{$session ? $session.url : ''}" ondid-finish-load={injectAdBlockCss}>
     
             </webview>
         </div>
         {#each webviewTabs as tab, i (tab)}
             <div class="tab" class:active={ currentTab == i} data-url="{tab.url}" data-index="{i}">
-                <webview src="{tab.url}" allowpopups autosize data-index="{i}" on:did-finish-load="{webviewLoaded}" on:new-window="{addTabWithUrl}">
+                <webview src="{tab.url}" allowpopups autosize data-index="{i}" ondid-finish-load={webviewLoaded} onnew-window={addTabWithUrl}>
 
                 </webview>
             </div>
