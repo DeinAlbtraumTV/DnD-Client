@@ -3,4 +3,5 @@
 .DS_Store
 
 dist/
+public/
 *.code-workspace
