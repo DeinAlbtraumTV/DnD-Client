@@ -20,7 +20,7 @@ jobs:
 
     env:
       GH_TOKEN: ${{ secrets.github_token }}
-      SNAPCRAFT_TOKEN: ${{ secrets.SNAPCRAFT_TOKEN }}
+      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -51,7 +51,7 @@ jobs:
       - name: Login to Snapcraft
         if: matrix.os == 'ubuntu-latest'
         run: |
-          echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
+          snapcraft login
 
       - name: Build Linux (AppImage + Snap)
         if: matrix.os == 'ubuntu-latest'
