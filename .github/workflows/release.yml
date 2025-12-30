@@ -20,7 +20,6 @@ jobs:
 
     env:
       GH_TOKEN: ${{ secrets.github_token }}
-      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -43,13 +42,8 @@ jobs:
           yarn electron-builder --win nsis --publish always
 
       # -------- Linux build --------
-      - name: Install Snapcraft
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo snap install snapcraft --classic
-
-      - name: Build Linux (AppImage + Snap)
+      - name: Build Linux (AppImage)
         if: matrix.os == 'ubuntu-latest'
         run: |
           yarn build
-          yarn electron-builder --linux AppImage snap --publish always
+          yarn electron-builder --linux AppImage --publish always
