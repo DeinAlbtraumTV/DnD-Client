@@ -211,6 +211,20 @@
 
     function loadUrl(event) {
         let target = event.currentTarget
+        if (!target.value.includes(".")) {
+            let searchEngineQuery = $localStorageStore.searchEngine
+
+            if (!searchEngineQuery) {
+                searchEngineQuery = "https://duckduckgo.com"
+            }
+
+            if (!searchEngineQuery.endsWith("/search?q=")) {
+                searchEngineQuery = searchEngineQuery + "/search?q="
+            }
+
+            target.value = searchEngineQuery + target.value
+        }
+
         if (!target.value.startsWith("http://") && !target.value.startsWith("https://")) {
             target.value = "https://" + target.value
         }
@@ -279,6 +293,18 @@
 
         document.querySelector("webview[data-index=\"" +  index + "\"]").insertCSS(adBlockCss)
     }
+
+    function toggleAdblock() {
+        if ($localStorageStore.disableAdblock == "true") {
+            $localStorageStore.disableAdblock = "false"
+            window.adblock.enable()
+            console.log("Adblock enabled")
+        } else {
+            $localStorageStore.disableAdblock = "true"
+            window.adblock.disable()
+            console.log("Adblock disabled")
+        }
+    }
 </script>
 
 <div id="tab-container">
@@ -314,6 +340,7 @@
             <button aria-label="Navigate forwards" onclick={navToNext} id="navToNext" disabled="{currentTab == -1}"><i class="fas fa-arrow-right icon"></i></button>
             <button aria-label="Reload" onclick={reload} id="reload"><i class="fas fa-redo icon"></i></button>
             <input id="urlInput" type="text" disabled="{currentTab == -1}" placeholder="url" onchange={loadUrl}>
+            <button aria-label="Toggle Adblock" onclick={toggleAdblock} id="ublock" class:inactive={$localStorageStore.disableAdblock == "true"}><img alt="UBlock Origin Icon" class="icon" width=16 height=16 src="https://github.com/gorhill/uBlock/raw/master/src/img/ublock.svg"></button>
         </div>
     </div>
     <div id="tabContent-container">
@@ -324,7 +351,7 @@
         </div>
         {#each webviewTabs as tab, i (tab)}
             <div class="tab" class:active={ currentTab == i} data-url="{tab.url}" data-index="{i}">
-                <webview src="{tab.url}" allowpopups autosize data-index="{i}" ondidfinishload={webviewLoaded} onnew-window={addTabWithUrl}>
+                <webview src="{tab.url}" allowpopups autosize data-index="{i}" ondid-finish-load={webviewLoaded} onnew-window={addTabWithUrl}>
 
                 </webview>
             </div>
@@ -408,7 +435,7 @@
         align-items: center;
     }
 
-    #navToPrev, #navToNext, #reload {
+    #navToPrev, #navToNext, #reload, #ublock {
         width: 25px;
         height: 25px;
         border-radius: 50%;
@@ -420,13 +447,17 @@
         cursor: pointer;
     }
 
-    #navToPrev:hover, #navToNext:hover, #reload:hover {
+    #navToPrev:hover, #navToNext:hover, #reload:hover, #ublock:hover {
         outline: var(--primary) 2px solid;
     }
 
     #navToPrev:disabled, #navToNext:disabled, #reload:disabled {
         cursor: default;
         outline: none;
+    }
+
+    #ublock.inactive > img {
+        filter: grayscale()
     }
 
     #urlInput {

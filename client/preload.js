@@ -19,13 +19,18 @@ contextBridge.exposeInMainWorld(
         getSpellInfo: async (url) => {
             return new Promise(resolve => {
                 fetch(url)
-                    .then(res => res.text())
-                    .then((html) => {
+                    .catch(() => {
+                        resolve("Failed to load that spell, please try again later.");
+                    }).then(
+                        res => res.text()
+                    ).catch(() => {
+                        resolve("Failed to load that spell, please try again later.");
+                    }).then((html) => {
                         const $ = cheerio.load(html)
                         const content = $('#page-content').html()
                         resolve(content)
                         return;
-                    }).catch((error) => {
+                    }).catch(() => {
                         resolve("Failed to load that spell, please try again later.");
                     });
             })
@@ -42,18 +47,12 @@ contextBridge.exposeInMainWorld(
 )
 
 contextBridge.exposeInMainWorld(
-    "pdfs", {
-        readCharacterSheet: () => {
-            const filename = path.resolve(__dirname, 'pdfs', 'character.pdf')
-            return fs.readFileSync(filename)
+    "adblock", {
+        enable: () => {
+            ipcRenderer.sendSync("start-adblock")
         },
-        readDetailsSheet: () => {
-            const filename = path.resolve(__dirname, 'pdfs', 'details.pdf')
-            return fs.readFileSync(filename)
-        },
-        readSpellcastingSheet: () => {
-            const filename = path.resolve(__dirname, 'pdfs', 'spellcasting.pdf')
-            return fs.readFileSync(filename)
+        disable: () => {
+            ipcRenderer.sendSync("stop-adblock")
         }
     }
 )

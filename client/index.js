@@ -1,18 +1,21 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, session } = require('electron')
 const { setupTitlebar, attachTitlebarToWindow } = require('custom-electron-titlebar/main')
-const DiscordRPC = require('discord-rpc')
-const path = require('path')
-const remoteMain = require('@electron/remote/main')
+const { Client } = require('discord-rpc')
+const { join, dirname } = require('path')
+const { initialize, enable } = require('@electron/remote/main')
 const { autoUpdater } = require('electron-updater')
+const { ElectronBlocker } = require('@ghostery/adblocker-electron')
+const fetch = require('cross-fetch')
 
 const DISABLE_AUTOMATIC_UPDATES = false
 
 const isDev = process.env.NODE_ENV === 'development' || process.defaultApp
 
-remoteMain.initialize()
+initialize()
 setupTitlebar()
 
 let updaterWindow = null;
+let adBlocker = null;
 
 function createUpdaterWindow() {
 	const win = new BrowserWindow({
@@ -22,14 +25,14 @@ function createUpdaterWindow() {
 		show: false,
 		backgroundColor: "#141414",
 		webPreferences: {
-			preload: path.join(__dirname, "updater_preload.js")
+			preload: join(__dirname, "updater_preload.js")
 		},
 		resizable: isDev
 	})
 
 	win.setMenuBarVisibility(false)
 
-	win.loadFile(path.join(__dirname, "updater.html"))
+	win.loadFile(join(__dirname, "updater.html"))
 
 	win.once('ready-to-show', () => {
 		win.show()
@@ -46,7 +49,7 @@ function createMainWindow() {
 		webPreferences: {
 			sandbox: false,
 			webviewTag: true,
-			preload: path.join(__dirname, 'preload.js'),
+			preload: join(__dirname, 'preload.js'),
 			enableRemoteModule: true,
 			contextIsolation: true,
 			nodeIntegration: true
@@ -54,14 +57,14 @@ function createMainWindow() {
 		show: false,
 		backgroundColor: "#141414"
 	});
-	remoteMain.enable(win.webContents)
+	enable(win.webContents)
 
 	win.setMenuBarVisibility(false)
 
 	if (isDev) {
 		win.loadURL("http://localhost:5173")
 	} else {
-		win.loadFile(path.join(__dirname, "../public/index.html"))
+		win.loadFile(join(__dirname, "../public/index.html"))
 	}
 
 	win.maximize()
@@ -70,19 +73,17 @@ function createMainWindow() {
 		win.show()
 	})
 
-	win.webContents.on('new-window', (e, windowURL, frameName, disposition, options) => {
-		e.preventDefault()
-	})
-
 	win.webContents.on('did-attach-webview', (e, contents) => {
-		contents.on('new-window', (e, windowURL, frameName, disposition, options) => {
-			e.preventDefault()
+		e.preventDefault()
+		contents.setWindowOpenHandler(({url}) => {
+			win.webContents.send("open-page-in-new-tab", url)
+			return { action: 'deny' }
 		})
 	})
 	
-	win.webContents.on('will-navigate', (e, url, isInPlace, isMainFrame, frameProcessId, frameRoutingId) => {
-		e.preventDefault();
+	win.webContents.setWindowOpenHandler(({url}) => {
 		win.webContents.send("open-page-in-new-tab", url)
+		return { action: 'deny' }
 	})
 
 	attachTitlebarToWindow(win);
@@ -102,7 +103,7 @@ function initMainApp() {
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy')
 
 ipcMain.on("get-exeroot-path", event => {
-	event.returnValue = path.dirname(app.getPath("exe"))
+	event.returnValue = dirname(app.getPath("exe"))
 })
 
 ipcMain.on("get-userdata-path", event => {
@@ -113,8 +114,24 @@ ipcMain.on("is-dev", event => {
 	event.returnValue = isDev
 })
 
+ipcMain.on("start-adblock", (event) => {
+	adBlocker.enableBlockingInSession(session.defaultSession);
+	console.log("Adblock active")
+	event.returnValue = "success"
+})
+
+ipcMain.on("stop-adblock", (event) => {
+	adBlocker.disableBlockingInSession(session.defaultSession);
+	console.log("Adblock inactive")
+	event.returnValue = "success"
+})
+
 //UPDATER RELATED EVENTS
 app.on('ready', () => {
+	ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+		adBlocker = blocker;
+	});
+
 	if (!isDev) {
 		if (DISABLE_AUTOMATIC_UPDATES || process.platform == 'darwin') {
 			initMainApp()
@@ -147,7 +164,7 @@ autoUpdater.on("update-available", (info) => {
 	updaterWindow.webContents.send("update-found", autoUpdater.currentVersion.version, info.version)
 })
 
-autoUpdater.on("update-not-available", (info) => {
+autoUpdater.on("update-not-available", () => {
 	initMainApp()
 })
 
@@ -155,11 +172,11 @@ autoUpdater.on("download-progress", (info) => {
 	updaterWindow.webContents.send("update-download-progress", info.percent)
 })
 
-autoUpdater.on("update-downloaded", (event) => {
+autoUpdater.on("update-downloaded", () => {
 	autoUpdater.quitAndInstall()
 })
 
-autoUpdater.on("error", (error) => {
+autoUpdater.on("error", () => {
 	initMainApp()
 })
 
@@ -171,7 +188,7 @@ app.on('window-all-closed', function () {
 //DISCORD RPC
 const clientId = '858413101320503317';
 
-const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+const rpc = new Client({ transport: 'ipc' });
 const startTimestamp = new Date();
 
 rpc.on('ready', () => {

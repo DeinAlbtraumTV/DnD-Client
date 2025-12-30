@@ -425,6 +425,10 @@
                         <p>Username:</p>
                         <input id="playerName_settings" placeholder="Username" type="text" class="input" onblur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
                     </div>
+                    <div class="input-wrapper">
+                        <p>Default Search Engine:</p>
+                        <input id="searchEngine_settings" placeholder="https://duckduckgo.com" type="text" class="input" bind:value="{$localStorageStore.searchEngine}"/>
+                    </div>
                 </div>
                 <div id="appearance" class="settings-category" class:active="{activeSettingsCategory == 1}">
                     <h2>Appearance</h2>

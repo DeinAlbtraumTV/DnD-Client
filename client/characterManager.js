@@ -160,7 +160,6 @@ function migrateSheets(data) {
         let module = sheetModulesLoaded[data[key].module.id]
 
         console.log("Starting character migration for:", key)
-        console.log("Migration data:", module.migration)
 
         if (!module) {
             console.log("Missing module", data[key].module.id + ",", "skipping migration for character:", key)

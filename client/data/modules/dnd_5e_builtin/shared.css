@@ -10,19 +10,19 @@
 @font-face {
     font-family: ScalaSansOffc-Bold_72;
     /*include fonts via https urls or fall back to the shipped fonts available in chromium. Don't rely on fonts being in this folder!*/
-    src: url("./sheets/fonts/ScalaSansOffc-Bold_72.woff") format("woff");
+    src: url("./assets/fonts/ScalaSansOffc-Bold_72.woff") format("woff");
 }
 
 @font-face {
     font-family: ScalaSansOffc_70;
     /*include fonts via https urls or fall back to the shipped fonts available in chromium. Don't rely on fonts being in this folder!*/
-    src: url("./sheets/fonts/ScalaSansOffc_70.woff") format("woff");
+    src: url("./assets/fonts/ScalaSansOffc_70.woff") format("woff");
 }
 
 @font-face {
     font-family: sub_Interstate-Light_nr;
     /*include fonts via https urls or fall back to the shipped fonts available in chromium. Don't rely on fonts being in this folder!*/
-    src: url("./sheets/fonts/sub_Interstate-Light_nr.woff") format("woff");
+    src: url("./assets/fonts/sub_Interstate-Light_nr.woff") format("woff");
 }
 
 #pg1 > svg:focus {
@@ -44,12 +44,17 @@
     stroke: none !important;
 }
 
-#spellcastingSheet .g3 {
+[id='Character Details'] .g3 {
+    fill: none !important;
+    stroke: var(--characterSheetsTertiary) !important;
+}
+
+#Spellcasting .g3 {
     fill: none !important;
     stroke: var(--characterSheetsPrimary) !important;
 }
 
-#spellcastingSheet .g4 {
+#Spellcasting .g4 {
     fill: var(--characterSheetsTertiary) !important;
 }
 
@@ -58,7 +63,7 @@
     stroke: none !important;
 }
 
-#spellcastingSheet .g5 {
+#Spellcasting .g5 {
     fill: var(--characterSheetsPrimary) !important;
 }
 
@@ -66,7 +71,7 @@
     fill: var(--characterSheetsSecondary) !important;
 }
 
-#spellcastingSheet .g6 {
+#Spellcasting .g6 {
     fill: var(--characterSheetsSecondary) !important;
 }
 

@@ -76,7 +76,9 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
+    "@ghostery/adblocker-electron": "^2.13.2",
     "cheerio": "^1.0.0-rc.10",
+    "cross-fetch": "^4.1.0",
     "custom-electron-titlebar": "^4.2.3",
     "discord-rpc": "^4.0.1",
     "electron-updater": "^6.1.7"

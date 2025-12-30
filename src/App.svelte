@@ -43,6 +43,10 @@
 	let sheetAnchor = $state();
 	let sheetElement;
 
+	if ($localStorageStore.disableAdblock == "false") {
+		window.adblock.enable()
+	}
+
 	$effect(() => {
 		if (sheetElement) return;
         if (!sheetAnchor) return;
@@ -54,7 +58,7 @@
             if (!sheetElement) return;
 			if (!$characters[$currentCharacter]) return;
 
-			sheetElement.textContent = modules[$characters[$currentCharacter].module.id]?.css?.shared
+			sheetElement.textContent = "@scope {" + modules[$characters[$currentCharacter].module.id]?.css?.shared + "}"
 		})
 
 		return () => {
@@ -297,14 +301,6 @@
 									<CharacterSheet bind:this={sheetRefs[sheet]} showNotes={currentCharacterSheet == i} sheetKey={sheet}/>
 								</div>
 							{/each}
-							<!--
-							<div id="characterdetails-container" class:visible={currentCharacterSheet == 1}>
-								<DetailsSheet bind:this={sheetRefs.detail} showNotes={currentCharacterSheet == 1}/>
-							</div>
-							<div id="spellcastingsheet-container" class:visible={currentCharacterSheet == 2}>
-								<SpellcastingSheet bind:this={sheetRefs.spellcasting} showNotes={currentCharacterSheet == 2}/>
-							</div>
-							-->
 							<span bind:this={sheetAnchor} style="display:none"></span>
 						</div>
 					{:else}

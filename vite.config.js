@@ -25,5 +25,6 @@ export default defineConfig({
         outDir: 'public',
         emptyOutDir: true
     },
-    publicDir: "frontend"
+    publicDir: "frontend",
+    base: production ? "./" : "/",
 });

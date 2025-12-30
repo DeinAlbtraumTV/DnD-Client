@@ -33,7 +33,7 @@
 
 		let unsubscribe = sheetModules.subscribe(modules => {
             if (!sheetElement) return;
-			sheetElement.textContent = modules[$characters[$currentCharacter].module.id]?.css?.[sheetKey]
+			sheetElement.textContent = "@scope {" + modules[$characters[$currentCharacter].module.id]?.css?.[sheetKey] + "}"
 		})
 
 		return () => {
@@ -53,11 +53,15 @@
             } else {
                 elem.value = ""
             }
+
+            elem.removeAttribute("user-edited")
         })
 
         Object.entries($characters[$currentCharacter][sheetKey]).forEach((pair) => {
             let key = pair[0]
             let value = pair[1]
+
+            if (value == "") return;
 
             let elem = document.querySelector("[data-id=\"" + sheetKey + ":" + key + "\"]")
 
@@ -337,6 +341,17 @@
         margin-top: 40px;
     }
 
+    .popup-wrapper {
+        border-radius: 10px;
+        background-color: var(--characterSheetsPrimary);
+        position: absolute;
+        height: 500px;
+        width: 300px;
+        z-index: 10;
+        padding: 4px;
+        overflow: auto;
+    }
+
     .note-remover {
         display: flex;
         align-items: center;
@@ -368,7 +383,7 @@
     }
 </style>
 
-<div bind:this={sheetDiv} id="${sheetKey}" class="tabcontent" class:dark={$characterSheets == "dark"}>
+<div bind:this={sheetDiv} id="{sheetKey}" class="tabcontent" class:dark={$characterSheets == "dark"}>
     <!-- svelte-ignore a11y_mouse_events_have_key_events -->
     <div role="button" tabindex=-1 class="note-remover" class:hidden={!showNoteRemover} onmouseover={() => {deleteNoteOnDrop = true}} onmouseout={() => {deleteNoteOnDrop = false}}>
         🗑️
