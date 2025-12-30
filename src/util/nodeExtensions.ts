@@ -1,6 +1,10 @@
 export function stopTyping(node: HTMLInputElement) {
-    const handleKeyup = debounce((event: { target: any; }) => {
-        if (node.contains(event.target)) {
+    const handleKeyup = debounce((event: KeyboardEvent) => {
+        if (!event.target) {
+            return;
+        }
+
+        if (node.contains(event.target as Node)) {
             node.dispatchEvent(new CustomEvent('stopTyping'));
         }
     }, 500);
@@ -14,9 +18,9 @@ export function stopTyping(node: HTMLInputElement) {
     };
 }
 
-function debounce(inputFunction: Function, timeToWaitBeforeFiringInMs = 500) {
+function debounce <U extends unknown[]>(inputFunction: (...args: U) => void, timeToWaitBeforeFiringInMs = 500) {
     let timer: NodeJS.Timeout;
-    return function(this: Function, ...args: any) {
+    return function(this: Document, ...args: U) {
         clearTimeout(timer);
         timer = setTimeout(() => {
             inputFunction.apply(this, args);

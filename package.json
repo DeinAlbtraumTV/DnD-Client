@@ -1,6 +1,6 @@
 {
   "name": "dnd-client",
-  "version": "1.0.13",
+  "version": "2.0.0",
   "author": {
     "name": "Jasper"
   },
@@ -13,9 +13,9 @@
   },
   "main": "client/index.js",
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "concurrently \"sirv public no-clear\" \"electron .\"",
+    "build": "vite build",
+    "dev": "vite",
+    "start": "concurrently \"vite\" \"electron .\"",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "preelectron-pack": "yarn run build",
     "electron-pack": "electron-builder",
@@ -54,11 +54,8 @@
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
     "@eslint/js": "^9.39.1",
-    "@rollup/plugin-commonjs": "^29.0.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.3.0",
     "@svelte-put/inline-svg": "^4.0.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tsconfig/svelte": "^5.0.6",
     "@types/node": "^22",
     "concurrently": "^9.2.1",
@@ -68,19 +65,14 @@
     "eslint": "^9.39.1",
     "eslint-plugin-svelte": "^3.13.1",
     "globals": "^16.5.0",
-    "rollup": "^4.54.0",
-    "rollup-plugin-css-only": "^4.5.5",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-polyfill-node": "^0.13.0",
-    "rollup-plugin-svelte": "^7.2.2",
-    "sirv-cli": "^3.0.1",
     "socket.io-client": "^4.5.2",
     "svelte": "^5.46.1",
     "svelte-check": "^4.3.5",
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.0.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.1"
+    "typescript-eslint": "^8.48.1",
+    "vite": "^7.3.0"
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",

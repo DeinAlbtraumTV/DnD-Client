@@ -2,7 +2,7 @@
     import { stopPropagation } from '../../util/eventExtensions';
 
     import { sheetZoom } from "../../stores/persistentSettingsStore";
-    import type { NoteData } from '../../types/types';
+    import type { NoteData } from '../../types';
 
     let { data = $bindable(), dragStart, dragEnd, dataUpdate }: {
         data: NoteData,

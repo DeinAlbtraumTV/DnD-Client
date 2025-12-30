@@ -1,20 +1,16 @@
-<script lang="ts">
+<script>
     import { onMount } from "svelte";
-    import { characters, socket, playerInfo, sheetModules } from "../../stores/nonPersistentStore"
+    import { characters, socket, playerInfo, sheetModules } from "../../stores/stateStore"
     import { currentCharacter, characterSheets, sessionCode } from "../../stores/persistentSettingsStore"
     import { getAffectedElements, reCalculateValue } from "../../util/inputInheritenceHelper";
     import Note from "./Note.svelte"
     import ModuleElement from "./ModuleElement.svelte";
-    import type { NoteData, SpellInfoPopup } from "../../types/types";
 
-    interface Props {
-        showNotes?: boolean;
-        sheetKey?: string;
-    }
+    let { showNotes = false, sheetKey } = $props();
 
-    let { showNotes = false, sheetKey = "" }: Props = $props();
-
-    let spellinfoPopups: Array<SpellInfoPopup> = $state([]);
+    let spellinfoPopups = $state([]);
+    let sheetDiv = $state();
+	let sheetElement;
 
     onMount(() => {
         if ($currentCharacter && $currentCharacter != "new" && $currentCharacter != "version" && $characters[$currentCharacter]) {
@@ -28,8 +24,28 @@
         })
     })
 
+    $effect(() => {
+		if (sheetElement) return;
+		if (!sheetDiv) return;
+
+		sheetElement = document.createElement("style")
+		sheetDiv.prepend(sheetElement)
+
+		let unsubscribe = sheetModules.subscribe(modules => {
+            if (!sheetElement) return;
+			sheetElement.textContent = modules[$characters[$currentCharacter].module.id]?.css?.[sheetKey]
+		})
+
+		return () => {
+			if (unsubscribe) unsubscribe()
+			if (sheetElement) sheetElement.remove()
+
+			sheetElement = undefined
+		}
+	})
+
     function loadValues() {
-        let elems = document.querySelectorAll("[data-field-name]") as NodeListOf<HTMLInputElement>
+        let elems = document.querySelectorAll('[data-id^="' + sheetKey + ':"]')
 
         elems.forEach(elem => {
             if (elem.type == "checkbox") {
@@ -43,44 +59,64 @@
             let key = pair[0]
             let value = pair[1]
 
-            let elem = document.querySelector("[id=\"" + key + "\"]") as HTMLInputElement
+            let elem = document.querySelector("[data-id=\"" + sheetKey + ":" + key + "\"]")
 
             if (!elem || elem == null) {
                 return
             }
 
             if (elem.type == "checkbox") {
-                elem.checked = value as boolean
+                elem.checked = value
             } else {
-                elem.value = value as string
+                elem.value = value
             }
 
             elem.setAttribute("user-edited", "true")
+
+            if (elem.hasAttribute("data-initiative")) {
+                value = Number.parseInt(value)
+                if (isNaN(value)) {
+                    value = 0
+                }
+
+                $playerInfo.initiativeModifier = value
+            }
         })
 
         $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey].forEach(elem => {
             if (!elem.type) return
 
-            let field = document.querySelector("[id=\"" + elem.id + "\"]") as HTMLInputElement
+            let field = document.querySelector("[data-id=\"" + sheetKey + ":" + elem.id + "\"]")
 
+            if (!field) return
             if (!field.getAttribute("user-edited")) {
                 let val = reCalculateValue(elem.id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
-
+                let stringVal;
+                
                 if (Number.parseInt(val) > 0)
-                    val = "+" + val
+                    stringVal = "+" + val
+                else
+                    stringVal = val
 
-                field.value = val
+                field.value = stringVal
+
+                if (elem.initiative) {
+                    val = Number.parseInt(val)
+                    if (isNaN(val)) {
+                        val = 0
+                    }
+
+                    $playerInfo.initiativeModifier = val
+                }
             }
         })
-
-        $playerInfo.initiativeModifier = Number.parseInt($characters[$currentCharacter][sheetKey].initiative) || 0
     }
 
     function onDrop() {
         return false;
     }
 
-    function onBlur(event: FocusEvent) {
+    function onBlur(event) {
         if (!(event.target instanceof HTMLInputElement)) {
             return;
         }
@@ -111,7 +147,7 @@
         let affectedElems = getAffectedElements(targetId, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
         
         for (const id of affectedElems) {
-            let elem = document.querySelector("[id=\"" + id + "\"]") as HTMLInputElement
+            let elem = document.querySelector("[data-id=\"" + sheetKey + ":" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
                 let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
@@ -162,7 +198,7 @@
         }, 75)
     }
 
-    function onClick(event: MouseEvent) {
+    function onClick(event) {
         if (!(event.target instanceof HTMLInputElement)) {
             return
         }
@@ -178,7 +214,7 @@
         let affectedElems = getAffectedElements(targetId, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey])
 
         for (const id of affectedElems) {
-            let elem = document.querySelector("[id=\"" + id + "\"]") as HTMLInputElement
+            let elem = document.querySelector("[data-id=\"" + sheetKey + ":" + id + "\"]")
 
             if (elem && !elem.getAttribute("user-edited")) {
                 let val = reCalculateValue(id, $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey], $characters[$currentCharacter][sheetKey])
@@ -204,7 +240,7 @@
         window.characters.storeSheets(JSON.stringify($characters))
     }
 
-    function onFocus(event: FocusEvent) {
+    function onFocus(event) {
         if (!(event.currentTarget instanceof HTMLInputElement)) {
             return;
         }
@@ -239,7 +275,7 @@
         spellinfoPopups = spellinfoPopups;
     }
 
-    async function loadSpellDesc(target: HTMLInputElement, spellname: string, left = false) {
+    async function loadSpellDesc(target, spellname, left = false) {
         let desc = await window.spells.getSpellInfo("http://dnd5e.wikidot.com/spell:" + spellname)
 
         let popupIndex = spellinfoPopups.findIndex(elem => elem.target == target);
@@ -255,7 +291,7 @@
         spellinfoPopups = spellinfoPopups;
     }
 
-    function noteDataUpdate(data: NoteData) {
+    function noteDataUpdate(data) {
         $characters[$currentCharacter][sheetKey + "Notes"][data.id] = data
         window.characters.storeSheets(JSON.stringify($characters))
     }
@@ -283,9 +319,10 @@
     let deleteNoteOnDrop = $state(false);
     let showNoteRemover = $state(false);
 
-    function noteDragEnd(id: number) {
+    function noteDragEnd(id) {
         if (deleteNoteOnDrop) {
-            $characters[$currentCharacter][sheetKey + "Notes"] = $characters[$currentCharacter][sheetKey + "Notes"].filter((note: NoteData) => note.id != id)
+            $characters[$currentCharacter][sheetKey + "Notes"] = $characters[$currentCharacter][sheetKey + "Notes"]
+                .filter((note) => note.id != id)
             window.characters.storeSheets(JSON.stringify($characters))
         }
 
@@ -294,7 +331,7 @@
 </script>
 
 <style>
-    #characterSheet {
+    .tabcontent {
         color: black;
         position: relative;
         margin-top: 40px;
@@ -331,14 +368,13 @@
     }
 </style>
 
-<div id="characterSheet" class="tabcontent" class:dark={$characterSheets == "dark"}>
-    {@html `<style>@scope{${$sheetModules[$characters[$currentCharacter].module.id]?.css?.characterSheet}}</style>`}
+<div bind:this={sheetDiv} id="${sheetKey}" class="tabcontent" class:dark={$characterSheets == "dark"}>
     <!-- svelte-ignore a11y_mouse_events_have_key_events -->
-    <div class="note-remover" class:hidden={!showNoteRemover} onmouseover={() => {deleteNoteOnDrop = true}} onmouseout={() => {deleteNoteOnDrop = false}}>
+    <div role="button" tabindex=-1 class="note-remover" class:hidden={!showNoteRemover} onmouseover={() => {deleteNoteOnDrop = true}} onmouseout={() => {deleteNoteOnDrop = false}}>
         🗑️
     </div>
     {#if showNotes}
-        {#each $characters[$currentCharacter][sheetKey + "Notes"] as data}
+        {#each $characters[$currentCharacter][sheetKey + "Notes"] as data (data)}
             <Note data={data} dragStart={() => {showNoteRemover = true}} dragEnd={noteDragEnd} dataUpdate={noteDataUpdate}></Note>
         {/each}
     {/if}
@@ -347,11 +383,11 @@
             <div id="page1" style="width: 935px; height: 1210px;" class="page">
                 <div class="page-inner" style="width: 935px; height: 1210px;">
                     <div id="p1" class="pageArea" style="overflow: hidden; position: relative; width: 935px; height: 1210px;margin-left:auto; margin-right:auto;">
-                        {#each $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey] as elem}
-                            <ModuleElement data={elem} onBlur={onBlur} onDrop={onDrop} onClick={onClick} onFocus={onFocus} onStopTyping={onFocus}/>
+                        {#each $sheetModules[$characters[$currentCharacter].module.id].data[sheetKey] as elem (elem)}
+                            <ModuleElement sheet={sheetKey} data={elem} onBlur={onBlur} onDrop={onDrop} onClick={onClick} onFocus={onFocus} onStopTyping={onFocus}/>
                         {/each}
                     </div>
-                    {#each spellinfoPopups as popup}
+                    {#each spellinfoPopups as popup (popup)}
                         {#if popup && popup.showing}
                             <div class="popup-wrapper" style="top: {popup.target.offsetTop - 234.5}px; {(popup.left ? "left: " + (popup.target.offsetLeft - 315) + "px" : "left: " + (popup.target.offsetLeft + 260) + "px")}; color: {$characterSheets == "dark" ? "white" : "black"} !important;">
                                 <style>

@@ -5,9 +5,9 @@
     "repo": "https://github.com/DeinAlbtraumTV/DnD-Client",
     "format": 2,
     "sheets": [
-        "characterSheet",
-        "detailSheet",
-        "spellcastingSheet"
+        "Character Stats",
+        "Character Details",
+        "Spellcasting"
     ],
     "sheetMigration": {
         "1": [

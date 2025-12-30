@@ -49,23 +49,23 @@ function _loadModule(dirName) {
         module.migration.spellcastingSheet = spellcastingSheetMigrationFile
 */
         for (let sheet of moduleInfo.sheets) {
-            let basePath = path.normalize(`${moduleStoragePath}/${dirName}/${sheet.fileName}`)
+            let basePath = path.normalize(`${moduleStoragePath}/${dirName}/${sheet}`)
             if (!fs.existsSync(basePath + ".json")) {
-                console.error(`Missing data file for module ${moduleInfo.name}. This sheet (${sheet.displayName}) will not work as expected!`)
+                console.error(`Missing data file for module ${moduleInfo.name}. This sheet (${sheet}) will not work as expected!`)
                 continue
             }
             if (!fs.existsSync(basePath + ".css")) {
-                console.error(`Missing style file for module ${moduleInfo.name}. This sheet (${sheet.displayName}) will not work as expected!`)
+                console.error(`Missing style file for module ${moduleInfo.name}. This sheet (${sheet}) will not work as expected!`)
                 continue
             }
             if (!fs.existsSync(basePath + ".csv")) {
-                console.warn(`Missing migration file for module ${moduleInfo.name}. This sheet (${sheet.displayName}) might not work as expected if its version changes!`)
+                console.warn(`Missing migration file for module ${moduleInfo.name}. This sheet (${sheet}) might not work as expected if its version changes!`)
                 continue
             }
 
-            module.data[sheet.fileName] = JSON.parse(fs.readFileSync(basePath + ".json", "utf-8"))
-            module.css[sheet.fileName] = fs.readFileSync(basePath + ".css", "utf-8")
-            module.migration[sheet.fileName] = basePath + ".csv"
+            module.data[sheet] = JSON.parse(fs.readFileSync(basePath + ".json", "utf-8"))
+            module.css[sheet] = fs.readFileSync(basePath + ".css", "utf-8")
+            module.migration[sheet] = basePath + ".csv"
         }
 
         module.css.shared = fs.readFileSync(sharedStyleFile, "utf-8")

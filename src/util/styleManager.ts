@@ -1,8 +1,8 @@
 const cssVars = new Map();
 
 function refresh() {
-    let values = [];
-    for(let [key, value] of cssVars) {
+    const values = [];
+    for(const [key, value] of cssVars) {
         values.push(`--${key}:${value}`);
     }
     document.documentElement.style.cssText = values.join(';');

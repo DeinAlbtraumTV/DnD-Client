@@ -1,22 +1,23 @@
-import type { InheritData, ModuleData } from "../types/types"
+import type { ConditionalData, ConditionData, InheritData, ModuleData } from "../types"
 
 export function getAffectedElements(changed: string, elements: ModuleData[]): string[] {
-    let affected: string[] = []
+    const affected: string[] = []
 
-    for (let elem of elements) {
+    for (const elem of elements) {
         if (!elem.inherits) continue
 
-        let inherit = elem.inherits
+        const inherit = elem.inherits
 
         try {
             if (doAffectedWalk(inherit, changed))
                 affected.push(elem.id)
-        } catch (e: any) {
-            if (e.unknown) {
+        } catch (e: unknown) {
+            const error = e as { unknown: string }
+            if (error.unknown) {
                 console.warn(
                     "Encountered unknown inherit type. This is a problem with the module you are using and should be reported to the module author.\n" +
                     "Detailed info below: \n" +
-                    "Key: \"" + e.unknown + "\"\n on element: \n" +
+                    "Key: \"" + error.unknown + "\"\n on element: \n" +
                     JSON.stringify(elem)
                 )
             }
@@ -35,12 +36,12 @@ export function getAffectedElements(changed: string, elements: ModuleData[]): st
 }
 
 function doAffectedChecks(elements: ModuleData[], affected: string[]) {
-    for (let elem of elements) {
+    for (const elem of elements) {
         if (!elem.inherits) continue
 
-        let inherit = elem.inherits
+        const inherit = elem.inherits
 
-        for (let affectedElem of affected) {
+        for (const affectedElem of affected) {
             if (doAffectedWalk(inherit, affectedElem)) {
                 if (!affected.includes(elem.id)) {
                     affected.push(elem.id)
@@ -53,14 +54,13 @@ function doAffectedChecks(elements: ModuleData[], affected: string[]) {
     return true
 }
 
-function doAffectedWalk(start: InheritData, changed: string, conditionalEntered: boolean = false): boolean {
+function doAffectedWalk(start: InheritData | ConditionalData | ConditionData | string, changed: string, conditional_entered: boolean = false): boolean {
     let affected: boolean = false
 
-    for (const [key, i_val] of Object.entries(start)) {
-        const val: any = <any> i_val
+    for (const [key, val] of Object.entries(start)) {
         //If we just entered a conditional we don't care what the options are called as we dont evaluate them
         //So we mark every referenced field as affected
-        if (conditionalEntered) {
+        if (conditional_entered) {
             affected ||= doAffectedWalk(val, changed)
         } else {
             switch (key) {
@@ -74,12 +74,12 @@ function doAffectedWalk(start: InheritData, changed: string, conditionalEntered:
                 case "sub":
                 case "mul":
                 case "div":
-                    for (let elem of val)
+                    for (const elem of val as InheritData[])
                         affected ||= doAffectedWalk(elem, changed)
                     break
 
                 case "conditional":
-                    affected ||= doAffectedWalk(val, changed, true)
+                    affected ||= doAffectedWalk(val as ConditionalData, changed, true)
                     break
 
                 //Values don't belong to any other input fields but we also don't want to error because of them
@@ -97,7 +97,8 @@ function doAffectedWalk(start: InheritData, changed: string, conditionalEntered:
     return affected
 }
 
-export function reCalculateValue(id: string, tree: ModuleData[], data: any, history: string[] = []): string {
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+export function reCalculateValue(id: string, tree: ModuleData[], data: { [key: string]: any }, history: string[] = []): string {
     if (history.includes(id)) {
         console.warn(
             "Circular inheritence detected. This is a problem with the module you are using and should be reported to the module author.\n" +
@@ -110,32 +111,33 @@ export function reCalculateValue(id: string, tree: ModuleData[], data: any, hist
 
     history.push(id)
 
-    let field = findElemById(id, tree)
-    let elem = <HTMLInputElement> document.querySelector("[id=\"" + id + "\"]")
+    const field = findElemById(id, tree)
+    const elem = <HTMLInputElement> document.querySelector("[id=\"" + id + "\"]")
 
     if (!field || !elem) {
         return ""
     }
 
-    if (!field.inherits || field.inherits.length == 0 || elem.hasAttribute("user-edited")) {
+    if (typeof(field) !== "object" || !field.inherits || elem.hasAttribute("user-edited")) {
         return data[id] ?? ""
     }
 
-    if (field.inherits.length > 1) {
+    if (Array.isArray(field)) {
         console.warn(
-            "Multiple inherits found on one element with id: " + id + "\n" +
+            "Inherits is an array on one element with id: " + id + "\n" +
             "This will lead to undefined behaviour. Please specify an operation to chain multiple fields together!"
         )
     }
 
     try {
         return "" + doCalculationWalk(field.inherits, tree, data, history)
-    } catch (e: any) {
-        if (e.unknown) {
+    } catch (e: unknown) {
+        const error = e as { unknown: string }
+        if (error.unknown) {
             console.warn(
                 "Encountered unknown inherit type. This is a problem with the module you are using and should be reported to the module author.\n" +
                 "Detailed info below: \n" +
-                "Key: \"" + e.unknown + "\"\n on element: \n" +
+                "Key: \"" + error.unknown + "\"\n on element: \n" +
                 JSON.stringify(field)
             )
         }
@@ -144,46 +146,52 @@ export function reCalculateValue(id: string, tree: ModuleData[], data: any, hist
     }
 }
 
-function doCalculationWalk(start: ModuleData, tree: ModuleData[], data: any, history: string[]): number {
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+function doCalculationWalk(start: InheritData, tree: ModuleData[], data: { [key: string]: any }, history: string[]): number {
     let value: number = 0
 
     for (const [key, i_val] of Object.entries(start)) {
-        const val: any = <any> i_val;
+        const val = i_val as InheritData[] | ConditionalData | string
         switch (key) {
-            case "id":
-                let field = findElemById(val, tree)
+            case "id": {
+                const id = val as string
+                const field = findElemById(id, tree)
 
-                if (field.inherits) {
-                    value = Number.parseInt(reCalculateValue(val, tree, data, history))
+                if (field && field.inherits) {
+                    value = Number.parseInt(reCalculateValue(id, tree, data, history))
                 } else {
-                    value = Number.parseInt(data[val] ?? 0)
+                    value = Number.parseInt(data[id] ?? 0)
                 }
                 break
+            }
 
-            case "add":
-                for (const elem of val) {
+            case "add": {
+                for (const elem of val as InheritData[]) {
                     value += doCalculationWalk(elem, tree, data, history)
                 }
                 break
+            }
 
-            case "sub":
-                for (const elem of val) {
+            case "sub": {
+                for (const elem of val as InheritData[]) {
                     value -= doCalculationWalk(elem, tree, data, history)
                 }
                 break
+            }
 
-            case "mul":
+            case "mul": {
                 if (value == 0)
                     value = 1
 
-                for (const elem of val) {
+                for (const elem of val as InheritData[]) {
                     value *= doCalculationWalk(elem, tree, data, history)
                 }
                 break
+            }
 
-            case "div":
-                for (const elem of val) {
-                    let temp = doCalculationWalk(elem, tree, data, history)
+            case "div": {
+                for (const elem of val as InheritData[]) {
+                    const temp = doCalculationWalk(elem, tree, data, history)
                     if (value == 0) {
                         value = temp
                     } else {
@@ -191,11 +199,18 @@ function doCalculationWalk(start: ModuleData, tree: ModuleData[], data: any, his
                     }
                 }
                 break
+            }
 
-            case "conditional":
-                let conditionField = findElemById(val.condition.id, tree)
-                let conditionFieldId = conditionField.id
-                let conditionFieldType = conditionField.type
+            case "conditional": {
+                const conditional = val as ConditionalData
+                const conditionField = findElemById(conditional.condition.id, tree)
+
+                if (conditionField == null) {
+                    break
+                }
+
+                const conditionFieldId = conditionField.id
+                const conditionFieldType = conditionField.type
                 let conditionFieldValue
 
                 if (conditionField.inherits) {
@@ -207,17 +222,18 @@ function doCalculationWalk(start: ModuleData, tree: ModuleData[], data: any, his
                 //Conditionals fall back to 0 if no value is set for a path. Careful when using them in mul/div groups!
                 if (conditionFieldType === "check") {
                     value = conditionFieldValue ? (
-                            Object.keys(val).includes("true") ? doCalculationWalk(val["true"], tree, data, history) : 0
+                            Object.keys(val).includes("true") ? doCalculationWalk(conditional["true"], tree, data, history) : 0
                         ) : (
-                            Object.keys(val).includes("false") ? doCalculationWalk(val["false"], tree, data, history) : 0
+                            Object.keys(val).includes("false") ? doCalculationWalk(conditional["false"], tree, data, history) : 0
                         )
-                } else if (val[conditionFieldValue]) {
-                    value = doCalculationWalk(val[conditionFieldValue], tree, data, history)
+                } else if (conditional[conditionFieldValue]) {
+                    value = doCalculationWalk(conditional[conditionFieldValue], tree, data, history)
                 }
                 break
+            }
 
             case "value":
-                value = val
+                value = Number.parseInt(val as string)
                 break
 
             default:
@@ -230,7 +246,7 @@ function doCalculationWalk(start: ModuleData, tree: ModuleData[], data: any, his
     return value
 }
 
-function findElemById(id: string, tree: ModuleData[]): any {
+function findElemById(id: string, tree: ModuleData[]): ModuleData | null {
     for (const elem of tree) {
         if (elem.id == id) {
             return elem;

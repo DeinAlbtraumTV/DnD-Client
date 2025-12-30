@@ -1,24 +1,28 @@
-<script lang="ts">
+<script>
     import { localStorageStore } from "../stores/localStorageStore.js"
     import { backgroundColor, backgroundImage, backgroundImageSize, backgroundOverlay, backgroundOverlayOpacity, backgroundPosition, primaryColor, characterSheets, sessionCode, currentCharacter } from "../stores/persistentSettingsStore.js"
-    import { socket, session, characters, playerInfo, type PlayerData, sheetModules } from "../stores/nonPersistentStore.js"
+    import { socket, session, characters, playerInfo, sheetModules } from "../stores/stateStore.js"
     import { generateName } from "../util/nameGenerator.js";
+    import { SvelteMap } from 'svelte/reactivity';
+    import { preventDefault } from '../util/eventExtensions.js';
 
-    let settingsOpened = false
-    let activeSettingsCategory = 0
-    let mapLink = ""
+    let { children } = $props();
 
-    let players:Map<string, PlayerData> = new Map<string, PlayerData>()
+    let settingsOpened = $state(false)
+    let activeSettingsCategory = $state(0)
+    let mapLink = $state("")
 
-    let dummyAddData = {
+    let players = new SvelteMap()
+
+    let dummyAddData = $state({
         name: "Dummy",
         initiativeModifier: 0
-    }
+    })
 
     $socket.on("connect", () => {
         console.log("Connected to websocket server")
         
-        $socket.emit("sync", { session_code: $sessionCode }, (callback: any) => {
+        $socket.emit("sync", { session_code: $sessionCode }, (callback) => {
             if (callback.session_exists) {
                 joinSession()
             } else {
@@ -31,7 +35,7 @@
     $socket.on("disconnect", () => {
         $sessionCode = ""
         $session = undefined
-        players = new Map<string, PlayerData>()
+        players.clear()
         console.log("Lost connection to server!")
     })
 
@@ -43,21 +47,17 @@
         }
     })
 
-    $socket.on("addPlayer", (data: any) => {
+    $socket.on("addPlayer", (data) => {
         players.set(data.player, {
             name: data.playerName,
             initiative: data.initiative ?? 0,
             initiativeModifier: Number.parseInt(data.initiativeModifier ?? 0),
             isDummy: data.isDummy
         })
-
-        players = players
     })
 
-    $socket.on("removePlayer", (data: any) => {
+    $socket.on("removePlayer", (data) => {
         players.delete(data.player)
-
-        players = players
     })
 
     $socket.on("syncPlayerData", () => {
@@ -68,7 +68,7 @@
         }
     })
 
-    $socket.on("updateInitiative", (data: any) => {
+    $socket.on("updateInitiative", (data) => {
         if (players.has(data.player)) {
             players.set(data.player, {
                 name: players.get(data.player)?.name || "",
@@ -76,8 +76,6 @@
                 initiativeModifier: players.get(data.player)?.initiativeModifier || 0,
                 isDummy: players.get(data.player)?.isDummy || false
             })
-
-            players = players
         }
 
         if ($socket.id == data.player) {
@@ -85,7 +83,7 @@
         }
     })
 
-    $socket.on("updateInitiativeModifier", (data: any) => {
+    $socket.on("updateInitiativeModifier", (data) => {
         if (players.has(data.player)) {
             players.set(data.player, {
                 name: players.get(data.player)?.name || "",
@@ -93,8 +91,6 @@
                 initiativeModifier: data.initiativeModifier,
                 isDummy: players.get(data.player)?.isDummy || false
             })
-
-            players = players
         }
 
         if ($socket.id == data.player) {
@@ -102,7 +98,7 @@
         }
     })
 
-    function select(event:FocusEvent & {currentTarget: EventTarget & HTMLInputElement;}) {
+    function select(event) {
         event.currentTarget.select()
     }
 
@@ -111,7 +107,7 @@
             leaveSession()
         }
 
-        $socket.emit("createSession", (callback: any) => {
+        $socket.emit("createSession", (callback) => {
             if (callback && callback.session_code) {
                 $session = {
                     code: callback.session_code,
@@ -121,7 +117,7 @@
                 }
 
                 $sessionCode = callback.session_code
-                players = new Map<string, PlayerData>()
+                players.clear()
                 rollInitiativeForMe()
                 console.log("Created session", $sessionCode)
             }
@@ -130,24 +126,29 @@
 
     function joinSession() {
         if ($session) {
-            $socket.emit("leaveSession", { session_code: $session.code }, (callback: any) => {
+            $socket.emit("leaveSession", { session_code: $session.code }, (callback) => {
                 if (callback && callback.left) {
                     $session = undefined
-                    players = new Map<string, PlayerData>()
+                    players.clear()
                     console.log("Left session", $sessionCode)
                 }
             })
         }
 
-        $socket.emit("joinSession", { session_code: $sessionCode, playerName: $localStorageStore.playerName, initiative: $playerInfo.initiative, initiativeModifier: ($characters[$currentCharacter] ? $characters[$currentCharacter].sheet["initiative"] : 0) }, (callback: any) => {
+        $socket.emit("joinSession", { 
+            session_code: $sessionCode, 
+            playerName: $localStorageStore.playerName, 
+            initiative: $playerInfo.initiative, 
+            initiativeModifier: $playerInfo.initiativeModifier 
+        }, (callback) => {
             if (callback && callback.joined) {
                 $session = {
                     code: $sessionCode,
                     role: "Player",
                     url: callback.url,
-                    dm: false
+                    dm: callback.dm
                 }
-                players = new Map<string, PlayerData>()
+                players.clear()
                 rollInitiativeForMe()
                 console.log("Joined session", $sessionCode)
             } else {
@@ -160,11 +161,11 @@
     function leaveSession() {
         if (!$session) return
 
-        $socket.emit("leaveSession", { session_code: $session.code }, (callback: any) => {
+        $socket.emit("leaveSession", { session_code: $session.code }, (callback) => {
             if (callback && callback.left) {
                 $session = undefined
                 $sessionCode = ""
-                players = new Map<string, PlayerData>()
+                players.clear()
                 console.log("Left session", sessionCode)
             }
         })
@@ -191,7 +192,7 @@
         }
     }
 
-    function transferDm(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+    function transferDm(event) {
         let target = event.currentTarget
         let parent = target.parentElement
 
@@ -204,7 +205,7 @@
             $session.role = "Player"
         }
 
-        players = new Map<string, PlayerData>()
+        players.clear()
     }
 
     function rollInitiativeForMe() {
@@ -215,7 +216,7 @@
         }
     }
 
-    function rollInitiativeForPlayer(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+    function rollInitiativeForPlayer(event) {
         if ($session) {
             let target = event.currentTarget
             let parent = target.parentElement
@@ -237,8 +238,6 @@
                 isDummy: playerData.isDummy
             })
 
-            players = players
-
             $socket.emit("updateInitiative", { player: player, session_code: $session.code, initiative: rand })
         }
     }
@@ -257,8 +256,6 @@
 
                 $socket.emit("updateInitiative", { player: key, session_code: $session.code, initiative: rand })
             }
-            
-            players = players
 
             rollInitiativeForMe()
         }
@@ -277,8 +274,6 @@
                 isDummy: true
             })
 
-            players = players
-
             $socket.emit("addDummy", { dummyId: dummyId, name: dummyAddData.name, session_code: $session.code, initiative: rand, initiativeModifier: dummyAddData.initiativeModifier })
 
             dummyAddData = {
@@ -288,7 +283,7 @@
         }
     }
 
-    function removeDummy(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+    function removeDummy(event) {
         let target = event.currentTarget
         let parent = target.parentElement
 
@@ -298,8 +293,6 @@
 
         if ($session) {
             players.delete(player)
-
-            players = players
 
             $socket.emit("removeDummy", { player: player, session_code: $session.code })
         }
@@ -318,20 +311,20 @@
     <div id="sidebar-content-container">
         <div id="dungeonControlRoom-container">
             <div id="sessionControls">
-                <form on:submit|preventDefault>
+                <form onsubmit={preventDefault()}>
                     <p id="sessionRole-indicator">Your role: {$session ? $session.role : "none"}</p>
                     <div class="dungeonControlRoom-inputRow">
                         <p class="dungeonControlRoom-inlineText">Join a Session:</p>
                         <input class="dungeonControlRoom-input input boxShadow" type="text" bind:value="{$sessionCode}">
                     </div>
                     <div class="dungeonControlRoom-inputRow">
-                        <button class="dungeonControlRoom-button" on:click="{createSession}">Create Session</button>
-                        <button class="dungeonControlRoom-button" on:click="{joinSession}">Join Session</button>
-                        <button class="dungeonControlRoom-button" disabled="{!$session}" on:click="{leaveSession}">Leave Session</button>
+                        <button class="dungeonControlRoom-button" onclick={createSession}>Create Session</button>
+                        <button class="dungeonControlRoom-button" onclick={joinSession}>Join Session</button>
+                        <button class="dungeonControlRoom-button" disabled="{!$session}" onclick={leaveSession}>Leave Session</button>
                     </div>
                 </form>
                 {#if $session}
-                <form on:submit|preventDefault>
+                <form onsubmit={preventDefault()}>
                     {#if $session.dm}
                     <p class="dungeonControlRoom-text">Dungeon Control Room</p>
                     <div class="dungeonControlRoom-inputRow">
@@ -339,18 +332,18 @@
                         <input class="dungeonControlRoom-input input boxShadow" type="text" bind:value="{mapLink}">
                     </div>
                     <div class="dungeonControlRoom-inputRow">
-                        <button class="dungeonControlRoom-button" on:click="{loadMapForSelf}">Load Map for yourself</button>
-                        <button class="dungeonControlRoom-button" on:click="{loadMapForAll}">Load Map for everyone</button>
+                        <button class="dungeonControlRoom-button" onclick={loadMapForSelf}>Load Map for yourself</button>
+                        <button class="dungeonControlRoom-button" onclick={loadMapForAll}>Load Map for everyone</button>
                     </div>
                     {/if}
                     <div class="playerList">
                         <p class="dungeonControlRoom-text">Players in the session:</p>
-                        {#each [...players] as [key, value]}
+                        {#each [...players] as [key, value] (key)}
                             {#if !value.isDummy}
                                 <div class="dungeonControlRoom-inputRow" data-player-id="{key}">
                                     <p class="dungeonControlRoom-inlineText">{value.name}</p>
                                     {#if $session.dm}
-                                        <button class="dungeonControlRoom-button" on:click="{transferDm}">Make DM</button>
+                                        <button class="dungeonControlRoom-button" onclick={transferDm}>Make DM</button>
                                     {/if}
                                 </div>
                             {/if}
@@ -362,13 +355,13 @@
         </div>
         <div id="initiativeTracker-container">
             {#if $session}
-                <form on:submit|preventDefault>
+                <form onsubmit={preventDefault()}>
                     <p class="dungeonControlRoom-text" id="initiativeTrackerTitle">Initiative Tracker</p>
                     <div class="dungeonControlRoom-inputRow">
                         {#if $session.dm}
-                            <button class="dungeonControlRoom-button" on:click={rollInitiativeForAll}>Roll for everyone</button>
+                            <button class="dungeonControlRoom-button" onclick={rollInitiativeForAll}>Roll for everyone</button>
                         {/if}
-                        <button class="dungeonControlRoom-button" on:click={rollInitiativeForMe}>Roll for me</button>
+                        <button class="dungeonControlRoom-button" onclick={rollInitiativeForMe}>Roll for me</button>
                     </div>
                     {#if $session.dm}
                         <div class="sidebar-subgroup">
@@ -382,19 +375,19 @@
                                 <input class="dungeonControlRoom-input input boxShadow" type="text" placeholder="Name" bind:value={dummyAddData.name}>
                             </div>
                             <div class="dungeonControlRoom-inputRow">
-                                <button class="dungeonControlRoom-button" on:click={addDummyToInitiativeTracker}>Add</button>
+                                <button class="dungeonControlRoom-button" onclick={addDummyToInitiativeTracker}>Add</button>
                             </div>
                         </div>
                     {/if}
                     <div class="playerList" id="initiativeList">
                         <p class="playerName">{$localStorageStore.playerName}: {$playerInfo.initiative + $playerInfo.initiativeModifier} ({$playerInfo.initiative} + {$playerInfo.initiativeModifier})</p>
-                        {#each [...players] as [key, value]}
+                        {#each [...players] as [key, value] (key)}
                             <div class="dungeonControlRoom-inputRow" data-player-id="{key}">
                                 <p class="dungeonControlRoom-inlineText">{value.name}: {value.initiative + value.initiativeModifier} ({value.initiative} + {value.initiativeModifier})</p>
                                 {#if $session.dm}
-                                    <button class="dungeonControlRoom-button" on:click="{rollInitiativeForPlayer}">Roll</button>
+                                    <button class="dungeonControlRoom-button" onclick={rollInitiativeForPlayer}>Roll</button>
                                     {#if value.isDummy}
-                                        <button class="dungeonControlRoom-button" on:click="{removeDummy}">Remove</button>
+                                        <button class="dungeonControlRoom-button" onclick={removeDummy}>Remove</button>
                                     {/if}
                                 {/if}
                             </div>
@@ -404,33 +397,33 @@
             {/if}
         </div>
         <div id="playerInfo-container">
-            <input id="playerName" placeholder="Username" type="text" class="input boxShadow" on:blur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
-            <button aria-label="Open Settings" id="settings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="fas fa-cog"></i></button>
+            <input id="playerName" placeholder="Username" type="text" class="input boxShadow" onblur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
+            <button aria-label="Open Settings" id="settings-button" onclick={() => {settingsOpened = !settingsOpened}}><i class="fas fa-cog"></i></button>
         </div>
     </div>
     <div id="content-container" class="">
-        <slot></slot>
+        {@render children?.()}
     </div>
 </div>
 <div id="settings-container" class:opened="{settingsOpened}">
     <div id="settings">
-        <button aria-label="Close Settings" id="closeSettings-button" on:click="{() => {settingsOpened = !settingsOpened}}"><i class="far fa-times-circle"></i></button>
+        <button aria-label="Close Settings" id="closeSettings-button" onclick={() => {settingsOpened = !settingsOpened}}><i class="far fa-times-circle"></i></button>
         <div id="category-wrapper">
             <div id="category-selector">
                 <hr>
                 <div class="settings-category-title">General Settings</div>
-                <div role="menu" tabindex=0 class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 0}} on:click="{() => {activeSettingsCategory = 0}}" class:active="{activeSettingsCategory == 0}">User Settings</div>
+                <div role="menu" tabindex=0 class="category-button" onkeydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 0}} onclick={() => {activeSettingsCategory = 0}} class:active="{activeSettingsCategory == 0}">User Settings</div>
                 <hr>
                 <div class="settings-category-title">App Settings</div>
-                <div role="menu" tabindex=0 class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 1}} on:click="{() => {activeSettingsCategory = 1}}" class:active="{activeSettingsCategory == 1}">Appearance</div>
-                <div role="menu" tabindex=0 class="category-button" on:keydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 2}} on:click="{() => {activeSettingsCategory = 2}}" class:active="{activeSettingsCategory == 2}">Modules</div>
+                <div role="menu" tabindex=0 class="category-button" onkeydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 1}} onclick={() => {activeSettingsCategory = 1}} class:active="{activeSettingsCategory == 1}">Appearance</div>
+                <div role="menu" tabindex=0 class="category-button" onkeydown={(event) => {if (event.key == "Enter") activeSettingsCategory = 2}} onclick={() => {activeSettingsCategory = 2}} class:active="{activeSettingsCategory == 2}">Modules</div>
             </div>
             <div id="category-container">
                 <div id="user-settings" class="settings-category" class:active="{activeSettingsCategory == 0}">
                     <h2>User Settings</h2>
                     <div class="input-wrapper">
                         <p>Username:</p>
-                        <input id="playerName_settings" placeholder="Username" type="text" class="input" on:blur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
+                        <input id="playerName_settings" placeholder="Username" type="text" class="input" onblur={onPlayernameBlur} bind:value="{$localStorageStore.playerName}"/>
                     </div>
                 </div>
                 <div id="appearance" class="settings-category" class:active="{activeSettingsCategory == 1}">
@@ -453,7 +446,7 @@
                     </div>
                     <div class="input-wrapper">
                         <p>Background Image:</p>
-                        <input type="url" id="backgroundImageUrl-input" class="input" bind:value="{$backgroundImage}" on:focus="{select}">
+                        <input type="url" id="backgroundImageUrl-input" class="input" bind:value="{$backgroundImage}" onfocus={select}>
                     </div>
                     <div class="input-wrapper">
                         <p>Background Image Size:</p>
@@ -486,7 +479,7 @@
                     <h2>Modules</h2>
                     <div class="input-wrapper">
                         <p>Installed Modules:</p>
-                        <button class="input button" on:click={() => {window.util.openModuleFolder()}}>Open Module Folder</button>
+                        <button class="input button" onclick={() => {window.util.openModuleFolder()}}>Open Module Folder</button>
                     </div>
                     <div class="input-wrapper table-wrapper">
                         <table class="table">
@@ -497,7 +490,7 @@
                                     <th>Author</th>
                                     <th>Repository</th>
                                 </tr>
-                                {#each Object.values($sheetModules) as module}
+                                {#each Object.values($sheetModules) as module (module)}
                                     <tr>
                                         <td>{module.info.name}</td>
                                         <td>{module.info.version}</td>

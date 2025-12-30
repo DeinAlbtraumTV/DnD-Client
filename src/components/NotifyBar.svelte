@@ -3,7 +3,7 @@
 </script>
 
 <div>
-    {#each $notifications as notification, i}
+    {#each $notifications as notification, i (notification)}
         {#if i < 3}
             <div class="notification-bar {NotificationType[notification.type].toLowerCase()}" style="{notification.type == NotificationType.CUSTOM ? `background-color: ${notification.color}` : ""}">
                 <span>{notification.content}</span>

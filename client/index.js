@@ -7,6 +7,8 @@ const { autoUpdater } = require('electron-updater')
 
 const DISABLE_AUTOMATIC_UPDATES = false
 
+const isDev = process.env.NODE_ENV === 'development' || process.defaultApp
+
 remoteMain.initialize()
 setupTitlebar()
 
@@ -22,7 +24,7 @@ function createUpdaterWindow() {
 		webPreferences: {
 			preload: path.join(__dirname, "updater_preload.js")
 		},
-		resizable: !app.isPackaged
+		resizable: isDev
 	})
 
 	win.setMenuBarVisibility(false)
@@ -56,7 +58,11 @@ function createMainWindow() {
 
 	win.setMenuBarVisibility(false)
 
-	win.loadFile(path.join(__dirname, "../public/index.html"))
+	if (isDev) {
+		win.loadURL("http://localhost:5173")
+	} else {
+		win.loadFile(path.join(__dirname, "../public/index.html"))
+	}
 
 	win.maximize()
 
@@ -104,12 +110,12 @@ ipcMain.on("get-userdata-path", event => {
 })
 
 ipcMain.on("is-dev", event => {
-	event.returnValue = !app.isPackaged
+	event.returnValue = isDev
 })
 
 //UPDATER RELATED EVENTS
 app.on('ready', () => {
-	if (app.isPackaged) {
+	if (!isDev) {
 		if (DISABLE_AUTOMATIC_UPDATES || process.platform == 'darwin') {
 			initMainApp()
 		} else {

@@ -18,7 +18,7 @@ function createNotificationStore() {
         },
         remove: (notification: BarNotification) => {
             update((arr) => {
-                let notificationIndex = arr.findIndex(elem => elem == notification)
+                const notificationIndex = arr.findIndex(elem => elem == notification)
                 arr.splice(notificationIndex, 1)
                 return arr
             })
