@@ -19,10 +19,11 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "preelectron-pack": "yarn run build",
     "electron-pack": "electron-builder",
-    "publish": "electron-builder -p always",
+    "publish": "electron-builder -p onTag",
     "lint": "eslint ."
   },
   "build": {
+    "publish": "github",
     "icon": "icon.png",
     "productName": "DnD Client",
     "files": [
