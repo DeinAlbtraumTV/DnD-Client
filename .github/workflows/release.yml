@@ -48,11 +48,6 @@ jobs:
         run: |
           sudo snap install snapcraft --classic
 
-      - name: Login to Snapcraft
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          snapcraft login
-
       - name: Build Linux (AppImage + Snap)
         if: matrix.os == 'ubuntu-latest'
         run: |
