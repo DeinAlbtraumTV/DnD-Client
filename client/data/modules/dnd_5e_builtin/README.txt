@@ -12,3 +12,23 @@ Mandatory files are:
 - moduleInfo.json
 - shared.css
 - *.json, *.css, *.csv for all sheets defined in moduleInfo.json (Make sure filenames match!)
+
+If you plan to update your module, have a look at how module migration data is defined in the dnd_5e_builtin module!
+
+This section will go over all of the fields in the moduleInfo.json:
+- name: 
+displayname for your module
+- version: 
+the current version of your module. 
+Changing this signals the character manager that old character data needs to be migrated to a new format!
+- author: 
+author of the module, displayed in the settings module section
+- repo: 
+a link to the github repo of this module, or wherever the module is hosted
+- sheets: 
+a list of all pages available in this module. 
+If these ever change, make sure to put the old name into the sheetMigration!
+- sheetMigration: 
+a history of old sheet names. 
+If a key in this list matches a past version of your module, existing character data stored for the old sheet will be moved over to the current sheet name.
+You can skip versions, but sheets are matched based on order, so sheet 1 will match to the first entry of a sheetMigration of a specific version

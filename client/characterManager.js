@@ -31,23 +31,9 @@ function _loadModule(dirName) {
         module.info.version = parseInt(moduleInfo.version)
         module.info.author = moduleInfo.author
         module.info.repo = moduleInfo.repo
-        module.info.format = moduleInfo.formatVersion ?? 1
         module.info.sheets = moduleInfo.sheets
+        module.info.migrations = moduleInfo.sheetMigration ?? {}
 
-/* TODO add Fallback for formatVersion 1 modules
-        module.data.characterSheet = JSON.parse(fs.readFileSync(characterSheetDataFile, "utf-8"))
-        module.data.detailSheet = JSON.parse(fs.readFileSync(detailSheetDataFile, "utf-8"))
-        module.data.spellcastingSheet = JSON.parse(fs.readFileSync(spellcastingSheetDataFile, "utf-8"))
-
-        module.css.characterSheet = fs.readFileSync(characterSheetStyleFile, "utf-8")
-        module.css.detailSheet = fs.readFileSync(detailSheetStyleFile, "utf-8")
-        module.css.spellcastingSheet = fs.readFileSync(spellcastingSheetStyleFile, "utf-8")
-        module.css.shared = fs.readFileSync(sharedStyleFile, "utf-8")
-
-        module.migration.characterSheet = characterSheetMigrationFile
-        module.migration.detailSheet = detailSheetMigrationFile
-        module.migration.spellcastingSheet = spellcastingSheetMigrationFile
-*/
         for (let sheet of moduleInfo.sheets) {
             let basePath = path.normalize(`${moduleStoragePath}/${dirName}/${sheet}`)
             if (!fs.existsSync(basePath + ".json")) {
@@ -131,7 +117,7 @@ module.exports = {
 
         fs.writeFileSync(path.normalize(`${characterStoragePath}/characters_migration_backup.json`), characterStorageFileContent, "utf-8")
 
-        data = migrateData(data)
+        data = migrateSheets(data)
         fs.writeFileSync(characterStorageFile, JSON.stringify(data), "utf-8")
     
         return data
@@ -144,12 +130,13 @@ module.exports = {
     }
 }
 
-function migrateData(data) {
+function migrateSheets(data) {
     //read csv file from the module the character is using
     //no module info means legacy character -> fallback to dnd_5e_builtin
     //replace all instances of the old keys with the new keys, version is the column name
     //return the new data
-    //key in data is version or charname, version key is considered legacy and will not be used anymore
+    //key in data is version or charname, key value "version" is considered legacy and will not be used anymore
+    //as newer versions of this client store the save format version in each character, as different modules might have different versions
     let newData = {}
 
     for (let key in data) {
@@ -165,7 +152,6 @@ function migrateData(data) {
         }
 
         let version = data[key].module.version
-        let format = data[key].module.format ?? 1
     
         if (version == -1) {
             continue
@@ -174,6 +160,7 @@ function migrateData(data) {
         let module = sheetModulesLoaded[data[key].module.id]
 
         console.log("Starting character migration for:", key)
+        console.log("Migration data:", module.migration)
 
         if (!module) {
             console.log("Missing module", data[key].module.id + ",", "skipping migration for character:", key)
@@ -205,72 +192,67 @@ function migrateData(data) {
             continue
         }
     
-        let sheetCsvLines = fs.readFileSync(sheetFormatPath, "utf8").replaceAll("\r", "").split("\n")
-    
-        let detailCsvLines = fs.readFileSync(detailFormatPath, "utf8").replaceAll("\r", "").split("\n")
-    
-        let spellcastingCsvLines = fs.readFileSync(spellFormatPath, "utf8").replaceAll("\r", "").split("\n")
-    
         newData[key] = {
-            module: data[key].module,
-            sheet: {},
-            details: {},
-            spellcasting: {},
-            sheetNotes: [],
-            detailNotes: [],
-            spellcastingNotes: []
+            module: data[key].module
         }
 
-        for (let i = 1; i < sheetCsvLines.length; i++) {
-            let line = sheetCsvLines[i].split(",")
-            let oldKey = line[version - 1]
-            let newKey = line[SAVE_VERSION - 1]
+        let sheetIndex = 0
+        for (sheet in module.sheets) {
+            newData[key][sheet] = {}
+            newData[key][sheet + "Notes"] = []
 
-            if (data[key].sheet[oldKey] == undefined) continue
+            let migrateFrom = data[key]
+            let migrateTo = {}
+            migrateTo[sheet] = {}
 
-            newData[key].sheet[newKey] = data[key].sheet[oldKey]
-            delete data[key].sheet[oldKey]
+            if (!fs.existsSync(module.migration[sheet])) {
+                console.log("No save format file found for sheet ", sheet, ", skipping migration of this sheet for character:", key)
+                newData[key] = data[key]
+                continue
+            }
+
+            let migrationCsv = fs.readFileSync(module.migration[sheet], "utf8").replaceAll("\r", "").split("\n")
+
+            for (let oldVersion = version; oldVersion < SAVE_VERSION; oldVersion++) {
+                let sheetFrom
+
+                if (module.info.migrations[oldVersion]) {
+                    sheetFrom = module.info.migrations[oldVersion][sheetIndex]
+                } else {
+                    sheetFrom = sheet
+                }
+
+                migrateSheet(migrationCsv, oldVersion, oldVersion + 1, sheetFrom, sheet, migrateFrom, migrateTo)
+
+                migrateFrom = migrateTo
+                migrateTo = {}
+            }
+
+            newData[key][sheet] = migrateFrom[sheet]
+            newData[key][sheet + "Notes"] = migrateFrom[sheet + "Notes"]
+            sheetIndex++
         }
-
-        for (let sheetKey in data[key].sheet) {
-            newData[key].sheet[sheetKey] = data[key].sheet[sheetKey]
-        }
-
-        for (let i = 1; i < detailCsvLines.length; i++) {
-            let line = detailCsvLines[i].split(",")
-            let oldKey = line[version - 1]
-            let newKey = line[SAVE_VERSION - 1]
-
-            if (data[key].details[oldKey] == undefined) continue
-
-            newData[key].details[newKey] = data[key].details[oldKey]
-            delete data[key].details[oldKey]
-        }
-
-        for (let detailKey in data[key].details) {
-            newData[key].details[detailKey] = data[key].details[detailKey]
-        }
-
-        for (let i = 1; i < spellcastingCsvLines.length; i++) {
-            let line = spellcastingCsvLines[i].split(",")
-            let oldKey = line[version - 1]
-            let newKey = line[SAVE_VERSION - 1]
-
-            if (data[key].spellcasting[oldKey] == undefined) continue
-
-            newData[key].spellcasting[newKey] = data[key].spellcasting[oldKey]
-            delete data[key].spellcasting[oldKey]
-        }
-
-        for (let spellcastingKey in data[key].spellcasting) {
-            newData[key].spellcasting[spellcastingKey] = data[key].spellcasting[spellcastingKey]
-        }
-
-        //Notes
-        newData[key].sheetNotes = data[key].sheetNotes != undefined && Array.isArray(data[key].sheetNotes) ? data[key].sheetNotes : [];
-        newData[key].detailNotes = data[key].detailNotes != undefined && Array.isArray(data[key].detailNotes) ? data[key].detailNotes : [];
-        newData[key].spellcastingNotes = data[key].spellcastingNotes != undefined && Array.isArray(data[key].spellcastingNotes) ? data[key].spellcastingNotes : [];
     }
 
     return newData
+}
+
+function migrateSheet(csvInput, versionFrom, versionTo, sheetFrom, sheetTo, from, to) {
+    for (let i = 1; i < csvInput.length; i++) {
+        let line = csvInput[i].split(",")
+        let oldKey = line[versionFrom - 1]
+        let newKey = line[versionTo - 1]
+
+        if (from[sheetFrom][oldKey] == undefined) continue
+
+        to[sheetTo][newKey] = from[sheetFrom][oldKey]
+        delete from[sheetFrom][oldKey]
+    }
+
+    for (let key in from[sheetFrom]) {
+        to[sheetTo][key] = from[sheetFrom][key]
+    }
+
+    let oldNotes = from[sheetFrom + "Notes"]
+    to[sheetTo + "Notes"] = oldNotes != undefined && Array.isArray(oldNotes) ? oldNotes : []
 }
