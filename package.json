@@ -23,7 +23,10 @@
     "lint": "eslint ."
   },
   "build": {
-    "publish": "github",
+    "publish": {
+      "provider": "github",
+      "releaseType": "draft"
+    },
     "icon": "icon.png",
     "productName": "DnD Client",
     "files": [
@@ -46,9 +49,12 @@
         ]
       }
     ],
-    "win": {},
+    "win": {
+      "target": "nsis"
+    },
     "linux": {
-      "category": "Utility"
+      "category": "Utility",
+      "target": ["AppImage", "snap"]
     },
     "mac": {}
   },
