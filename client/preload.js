@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { CustomTitlebar, TitlebarColor } = require('custom-electron-titlebar')
 const { contextBridge, ipcRenderer } = require("electron")
 const cheerio = require('cheerio')
-const path = require('path')
 const { loadSheets, storeSheets, loadModules, getModuleStoragePath } = require("./characterManager.js")
 
 if (process.platform == "darwin" 

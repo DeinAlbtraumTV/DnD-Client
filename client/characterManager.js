@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
@@ -173,30 +174,17 @@ function migrateSheets(data) {
             continue
         }
     
-        if (!fs.existsSync(module.migration.characterSheet)) {
-            console.log("No character save format file found, skipping migration for character:", key)
-            newData[key] = data[key]
-            continue
-        }
-    
-        if (!fs.existsSync(module.migration.detailSheet)) {
-            console.log("No detail save format file found, skipping migration for character:", key)
-            newData[key] = data[key]
-            continue
-        }
-    
-        if (!fs.existsSync(module.migration.spellcastingSheet)) {
-            console.log("No spellcasting save format file found, skipping migration for character:", key)
-            newData[key] = data[key]
-            continue
-        }
-    
         newData[key] = {
             module: data[key].module
         }
 
+        newData[key].module.version = module.info.version
+
         let sheetIndex = 0
-        for (sheet in module.sheets) {
+        for (i in module.info.sheets) {
+            let sheet = module.info.sheets[i]
+            console.log("Migrating Sheet", sheet)
+
             newData[key][sheet] = {}
             newData[key][sheet + "Notes"] = []
 

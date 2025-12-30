@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { app, BrowserWindow, ipcMain, session } = require('electron')
 const { setupTitlebar, attachTitlebarToWindow } = require('custom-electron-titlebar/main')
 const { Client } = require('discord-rpc')
@@ -115,22 +116,30 @@ ipcMain.on("is-dev", event => {
 })
 
 ipcMain.on("start-adblock", (event) => {
-	adBlocker.enableBlockingInSession(session.defaultSession);
-	console.log("Adblock active")
-	event.returnValue = "success"
+	if (adBlocker) {
+		adBlocker.enableBlockingInSession(session.defaultSession);
+		console.log("Adblock active")
+		event.returnValue = "success"
+	} else {
+		event.returnValue = "failure"
+	}
 })
 
 ipcMain.on("stop-adblock", (event) => {
-	adBlocker.disableBlockingInSession(session.defaultSession);
-	console.log("Adblock inactive")
-	event.returnValue = "success"
+	if (adBlocker) {
+		adBlocker.disableBlockingInSession(session.defaultSession);
+		console.log("Adblock inactive")
+		event.returnValue = "success"
+	} else {
+		event.returnValue = "failure"
+	}
 })
 
 //UPDATER RELATED EVENTS
 app.on('ready', () => {
 	ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 		adBlocker = blocker;
-	});
+	}).catch(() => console.log("Adblock Unavailable!"));
 
 	if (!isDev) {
 		if (DISABLE_AUTOMATIC_UPDATES || process.platform == 'darwin') {
