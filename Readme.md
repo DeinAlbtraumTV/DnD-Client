@@ -1,7 +1,9 @@
 A simple desktop client for playing Dungeons and Dragons online with friends.
+
+Starting with version 2.0.0, you can load in custom modules that can customize the character sheets available to you, meaning you can now also use this client for other pen and papers apart from DnD!
   
 The client provides character-sheets, automatically fetches spell descriptions and provides a small browser, meaning don't have to tab out of the program if you want to look at a wiki entry or something.
-  
+
 It is also capable of tracking and synchronizing initiative for the entire party as well as bad guys, has super simple session management and allows the dungeon master to load a battle map for everyone at the same time!
   
 Since the client does not provide a VTT but instead relies on you to bring one, you can just take your favorite tools to the next level instead of learning a completely new VTT!
