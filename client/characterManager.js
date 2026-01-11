@@ -12,7 +12,7 @@ let characterStorageFile = path.normalize(`${characterStoragePath}/characters.js
 let sheetModulesLoaded = {}
 let isDev = ipcRenderer.sendSync("is-dev")
 
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 
 let modulesLoaded = false;
 

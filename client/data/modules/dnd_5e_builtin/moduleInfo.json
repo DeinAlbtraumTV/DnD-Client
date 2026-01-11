@@ -1,6 +1,6 @@
 {
     "name": "DnD 5e",
-    "version": 2,
+    "version": 3,
     "author": "DeinAlbtraumTV",
     "repo": "https://github.com/DeinAlbtraumTV/DnD-Client",
     "sheets": [
@@ -10,6 +10,11 @@
     ],
     "sheetMigration": {
         "1": [
+            "sheet",
+            "details",
+            "spellcasting"
+        ],
+        "2": [
             "sheet",
             "details",
             "spellcasting"
