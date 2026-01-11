@@ -12,11 +12,11 @@ Just download and run the installer linked in the latest release!
 The client will automatically update itself
 
 # Linux
-You can either download the AppImage linked in the latest release or get the client via snap: https://snapcraft.io/dnd-client
+You can either download the AppImage linked in the latest release.
 
-`sudo snap install dnd-client --edge`
+The appimage should automatically update itself
 
-Both versions will automatically update themselves
+**While there exists a prerelease on the snapstore, that version is no longer receiving updates and will not work as expected.**
 
 # MacOS
 MacOS isn't officialy supported but you can try building it yourself, see [Build it yourself](https://github.com/DeinAlbtraumTV/DnD-Client/edit/master/Readme.md#build-it-yourself)
@@ -27,7 +27,7 @@ You might encounter various issues with running the client on MacOS. Please repo
 
 # Build it yourself
 Building the client yourself is quite simple as well:
-1. Make sure you have Node 20 and Yarn installed
+1. Make sure you have Node 22 and Yarn installed
 2. Clone the repo `git clone https://github.com/DeinAlbtraumTV/DnD-Client.git`
 3. Enter the directory `cd DnD-Client`
 4. Install the dependencies `yarn install`
